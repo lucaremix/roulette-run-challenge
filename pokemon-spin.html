@@ -382,9 +382,12 @@
                 return;
             }
 
-            // Crea 20 slot per il reel (ripete i Pokemon se necessario)
+            // Crea abbastanza slot per coprire 3 schermate + extra per animazione smooth
+            // Minimo 50 slot per avere loop visivamente infinito
+            const totalSlots = Math.max(50, currentPool.length * 3);
             const slots = [];
-            for (let i = 0; i < 20; i++) {
+            
+            for (let i = 0; i < totalSlots; i++) {
                 const pokemon = currentPool[i % currentPool.length];
                 slots.push(pokemon);
             }
@@ -398,7 +401,7 @@
 
             // Reset position
             reel.style.transition = 'none';
-            reel.style.transform = 'translateX(0)';
+            reel.style.transform = 'translateX(100px)';
         }
 
         window.startSpin = async function() {
@@ -430,11 +433,12 @@
             const abilities = [
                 wonPokemon.abilities_0,
                 wonPokemon.abilities_1,
-                wonPokemon.abilities_2,
-                wonPokemon.abilities_hidden
+                wonPokemon.abilities_2
             ].filter(a => a && a.trim() !== '');
             
-            const randomAbility = abilities[Math.floor(Math.random() * abilities.length)];
+            const randomAbility = abilities.length > 0 
+                ? abilities[Math.floor(Math.random() * abilities.length)]
+                : 'Unknown';
 
             wonPokemon.rolled_nature = randomNature;
             wonPokemon.rolled_ability = randomAbility;
@@ -442,18 +446,33 @@
             // Animazione slot machine
             const reel = document.getElementById('slotReel');
             const slotWidth = 170; // 150px + 20px gap
-            const centerPosition = window.innerWidth / 2 - 75; // Centro della finestra
             
-            // Calcola posizione finale per centrare il Pokemon vinto
-            const winningPosition = randomIndex * slotWidth;
-            const finalTransform = centerPosition - winningPosition;
+            // Trova la posizione del Pokemon vincente nel reel
+            // Cerchiamo dove appare nel reel (considerando che si ripete)
+            const reelChildren = reel.children;
+            let targetSlotIndex = -1;
+            
+            for (let i = 0; i < reelChildren.length; i++) {
+                const slotPokemon = currentPool[i % currentPool.length];
+                if (slotPokemon.national_number === wonPokemon.national_number) {
+                    // Prendi una posizione a metà del reel per evitare di finire subito o troppo tardi
+                    targetSlotIndex = i + Math.floor(reelChildren.length / 2);
+                    if (targetSlotIndex >= reelChildren.length) {
+                        targetSlotIndex = i + Math.floor(reelChildren.length / 4);
+                    }
+                    break;
+                }
+            }
 
-            // Aggiungi spins extra per effetto
-            const extraSpins = 3;
-            const totalDistance = -(winningPosition + (extraSpins * currentPool.length * slotWidth)) + centerPosition;
+            if (targetSlotIndex === -1) targetSlotIndex = Math.floor(reelChildren.length / 2);
+
+            // Calcola quanto spostare per centrare il Pokemon vincente
+            const screenCenter = window.innerWidth / 2;
+            const targetPosition = targetSlotIndex * slotWidth;
+            const finalTransform = screenCenter - targetPosition - 75; // -75 per centrare meglio
 
             reel.style.transition = 'transform 3s cubic-bezier(0.25, 0.1, 0.25, 1)';
-            reel.style.transform = `translateX(${totalDistance}px)`;
+            reel.style.transform = `translateX(${finalTransform}px)`;
 
             // Dopo l'animazione, mostra risultato
             setTimeout(() => {
