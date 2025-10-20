@@ -76,7 +76,7 @@
             border: 1px solid #2a2a2a;
             border-radius: 12px;
             padding: 20px;
-            margin-bottom: 30px;
+            margin-bottom: 20px;
             text-align: center;
         }
 
@@ -127,6 +127,94 @@
         .current-player {
             margin-top: 10px;
             color: #888;
+        }
+
+        .team-bar {
+            background: #1a1a1a;
+            border: 1px solid #2a2a2a;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .team-bar-title {
+            text-align: center;
+            color: #888;
+            font-size: 0.9em;
+            margin-bottom: 15px;
+        }
+
+        .team-bar-grid {
+            display: grid;
+            grid-template-columns: repeat(10, 1fr);
+            gap: 10px;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .team-slot {
+            aspect-ratio: 1;
+            background: #0a0a0a;
+            border: 2px solid #2a2a2a;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .team-slot.empty {
+            border-style: dashed;
+            opacity: 0.3;
+        }
+
+        .team-slot:not(.empty):hover {
+            border-color: #4a4a4a;
+            transform: scale(1.1);
+            z-index: 10;
+        }
+
+        .team-slot img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            image-rendering: auto;
+        }
+
+        .team-slot .pokemon-tooltip {
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #1a1a1a;
+            border: 1px solid #2a2a2a;
+            border-radius: 8px;
+            padding: 10px 15px;
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
+            margin-bottom: 5px;
+            font-size: 0.9em;
+            z-index: 100;
+            min-width: 150px;
+        }
+
+        .team-slot:hover .pokemon-tooltip {
+            opacity: 1;
+        }
+
+        .tooltip-name {
+            font-weight: bold;
+            color: #fff;
+            margin-bottom: 5px;
+        }
+
+        .tooltip-stat {
+            color: #888;
+            font-size: 0.85em;
         }
 
         .events-grid {
@@ -267,7 +355,53 @@
             background: #252525;
         }
 
-        @media (max-width: 768px) {
+        .team-card {
+            background: #1a1a1a;
+            border: 1px solid #2a2a2a;
+            border-radius: 12px;
+            padding: 20px;
+        }
+
+        .team-header {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #fff;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .team-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+        }
+
+        .team-pokemon {
+            aspect-ratio: 1;
+            background: #0a0a0a;
+            border: 2px solid #2a2a2a;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .team-pokemon:hover {
+            border-color: #4a4a4a;
+            transform: scale(1.05);
+        }
+
+        .team-pokemon img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            image-rendering: auto;
+        }
+
+                    @media (max-width: 768px) {
             h1 {
                 font-size: 1.5em;
             }
@@ -280,6 +414,10 @@
                 position: static;
                 margin: 15px auto 0;
                 justify-content: center;
+            }
+
+            .team-bar-grid {
+                grid-template-columns: repeat(5, 1fr);
             }
 
             .events-grid {
@@ -318,6 +456,11 @@
                 <button class="set-name-btn" onclick="setPlayerName()">Salva Nome</button>
             </div>
             <div class="current-player" id="currentPlayerDisplay"></div>
+        </div>
+
+        <div class="team-bar" id="teamBar" style="display: none;">
+            <div class="team-bar-title">Il tuo Team</div>
+            <div class="team-bar-grid" id="teamBarGrid"></div>
         </div>
 
         <div class="events-grid" id="eventsGrid"></div>
@@ -389,10 +532,6 @@
         function setCoins(amount) {
             localStorage.setItem('playerCoins', amount);
             updateCoinDisplay();
-        }
-
-        function updateCoinDisplay() {
-            document.getElementById('coinAmount').textContent = getCoins();
         }
 
         function setPlayerName() {
@@ -546,9 +685,51 @@
         });
 
         updatePlayerDisplay();
-        updateCoinDisplay();
+        updatePlayerTeam();
         renderEvents();
         renderMarkets();
+        renderTeams();
+
+        function renderTeams() {
+            const players = ['lucaremix', 'crmagno'];
+            const teamsSection = document.getElementById('teamsSection');
+
+            players.forEach(playerName => {
+                const playerRef = ref(database, `players/${playerName}`);
+                onValue(playerRef, (snapshot) => {
+                    const playerData = snapshot.val();
+                    const team = playerData?.team || [];
+
+                    let teamCard = teamsSection.querySelector(`[data-player="${playerName}"]`);
+                    if (!teamCard) {
+                        teamCard = document.createElement('div');
+                        teamCard.className = 'team-card';
+                        teamCard.setAttribute('data-player', playerName);
+                        teamsSection.appendChild(teamCard);
+                    }
+
+                    teamCard.innerHTML = `
+                        <div class="team-header">${playerName} - ${team.length} Pokemon</div>
+                        <div class="team-grid">
+                            ${team.slice(0, 6).map(p => {
+                                const paddedNum = String(p.national_number).padStart(3, '0');
+                                const imgUrl = `https://www.pokemon.com/static-assets/content-assets/cms2/img/pokedex/full/${paddedNum}.png`;
+                                return `
+                                    <div class="team-pokemon" title="${p.english_name}\n${p.nature} | ${p.ability}">
+                                        <img src="${imgUrl}" alt="${p.english_name}">
+                                    </div>
+                                `;
+                            }).join('')}
+                            ${Array(Math.max(0, 6 - team.length)).fill(0).map(() => `
+                                <div class="team-pokemon" style="border-style: dashed; opacity: 0.3;">
+                                    <span style="color: #444; font-size: 2em;">?</span>
+                                </div>
+                            `).join('')}
+                        </div>
+                    `;
+                });
+            });
+        }
     </script>
 </body>
 </html>
