@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Silver - Roulette Run Challenge</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #0a0a0a;
+            min-height: 100vh;
+            padding: 20px;
+            color: #e0e0e0;
+        }
+
+        body.intro-mode {
+            background-image: url('https://raw.githubusercontent.com/lucaremix/roulette-run-challenge/main/silver_background.png');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+        }
+
+        body.intro-mode::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: -1;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            background: #1a1a1a;
+            border: 1px solid #2a2a2a;
+            border-radius: 8px;
+            color: #e0e0e0;
+            text-decoration: none;
+            font-size: 1em;
+            transition: all 0.3s ease;
+            margin-bottom: 30px;
+        }
+
+        .intro-mode .back-btn {
+            background: rgba(26, 26, 26, 0.9);
+            backdrop-filter: blur(10px);
+        }
+
+        .back-btn:hover {
+            background: #252525;
+            border-color: #3a3a3a;
+        }
+
+        .event-header {
+            background: #1a1a1a;
+            border: 1px solid #2a2a2a;
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 30px;
+            display: flex;
+            align-items: center;
+            gap: 30px;
+        }
+
+        .event-trainer-img {
+            width: 160px;
+            height: 160px;
+            object-fit: contain;
+            border: none;
+            flex-shrink: 0;
+            image-rendering: pixelated;
+            image-rendering: -moz-crisp-edges;
+            image-rendering: crisp-edges;
+        }
+
+        .event-info {
+            flex: 1;
+        }
+
+        .event-title {
+            font-size: 2.5em;
+            color: #ffffff;
+            margin-bottom: 15px;
+        }
+
+        .event-status {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .status-badge {
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 1.1em;
+        }
+
+        .status-badge.joined {
+            background: #2d4a2d;
+            color: #7fff7f;
+        }
+
+        .status-badge.not-joined {
+            background: #2a2a2a;
+            color: #888;
+        }
+
+        .join-leave-btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+
+        .join-btn {
+            background: #2a7a2a;
+            color: white;
+        }
+
+        .join-btn:hover {
+            background: #357a35;
+        }
+
+        .leave-btn {
+            background: #7a2a2a;
+            color: white;
+        }
+
+        .leave-btn:hover {
+            background: #8a3535;
+        }
+
+        .players-section {
+            background: #1a1a1a;
+            border: 1px solid #2a2a2a;
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 30px;
+        }
+
+        .players-title {
+            font-size: 1.8em;
+            color: #ffffff;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .player-count-badge {
+            background: #2a2a2a;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.7em;
+            color: #888;
+        }
+
+        .players-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .player-card {
+            background: #0a0a0a;
+            border: 1px solid #2a2a2a;
+            border-radius: 8px;
+            padding: 15px 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .player-card.current-user {
+            border-color: #4a4a4a;
+            background: #1f1f1f;
+        }
+
+        .player-name {
+            font-size: 1.1em;
+            color: #e0e0e0;
+        }
+
+        .player-card.current-user .player-name {
+            color: #ffffff;
+            font-weight: 600;
+        }
+
+        .you-badge {
+            background: #2a7a2a;
+            color: white;
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 0.8em;
+            font-weight: 600;
+        }
+
+        .no-players {
+            text-align: center;
+            color: #555;
+            font-style: italic;
+            padding: 30px;
+        }
+
+        .intro-screen {
+            background: #ffffff;
+            border: none;
+            border-radius: 12px;
+            padding: 40px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        .intro-content {
+            display: flex;
+            gap: 40px;
+            align-items: center;
+            margin: 40px 0;
+        }
+
+        .silver-image {
+            width: 300px;
+            height: auto;
+            flex-shrink: 0;
+        }
+
+        .intro-text {
+            flex: 1;
+        }
+
+        .intro-text h2 {
+            font-size: 2em;
+            color: #c0c0c0;
+            margin-bottom: 20px;
+            text-shadow: none;
+        }
+
+        .intro-text p {
+            font-size: 1.3em;
+            line-height: 1.8;
+            color: #000;
+            margin-bottom: 15px;
+        }
+
+        .intro-text .important {
+            color: #c41e3a;
+            font-weight: bold;
+        }
+
+        .hint-list {
+            background: #f0f0f0;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+
+        .hint-list h3 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+        }
+
+        .hint-item {
+            margin: 10px 0;
+            padding: 10px;
+            background: white;
+            border-radius: 6px;
+            border-left: 4px solid #c0c0c0;
+        }
+
+        .hint-number {
+            font-weight: bold;
+            color: #c0c0c0;
+            margin-right: 8px;
+        }
+
+        .start-btn {
+            display: block;
+            margin: 30px auto 0;
+            padding: 20px 60px;
+            background: #c0c0c0;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.5em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(192, 192, 192, 0.4);
+        }
+
+        .start-btn:hover {
+            background: #a8a8a8;
+            transform: scale(1.05);
+            box-shadow: 0 6px 20px rgba(192, 192, 192, 0.6);
+        }
+
+        @media (max-width: 768px) {
+            .event-header {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .event-title {
+                font-size: 2em;
+            }
+
+            .event-status {
+                flex-direction: column;
+                width: 100%;
+            }
+
+            .join-leave-btn {
+                width: 100%;
+            }
+
+            .intro-content {
+                flex-direction: column;
+            }
+
+            .silver-image {
+                width: 200px;
+            }
+
+            .intro-text h2 {
+                font-size: 1.5em;
+            }
+
+            .intro-text p {
+                font-size: 1.1em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="index.html" class="back-btn">
+            <span>←</span>
+            <span>Torna alla Home</span>
+        </a>
+
+        <div id="normalScreen">
+            <div class="event-header">
+                <img src="https://img.nuzlocke.app/leaders/gs-silver.png" 
+                     alt="Silver" 
+                     class="event-trainer-img">
+                <div class="event-info">
+                    <h1 class="event-title">Silver - Indovina il Pokémon</h1>
+                    <div class="event-status">
+                        <div class="status-badge" id="statusBadge">Non sei nell'evento</div>
+                        <button class="join-leave-btn join-btn" id="joinLeaveBtn" onclick="toggleJoin()">
+                            Entra nell'Evento
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="players-section">
+                <h2 class="players-title">
+                    Giocatori nell'evento
+                    <span class="player-count-badge" id="playerCountBadge">0</span>
+                </h2>
+                <div class="players-list" id="playersList">
+                    <div class="no-players">Nessun giocatore nell'evento</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="intro-screen" id="introScreen" style="display: none;">
+            <div class="intro-content">
+                <img src="https://img.nuzlocke.app/leaders/gs-silver.png" 
+                     alt="Silver" 
+                     class="silver-image">
+                <div class="intro-text">
+                    <h2>Sfida Silver: Indovina il Pokémon!</h2>
+                    <p>
+                        Silver vi sfida a un gioco di deduzione! Ad ogni giocatore verrà assegnato 
+                        un Pokémon misterioso dal pool B-Tier.
+                    </p>
+                    <p>
+                        Avrete <strong>5 tentativi</strong> per indovinare quale Pokémon vi è stato assegnato. 
+                        Ad ogni tentativo, riceverete nuovi indizi che vi aiuteranno a scoprire il vostro Pokémon!
+                    </p>
+
+                    <div class="hint-list">
+                        <h3>🔍 Sistema degli Indizi</h3>
+                        <div class="hint-item">
+                            <span class="hint-number">Tentativo 1:</span>
+                            2 statistiche casuali + Bonus misteriosi
+                        </div>
+                        <div class="hint-item">
+                            <span class="hint-number">Tentativo 2:</span>
+                            Altre 2 statistiche + 1 debolezza + Nuovi bonus
+                        </div>
+                        <div class="hint-item">
+                            <span class="hint-number">Tentativo 3:</span>
+                            Le ultime 2 statistiche + Generazione del Pokémon
+                        </div>
+                        <div class="hint-item">
+                            <span class="hint-number">Tentativo 4:</span>
+                            Tipo/i del Pokémon
+                        </div>
+                        <div class="hint-item">
+                            <span class="hint-number">Tentativo 5:</span>
+                            L'immagine del Pokémon!
+                        </div>
+                    </div>
+
+                    <p class="important">
+                        ⚠️ Più presto indovinate, più ricompense otterrete! Ma attenzione: 
+                        se sbagliate tentativo, perderete dei bonus preziosi!
+                    </p>
+                </div>
+            </div>
+
+            <button class="start-btn" onclick="startGame()">
+                🎯 Inizia la Sfida! 🎯
+            </button>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+        import { getDatabase, ref, set, onValue, remove, push, get } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js';
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDNuD9wViLLxteHMCEBlvfdONwcZbAjAvo",
+            authDomain: "roulette-run-challenge.firebaseapp.com",
+            databaseURL: "https://roulette-run-challenge-default-rtdb.europe-west1.firebasedatabase.app",
+            projectId: "roulette-run-challenge",
+            storageBucket: "roulette-run-challenge.firebasestorage.app",
+            messagingSenderId: "994019156093",
+            appId: "1:994019156093:web:9792bdce75c486f589d114"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app);
+
+        function getCurrentPlayer() {
+            return localStorage.getItem('playerName') || '';
+        }
+
+        async function toggleJoin() {
+            const playerName = getCurrentPlayer();
+            if (!playerName) {
+                alert('Devi impostare il tuo nome dalla home page!');
+                window.location.href = 'index.html';
+                return;
+            }
+
+            const eventRef = ref(database, `events/silver/players`);
+            
+            const snapshot = await get(eventRef);
+
+            let isInEvent = false;
+            let playerNodeKey = null;
+
+            snapshot.forEach((childSnapshot) => {
+                if (childSnapshot.val() === playerName) {
+                    isInEvent = true;
+                    playerNodeKey = childSnapshot.key;
+                }
+            });
+
+            if (isInEvent && playerNodeKey) {
+                await remove(ref(database, `events/silver/players/${playerNodeKey}`));
+            } else {
+                const newPlayerRef = push(ref(database, `events/silver/players`));
+                await set(newPlayerRef, playerName);
+            }
+        }
+
+        function render() {
+            const currentPlayer = getCurrentPlayer();
+            const eventRef = ref(database, `events/silver/players`);
+
+            onValue(eventRef, (snapshot) => {
+                const players = [];
+                snapshot.forEach((childSnapshot) => {
+                    players.push(childSnapshot.val());
+                });
+
+                const isJoined = players.includes(currentPlayer);
+
+                const statusBadge = document.getElementById('statusBadge');
+                const joinLeaveBtn = document.getElementById('joinLeaveBtn');
+
+                if (statusBadge && joinLeaveBtn) {
+                    if (isJoined) {
+                        statusBadge.textContent = 'Sei nell\'evento';
+                        statusBadge.className = 'status-badge joined';
+                        joinLeaveBtn.textContent = 'Esci dall\'Evento';
+                        joinLeaveBtn.className = 'join-leave-btn leave-btn';
+                    } else {
+                        statusBadge.textContent = 'Non sei nell\'evento';
+                        statusBadge.className = 'status-badge not-joined';
+                        joinLeaveBtn.textContent = 'Entra nell\'Evento';
+                        joinLeaveBtn.className = 'join-leave-btn join-btn';
+                    }
+                }
+
+                const countBadge = document.getElementById('playerCountBadge');
+                if (countBadge) {
+                    countBadge.textContent = players.length;
+                }
+
+                const playersList = document.getElementById('playersList');
+                
+                if (playersList) {
+                    if (players.length === 0) {
+                        playersList.innerHTML = '<div class="no-players">Nessun giocatore nell\'evento</div>';
+                    } else {
+                        playersList.innerHTML = players.map(player => {
+                            const isCurrentUser = player === currentPlayer;
+                            return `
+                                <div class="player-card ${isCurrentUser ? 'current-user' : ''}">
+                                    <span class="player-name">${player}</span>
+                                    ${isCurrentUser ? '<span class="you-badge">TU</span>' : ''}
+                                </div>
+                            `;
+                        }).join('');
+                    }
+                }
+
+                if (players.length === 2) {
+                    document.getElementById('normalScreen').style.display = 'none';
+                    document.getElementById('introScreen').style.display = 'block';
+                    document.body.classList.add('intro-mode');
+                } else {
+                    document.getElementById('normalScreen').style.display = 'block';
+                    document.getElementById('introScreen').style.display = 'none';
+                    document.body.classList.remove('intro-mode');
+                }
+            });
+        }
+
+        window.toggleJoin = toggleJoin;
+
+        window.startGame = function() {
+            window.location.href = 'pokemon-guess-silver.html';
+        };
+
+        if (!getCurrentPlayer()) {
+            alert('Devi impostare il tuo nome dalla home page!');
+            window.location.href = 'index.html';
+        } else {
+            render();
+        }
+    </script>
+</body>
+</html>
