@@ -531,7 +531,6 @@
 
         function setCoins(amount) {
             localStorage.setItem('playerCoins', amount);
-            updateCoinDisplay();
         }
 
         function setPlayerName() {
@@ -684,6 +683,7 @@
             }
         });
 
+        // Inizializza tutto
         updatePlayerDisplay();
         updatePlayerTeam();
         renderEvents();
