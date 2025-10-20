@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pool Manager - Roulette Run Challenge</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #0a0a0a;
+            color: #e0e0e0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+        }
+
+        h1 {
+            font-size: 2.5em;
+            color: #fff;
+            margin-bottom: 10px;
+        }
+
+        .back-btn {
+            display: inline-block;
+            padding: 10px 20px;
+            background: #1a1a1a;
+            border: 1px solid #2a2a2a;
+            border-radius: 8px;
+            color: #e0e0e0;
+            text-decoration: none;
+            margin-bottom: 20px;
+        }
+
+        .back-btn:hover {
+            background: #252525;
+        }
+
+        .pool-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .pool-tab {
+            padding: 15px 30px;
+            background: #1a1a1a;
+            border: 1px solid #2a2a2a;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 1.1em;
+        }
+
+        .pool-tab:hover {
+            background: #252525;
+        }
+
+        .pool-tab.active {
+            background: #2a2a2a;
+            border-color: #4a4a4a;
+        }
+
+        .pool-stats {
+            background: #1a1a1a;
+            border: 1px solid #2a2a2a;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .pool-stats h2 {
+            margin-bottom: 15px;
+            font-size: 1.5em;
+        }
+
+        .stats-count {
+            font-size: 3em;
+            font-weight: bold;
+            color: #fff;
+        }
+
+        .pokemon-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 10px;
+            padding: 20px;
+            background: #1a1a1a;
+            border: 1px solid #2a2a2a;
+            border-radius: 12px;
+        }
+
+        .pokemon-item {
+            position: relative;
+            aspect-ratio: 1;
+            background: #0a0a0a;
+            border-radius: 8px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .pokemon-item:hover {
+            transform: scale(1.1);
+            background: #1a1a1a;
+            z-index: 10;
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+        }
+
+        .pokemon-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            image-rendering: auto;
+        }
+
+        .pokemon-tooltip {
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #1a1a1a;
+            border: 1px solid #2a2a2a;
+            border-radius: 8px;
+            padding: 10px 15px;
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
+            margin-bottom: 5px;
+            font-size: 0.9em;
+            z-index: 100;
+        }
+
+        .pokemon-item:hover .pokemon-tooltip {
+            opacity: 1;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 50px;
+            color: #888;
+            font-size: 1.2em;
+        }
+
+        .no-pokemon {
+            text-align: center;
+            padding: 50px;
+            color: #666;
+            font-style: italic;
+            font-size: 1.2em;
+        }
+
+        .remove-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(122, 42, 42, 0.9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.3s;
+            font-size: 0.8em;
+            font-weight: bold;
+            color: white;
+        }
+
+        .pokemon-item:hover .remove-overlay {
+            opacity: 1;
+        }
+
+        @media (max-width: 768px) {
+            .pokemon-grid {
+                grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+                gap: 5px;
+            }
+
+            h1 {
+                font-size: 1.8em;
+            }
+
+            .pool-tab {
+                padding: 10px 20px;
+                font-size: 1em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="index.html" class="back-btn">← Torna alla Home</a>
+
+        <header>
+            <h1>🎮 Pool Manager</h1>
+            <p>Visualizza e gestisci i Pokemon disponibili</p>
+        </header>
+
+        <div class="pool-tabs" id="poolTabs">
+            <div class="pool-tab active" data-pool="legendary">Legendary</div>
+            <div class="pool-tab" data-pool="starter">Starter</div>
+            <div class="pool-tab" data-pool="s_tier">S Tier</div>
+            <div class="pool-tab" data-pool="a_tier">A Tier</div>
+            <div class="pool-tab" data-pool="b_tier">B Tier</div>
+            <div class="pool-tab" data-pool="c_tier">C Tier</div>
+        </div>
+
+        <div class="pool-stats">
+            <h2 id="poolTitle">Legendary Pool</h2>
+            <div class="stats-count" id="pokemonCount">0</div>
+            <div style="color: #888; margin-top: 10px;">Pokemon disponibili</div>
+        </div>
+
+        <div class="pokemon-grid" id="pokemonGrid">
+            <div class="loading">Caricamento Pokemon...</div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+        import { getDatabase, ref, onValue, remove } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js';
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDNuD9wViLLxteHMCEBlvfdONwcZbAjAvo",
+            authDomain: "roulette-run-challenge.firebaseapp.com",
+            databaseURL: "https://roulette-run-challenge-default-rtdb.europe-west1.firebasedatabase.app",
+            projectId: "roulette-run-challenge",
+            storageBucket: "roulette-run-challenge.firebasestorage.app",
+            messagingSenderId: "994019156093",
+            appId: "1:994019156093:web:9792bdce75c486f589d114"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app);
+
+        let currentPool = 'legendary';
+        let currentPokemonData = [];
+
+        const poolNames = {
+            'legendary': 'Legendary Pool',
+            'starter': 'Starter Pool',
+            's_tier': 'S Tier Pool',
+            'a_tier': 'A Tier Pool',
+            'b_tier': 'B Tier Pool',
+            'c_tier': 'C Tier Pool'
+        };
+
+        function padNumber(num) {
+            return String(num).padStart(3, '0');
+        }
+
+        function getPokemonImageUrl(nationalNumber) {
+            const paddedNumber = padNumber(nationalNumber);
+            return `https://www.pokemon.com/static-assets/content-assets/cms2/img/pokedex/full/${paddedNumber}.png`;
+        }
+
+        function loadPool(poolName) {
+            currentPool = poolName;
+            document.getElementById('poolTitle').textContent = poolNames[poolName];
+            
+            const poolRef = ref(database, `pools/${poolName}`);
+            onValue(poolRef, (snapshot) => {
+                const data = snapshot.val();
+                currentPokemonData = data ? Object.entries(data).map(([key, value]) => ({
+                    key: key,
+                    ...value
+                })) : [];
+                
+                renderPokemon();
+            });
+        }
+
+        function renderPokemon() {
+            const grid = document.getElementById('pokemonGrid');
+            const countEl = document.getElementById('pokemonCount');
+            
+            countEl.textContent = currentPokemonData.length;
+
+            if (currentPokemonData.length === 0) {
+                grid.innerHTML = '<div class="no-pokemon">Nessun Pokemon in questo pool</div>';
+                return;
+            }
+
+            // Ordina per national_number
+            const sortedPokemon = [...currentPokemonData].sort((a, b) => a.national_number - b.national_number);
+
+            grid.innerHTML = sortedPokemon.map(pokemon => {
+                const imageUrl = getPokemonImageUrl(pokemon.national_number);
+                
+                return `
+                    <div class="pokemon-item" onclick="removePokemon('${pokemon.key}', '${pokemon.english_name}')">
+                        <img src="${imageUrl}" 
+                             alt="${pokemon.english_name}"
+                             onerror="this.src='https://via.placeholder.com/120x120/1a1a1a/888?text=?'">
+                        <div class="pokemon-tooltip">
+                            #${padNumber(pokemon.national_number)} ${pokemon.english_name}<br>
+                            BST: ${pokemon.bst}
+                        </div>
+                        <div class="remove-overlay">
+                            RIMUOVI
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        window.removePokemon = async function(key, name) {
+            if (!confirm(`Rimuovere ${name} dal pool ${poolNames[currentPool]}?`)) return;
+
+            const pokemonRef = ref(database, `pools/${currentPool}/${key}`);
+            await remove(pokemonRef);
+        };
+
+        document.getElementById('poolTabs').addEventListener('click', (e) => {
+            if (e.target.classList.contains('pool-tab')) {
+                document.querySelectorAll('.pool-tab').forEach(tab => tab.classList.remove('active'));
+                e.target.classList.add('active');
+                loadPool(e.target.dataset.pool);
+            }
+        });
+
+        loadPool('legendary');
+    </script>
+</body>
+</html>
