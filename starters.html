@@ -252,8 +252,27 @@
         </div>
     </div>
 
-    <script>
-        // Configurazione evento - MODIFICA QUESTI VALORI PER OGNI PAGINA
+    <!-- Firebase SDK -->
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+        import { getDatabase, ref, set, onValue, remove, push } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js';
+
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyDNuD9wViLLxteHMCEBlvfdONwcZbAjAvo",
+            authDomain: "roulette-run-challenge.firebaseapp.com",
+            databaseURL: "https://roulette-run-challenge-default-rtdb.europe-west1.firebasedatabase.app",
+            projectId: "roulette-run-challenge",
+            storageBucket: "roulette-run-challenge.firebasestorage.app",
+            messagingSenderId: "994019156093",
+            appId: "1:994019156093:web:9792bdce75c486f589d114"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app);
+
+        // ⚠️ IMPORTANTE: CAMBIA QUESTI VALORI PER OGNI PAGINA EVENTO ⚠️
         const EVENT_CONFIG = {
             id: 'starters',  // Cambia per ogni evento: 'starters', 'silver', 'falkner', etc.
             name: 'Starters', // Nome dell'evento
@@ -264,17 +283,16 @@
             return localStorage.getItem('playerName') || '';
         }
 
-        function getEventPlayers() {
-            const saved = localStorage.getItem(`event_players_${EVENT_CONFIG.id}`);
-            return saved ? JSON.parse(saved) : [];
+        function getCurrentPlayerKey() {
+            let key = localStorage.getItem('playerKey');
+            if (!key) {
+                key = 'player_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+                localStorage.setItem('playerKey', key);
+            }
+            return key;
         }
 
-        function isPlayerInEvent() {
-            const players = getEventPlayers();
-            return players.includes(getCurrentPlayer());
-        }
-
-        function toggleJoin() {
+        async function toggleJoin() {
             const playerName = getCurrentPlayer();
             if (!playerName) {
                 alert('Devi impostare il tuo nome dalla home page!');
@@ -282,25 +300,37 @@
                 return;
             }
 
-            let players = getEventPlayers();
-            const index = players.indexOf(playerName);
+            const playerKey = getCurrentPlayerKey();
+            const eventRef = ref(database, `events/${EVENT_CONFIG.id}/players`);
+            
+            // Controlla se il giocatore è già nell'evento
+            const snapshot = await new Promise((resolve) => {
+                onValue(eventRef, (snap) => resolve(snap), { onlyOnce: true });
+            });
 
-            if (index > -1) {
-                // Rimuovi giocatore
-                players.splice(index, 1);
+            let isInEvent = false;
+            let playerNodeKey = null;
+
+            snapshot.forEach((childSnapshot) => {
+                if (childSnapshot.val() === playerName) {
+                    isInEvent = true;
+                    playerNodeKey = childSnapshot.key;
+                }
+            });
+
+            if (isInEvent && playerNodeKey) {
+                // Rimuovi il giocatore
+                await remove(ref(database, `events/${EVENT_CONFIG.id}/players/${playerNodeKey}`));
             } else {
-                // Aggiungi giocatore
-                players.push(playerName);
+                // Aggiungi il giocatore
+                const newPlayerRef = push(ref(database, `events/${EVENT_CONFIG.id}/players`));
+                await set(newPlayerRef, playerName);
             }
-
-            localStorage.setItem(`event_players_${EVENT_CONFIG.id}`, JSON.stringify(players));
-            render();
         }
 
         function render() {
             const currentPlayer = getCurrentPlayer();
-            const players = getEventPlayers();
-            const isJoined = isPlayerInEvent();
+            const eventRef = ref(database, `events/${EVENT_CONFIG.id}/players`);
 
             // Imposta titolo e immagine
             document.getElementById('eventTitle').textContent = EVENT_CONFIG.name;
@@ -308,53 +338,7 @@
             document.getElementById('eventTrainerImg').alt = EVENT_CONFIG.name;
             document.title = `${EVENT_CONFIG.name} - Roulette Run Challenge`;
 
-            // Aggiorna status badge
-            const statusBadge = document.getElementById('statusBadge');
-            const joinLeaveBtn = document.getElementById('joinLeaveBtn');
-
-            if (isJoined) {
-                statusBadge.textContent = 'Sei nell\'evento';
-                statusBadge.className = 'status-badge joined';
-                joinLeaveBtn.textContent = 'Esci dall\'Evento';
-                joinLeaveBtn.className = 'join-leave-btn leave-btn';
-            } else {
-                statusBadge.textContent = 'Non sei nell\'evento';
-                statusBadge.className = 'status-badge not-joined';
-                joinLeaveBtn.textContent = 'Entra nell\'Evento';
-                joinLeaveBtn.className = 'join-leave-btn join-btn';
-            }
-
-            // Aggiorna contatore giocatori
-            document.getElementById('playerCountBadge').textContent = players.length;
-
-            // Renderizza lista giocatori
-            const playersList = document.getElementById('playersList');
-            
-            if (players.length === 0) {
-                playersList.innerHTML = '<div class="no-players">Nessun giocatore nell\'evento</div>';
-            } else {
-                playersList.innerHTML = players.map(player => {
-                    const isCurrentUser = player === currentPlayer;
-                    return `
-                        <div class="player-card ${isCurrentUser ? 'current-user' : ''}">
-                            <span class="player-name">${player}</span>
-                            ${isCurrentUser ? '<span class="you-badge">TU</span>' : ''}
-                        </div>
-                    `;
-                }).join('');
-            }
-        }
-
-        // Controlla se il giocatore ha impostato il nome
-        if (!getCurrentPlayer()) {
-            alert('Devi impostare il tuo nome dalla home page!');
-            window.location.href = 'index.html';
-        } else {
-            render();
-        }
-
-        // Aggiorna ogni secondo per vedere altri giocatori che entrano
-        setInterval(render, 1000);
-    </script>
-</body>
-</html>
+            // Ascolta i cambiamenti in tempo reale
+            onValue(eventRef, (snapshot) => {
+                const players = [];
+                snapshot.forEach((childSnapshot
