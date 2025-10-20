@@ -448,30 +448,31 @@
             const slotWidth = 170; // 150px + 20px gap
             
             // Trova la posizione del Pokemon vincente nel reel
-            // Cerchiamo dove appare nel reel (considerando che si ripete)
             const reelChildren = reel.children;
             let targetSlotIndex = -1;
             
-            for (let i = 0; i < reelChildren.length; i++) {
+            // Cerca il Pokemon vincente nella seconda metà del reel per avere spazio per animare
+            for (let i = Math.floor(reelChildren.length / 2); i < reelChildren.length; i++) {
                 const slotPokemon = currentPool[i % currentPool.length];
-                if (slotPokemon.national_number === wonPokemon.national_number) {
-                    // Prendi una posizione a metà del reel per evitare di finire subito o troppo tardi
-                    targetSlotIndex = i + Math.floor(reelChildren.length / 2);
-                    if (targetSlotIndex >= reelChildren.length) {
-                        targetSlotIndex = i + Math.floor(reelChildren.length / 4);
-                    }
+                if (slotPokemon.national_number === wonPokemon.national_number && 
+                    slotPokemon.english_name === wonPokemon.english_name) {
+                    targetSlotIndex = i;
                     break;
                 }
             }
 
-            if (targetSlotIndex === -1) targetSlotIndex = Math.floor(reelChildren.length / 2);
+            // Fallback se non trovato
+            if (targetSlotIndex === -1) {
+                targetSlotIndex = Math.floor(reelChildren.length * 0.7);
+            }
 
-            // Calcola quanto spostare per centrare il Pokemon vincente
-            const screenCenter = window.innerWidth / 2;
-            const targetPosition = targetSlotIndex * slotWidth;
-            const finalTransform = screenCenter - targetPosition - 75; // -75 per centrare meglio
+            // Calcola lo spostamento per centrare PERFETTAMENTE il Pokemon nella finestra dorata
+            const machineCenter = document.querySelector('.slot-machine').offsetWidth / 2;
+            const slotCenter = slotWidth / 2; // Centro dello slot (75px)
+            const targetPosition = (targetSlotIndex * slotWidth) + slotCenter;
+            const finalTransform = machineCenter - targetPosition;
 
-            reel.style.transition = 'transform 3s cubic-bezier(0.25, 0.1, 0.25, 1)';
+            reel.style.transition = 'transform 5s cubic-bezier(0.25, 0.1, 0.25, 1)';
             reel.style.transform = `translateX(${finalTransform}px)`;
 
             // Dopo l'animazione, mostra risultato
@@ -479,7 +480,7 @@
                 showResult();
                 isSpinning = false;
                 document.getElementById('spinBtn').disabled = false;
-            }, 3000);
+            }, 5000);
         };
 
         function showResult() {
