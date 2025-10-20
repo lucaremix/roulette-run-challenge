@@ -220,24 +220,6 @@
             color: #bbb;
         }
 
-        .reset-btn {
-            display: block;
-            margin: 20px auto;
-            padding: 15px 40px;
-            background: #1a1a1a;
-            color: #e0e0e0;
-            border: 1px solid #2a2a2a;
-            border-radius: 8px;
-            font-size: 1.1em;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .reset-btn:hover {
-            background: #252525;
-            border-color: #3a3a3a;
-        }
-
         .markets-section {
             margin-top: 50px;
             padding-top: 30px;
@@ -346,7 +328,26 @@
         </div>
     </div>
 
-    <script>
+    <!-- Firebase SDK -->
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+        import { getDatabase, ref, set, onValue, remove } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js';
+
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyDNuD9wViLLxteHMCEBlvfdONwcZbAjAvo",
+            authDomain: "roulette-run-challenge.firebaseapp.com",
+            databaseURL: "https://roulette-run-challenge-default-rtdb.europe-west1.firebasedatabase.app",
+            projectId: "roulette-run-challenge",
+            storageBucket: "roulette-run-challenge.firebasestorage.app",
+            messagingSenderId: "994019156093",
+            appId: "1:994019156093:web:9792bdce75c486f589d114"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app);
+
         const events = [
             { id: 'starters', name: 'Starters', trainer: 'red' },
             { id: 'silver', name: 'Silver', trainer: 'silver' },
@@ -367,6 +368,10 @@
             { id: 'black-market', name: 'Black Market', image: 'https://img.nuzlocke.app/leaders/frlg-giovanni.png' },
             { id: 'mt-market', name: 'MT Market', image: 'https://img.nuzlocke.app/leaders/dp-cynthia.png' }
         ];
+
+        // Esponi le funzioni globalmente
+        window.setPlayerName = setPlayerName;
+        window.togglePlayerInEvent = togglePlayerInEvent;
 
         function getCurrentPlayer() {
             return localStorage.getItem('playerName') || '';
@@ -392,8 +397,6 @@
                 localStorage.setItem('playerName', name);
                 input.value = '';
                 updatePlayerDisplay();
-                renderEvents();
-                renderMarkets();
             } else {
                 alert('Inserisci un nome valido!');
             }
@@ -407,11 +410,6 @@
             } else {
                 display.textContent = 'Nessun nome impostato';
             }
-        }
-
-        function getEventPlayers(eventId) {
-            const saved = localStorage.getItem(`event_players_${eventId}`);
-            return saved ? JSON.parse(saved) : [];
         }
 
         function togglePlayerInEvent(eventId) {
@@ -429,91 +427,111 @@
             const grid = document.getElementById('eventsGrid');
             const currentPlayer = getCurrentPlayer();
 
-            grid.innerHTML = events.map(event => {
-                const players = getEventPlayers(event.id);
-                const isJoined = players.includes(currentPlayer);
-                const joinedClass = isJoined ? 'joined' : '';
+            events.forEach(event => {
+                const eventRef = ref(database, `events/${event.id}/players`);
+                
+                onValue(eventRef, (snapshot) => {
+                    const players = [];
+                    snapshot.forEach((childSnapshot) => {
+                        players.push(childSnapshot.val());
+                    });
 
-                let playersHTML;
-                if (players.length === 0) {
-                    playersHTML = '<div class="no-players">Nessun giocatore</div>';
-                } else {
-                    playersHTML = players.map(player => {
-                        const currentClass = player === currentPlayer ? 'current-user' : '';
-                        return `<div class="player-item ${currentClass}">• ${player}</div>`;
-                    }).join('');
-                }
+                    const isJoined = players.includes(currentPlayer);
+                    const joinedClass = isJoined ? 'joined' : '';
 
-                const statusText = isJoined ? 'Clicca per uscire' : 'Clicca per entrare';
+                    let playersHTML;
+                    if (players.length === 0) {
+                        playersHTML = '<div class="no-players">Nessun giocatore</div>';
+                    } else {
+                        playersHTML = players.map(player => {
+                            const currentClass = player === currentPlayer ? 'current-user' : '';
+                            return `<div class="player-item ${currentClass}">• ${player}</div>`;
+                        }).join('');
+                    }
 
-                return `
-                    <div class="event-card ${joinedClass}" onclick="togglePlayerInEvent('${event.id}')">
-                        <img src="https://img.nuzlocke.app/leaders/gs-${event.trainer}.png" 
-                             alt="${event.name}" 
-                             class="trainer-img"
-                             onerror="this.src='https://via.placeholder.com/128x128/1a1a1a/888?text=${event.trainer}'">
-                        <div class="event-info">
-                            <div class="event-name">${event.name}</div>
-                            <div class="player-list">
-                                ${playersHTML}
+                    const statusText = isJoined ? 'Clicca per entrare' : 'Clicca per entrare';
+
+                    const cardHTML = `
+                        <div class="event-card ${joinedClass}" onclick="togglePlayerInEvent('${event.id}')">
+                            <img src="https://img.nuzlocke.app/leaders/gs-${event.trainer}.png" 
+                                 alt="${event.name}" 
+                                 class="trainer-img"
+                                 onerror="this.src='https://via.placeholder.com/128x128/1a1a1a/888?text=${event.trainer}'">
+                            <div class="event-info">
+                                <div class="event-name">${event.name}</div>
+                                <div class="player-list">
+                                    ${playersHTML}
+                                </div>
+                                ${currentPlayer ? `<div class="join-status ${isJoined ? 'joined' : ''}">${statusText}</div>` : ''}
                             </div>
-                            ${currentPlayer ? `<div class="join-status ${isJoined ? 'joined' : ''}">${statusText}</div>` : ''}
                         </div>
-                    </div>
-                `;
-            }).join('');
+                    `;
+
+                    // Trova o crea la card
+                    let card = grid.querySelector(`[data-event-id="${event.id}"]`);
+                    if (!card) {
+                        card = document.createElement('div');
+                        card.setAttribute('data-event-id', event.id);
+                        grid.appendChild(card);
+                    }
+                    card.innerHTML = cardHTML.replace('<div class="event-card', `<div data-event-id="${event.id}" class="event-card`);
+                });
+            });
         }
 
         function renderMarkets() {
             const grid = document.getElementById('marketsGrid');
             const currentPlayer = getCurrentPlayer();
 
-            grid.innerHTML = markets.map(market => {
-                const players = getEventPlayers(market.id);
-                const isJoined = players.includes(currentPlayer);
-                const joinedClass = isJoined ? 'joined' : '';
+            markets.forEach(market => {
+                const marketRef = ref(database, `events/${market.id}/players`);
+                
+                onValue(marketRef, (snapshot) => {
+                    const players = [];
+                    snapshot.forEach((childSnapshot) => {
+                        players.push(childSnapshot.val());
+                    });
 
-                let playersHTML;
-                if (players.length === 0) {
-                    playersHTML = '<div class="no-players">Nessun giocatore</div>';
-                } else {
-                    playersHTML = players.map(player => {
-                        const currentClass = player === currentPlayer ? 'current-user' : '';
-                        return `<div class="player-item ${currentClass}">• ${player}</div>`;
-                    }).join('');
-                }
+                    const isJoined = players.includes(currentPlayer);
+                    const joinedClass = isJoined ? 'joined' : '';
 
-                const statusText = isJoined ? 'Clicca per uscire' : 'Clicca per entrare';
+                    let playersHTML;
+                    if (players.length === 0) {
+                        playersHTML = '<div class="no-players">Nessun giocatore</div>';
+                    } else {
+                        playersHTML = players.map(player => {
+                            const currentClass = player === currentPlayer ? 'current-user' : '';
+                            return `<div class="player-item ${currentClass}">• ${player}</div>`;
+                        }).join('');
+                    }
 
-                return `
-                    <div class="market-card ${joinedClass}" onclick="togglePlayerInEvent('${market.id}')">
-                        <img src="${market.image}" 
-                             alt="${market.name}" 
-                             class="trainer-img"
-                             onerror="this.src='https://via.placeholder.com/128x128/1a1a1a/888?text=Market'">
-                        <div class="event-info">
-                            <div class="event-name">${market.name}</div>
-                            <div class="player-list">
-                                ${playersHTML}
+                    const statusText = isJoined ? 'Clicca per entrare' : 'Clicca per entrare';
+
+                    const cardHTML = `
+                        <div class="market-card ${joinedClass}" onclick="togglePlayerInEvent('${market.id}')">
+                            <img src="${market.image}" 
+                                 alt="${market.name}" 
+                                 class="trainer-img"
+                                 onerror="this.src='https://via.placeholder.com/128x128/1a1a1a/888?text=Market'">
+                            <div class="event-info">
+                                <div class="event-name">${market.name}</div>
+                                <div class="player-list">
+                                    ${playersHTML}
+                                </div>
+                                ${currentPlayer ? `<div class="join-status ${isJoined ? 'joined' : ''}">${statusText}</div>` : ''}
                             </div>
-                            ${currentPlayer ? `<div class="join-status ${isJoined ? 'joined' : ''}">${statusText}</div>` : ''}
                         </div>
-                    </div>
-                `;
-            }).join('');
-        }
+                    `;
 
-        function resetAllEvents() {
-            if (confirm('Sei sicuro di voler resettare tutti gli eventi?')) {
-                events.forEach(event => {
-                    localStorage.removeItem(`event_players_${event.id}`);
+                    let card = grid.querySelector(`[data-market-id="${market.id}"]`);
+                    if (!card) {
+                        card = document.createElement('div');
+                        card.setAttribute('data-market-id', market.id);
+                        grid.appendChild(card);
+                    }
+                    card.innerHTML = cardHTML.replace('<div class="market-card', `<div data-market-id="${market.id}" class="market-card`);
                 });
-                markets.forEach(market => {
-                    localStorage.removeItem(`event_players_${market.id}`);
-                });
-                renderEvents();
-                renderMarkets();
-            }
+            });
         }
 
         document.getElementById('playerNameInput').addEventListener('keypress', function(e) {
