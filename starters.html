@@ -341,4 +341,60 @@
             // Ascolta i cambiamenti in tempo reale
             onValue(eventRef, (snapshot) => {
                 const players = [];
-                snapshot.forEach((childSnapshot
+                snapshot.forEach((childSnapshot) => {
+                    players.push(childSnapshot.val());
+                });
+
+                const isJoined = players.includes(currentPlayer);
+
+                // Aggiorna status badge
+                const statusBadge = document.getElementById('statusBadge');
+                const joinLeaveBtn = document.getElementById('joinLeaveBtn');
+
+                if (isJoined) {
+                    statusBadge.textContent = 'Sei nell\'evento';
+                    statusBadge.className = 'status-badge joined';
+                    joinLeaveBtn.textContent = 'Esci dall\'Evento';
+                    joinLeaveBtn.className = 'join-leave-btn leave-btn';
+                } else {
+                    statusBadge.textContent = 'Non sei nell\'evento';
+                    statusBadge.className = 'status-badge not-joined';
+                    joinLeaveBtn.textContent = 'Entra nell\'Evento';
+                    joinLeaveBtn.className = 'join-leave-btn join-btn';
+                }
+
+                // Aggiorna contatore giocatori
+                document.getElementById('playerCountBadge').textContent = players.length;
+
+                // Renderizza lista giocatori
+                const playersList = document.getElementById('playersList');
+                
+                if (players.length === 0) {
+                    playersList.innerHTML = '<div class="no-players">Nessun giocatore nell\'evento</div>';
+                } else {
+                    playersList.innerHTML = players.map(player => {
+                        const isCurrentUser = player === currentPlayer;
+                        return `
+                            <div class="player-card ${isCurrentUser ? 'current-user' : ''}">
+                                <span class="player-name">${player}</span>
+                                ${isCurrentUser ? '<span class="you-badge">TU</span>' : ''}
+                            </div>
+                        `;
+                    }).join('');
+                }
+            });
+        }
+
+        // Esponi toggleJoin globalmente
+        window.toggleJoin = toggleJoin;
+
+        // Controlla se il giocatore ha impostato il nome
+        if (!getCurrentPlayer()) {
+            alert('Devi impostare il tuo nome dalla home page!');
+            window.location.href = 'index.html';
+        } else {
+            render();
+        }
+    </script>
+</body>
+</html>
