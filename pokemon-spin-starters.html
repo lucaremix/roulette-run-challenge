@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Starter Spin - Roulette Run Challenge</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #0a0a0a;
+            color: #e0e0e0;
+            padding: 20px;
+            overflow-x: hidden;
+            background-image: url('https://raw.githubusercontent.com/lucaremix/roulette-run-challenge/main/starters_background.png');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: -1;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 20px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 12px;
+        }
+
+        h1 {
+            font-size: 2.5em;
+            color: #000;
+            margin-bottom: 10px;
+        }
+
+        .spin-counter {
+            font-size: 1.5em;
+            color: #d4af37;
+            font-weight: bold;
+        }
+
+        .player-info {
+            text-align: center;
+            font-size: 1.2em;
+            color: #000;
+            margin-bottom: 10px;
+        }
+
+        .slot-machine {
+            position: relative;
+            margin: 40px auto;
+            width: 100%;
+            max-width: 800px;
+            height: 200px;
+            background: rgba(26, 26, 26, 0.9);
+            border: 3px solid #2a2a2a;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .slot-window {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            width: 180px;
+            height: 180px;
+            border: 4px solid #ffd700;
+            border-radius: 12px;
+            z-index: 10;
+            pointer-events: none;
+            box-shadow: 0 0 30px rgba(255, 215, 0, 0.5);
+        }
+
+        .slot-reel {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            transition: transform 5s cubic-bezier(0.25, 0.1, 0.25, 1);
+        }
+
+        .pokemon-slot {
+            width: 150px;
+            height: 150px;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #0a0a0a;
+            border-radius: 8px;
+        }
+
+        .pokemon-slot img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .spin-btn {
+            display: block;
+            margin: 20px auto;
+            padding: 15px 40px;
+            background: #2a7a2a;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.2em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .spin-btn:hover:not(:disabled) {
+            background: #357a35;
+            transform: scale(1.05);
+        }
+
+        .spin-btn:disabled {
+            background: #2a2a2a;
+            cursor: not-allowed;
+            opacity: 0.5;
+        }
+
+        .result-panel {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 12px;
+            padding: 30px;
+            margin-top: 30px;
+            text-align: center;
+            display: none;
+        }
+
+        .result-panel.show {
+            display: block;
+            animation: slideIn 0.5s;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .result-pokemon {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 30px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+
+        .result-pokemon img {
+            width: 200px;
+            height: 200px;
+            object-fit: contain;
+        }
+
+        .result-info {
+            text-align: left;
+        }
+
+        .result-info h2 {
+            font-size: 2em;
+            color: #d4af37;
+            margin-bottom: 15px;
+        }
+
+        .result-stat {
+            margin: 10px 0;
+            font-size: 1.1em;
+            color: #000;
+        }
+
+        .result-stat strong {
+            color: #555;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            margin-top: 30px;
+        }
+
+        .add-btn, .respin-btn {
+            padding: 15px 40px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.2em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .add-btn {
+            background: #2a7a2a;
+            color: white;
+        }
+
+        .add-btn:hover {
+            background: #357a35;
+        }
+
+        .respin-btn {
+            background: #7a2a2a;
+            color: white;
+        }
+
+        .respin-btn:hover {
+            background: #8a3535;
+        }
+
+        @media (max-width: 768px) {
+            .slot-machine {
+                height: 150px;
+            }
+
+            .slot-window {
+                width: 140px;
+                height: 140px;
+            }
+
+            .pokemon-slot {
+                width: 120px;
+                height: 120px;
+            }
+
+            .result-pokemon {
+                flex-direction: column;
+            }
+
+            .result-pokemon img {
+                width: 150px;
+                height: 150px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🌟 Starter Spin 🌟</h1>
+            <div class="player-info" id="playerInfo">Giocatore: ---</div>
+            <div class="spin-counter" id="spinCounter">Spin rimanenti: 5</div>
+        </header>
+
+        <div class="slot-machine" id="slotMachine">
+            <div class="slot-window"></div>
+            <div class="slot-reel" id="slotReel"></div>
+        </div>
+
+        <button class="spin-btn" id="spinBtn" onclick="startSpin()">
+            🎰 SPIN!
+        </button>
+
+        <div class="result-panel" id="resultPanel">
+            <h2>✨ Hai ottenuto!</h2>
+            <div class="result-pokemon" id="resultPokemon"></div>
+            
+            <div class="action-buttons">
+                <button class="add-btn" onclick="addToTeam()">
+                    ➕ Aggiungi alla Squadra
+                </button>
+                <button class="respin-btn" id="respinBtn" onclick="respin()">
+                    🔄 Respinna
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+        import { getDatabase, ref, onValue, remove, push, set, get } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js';
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDNuD9wViLLxteHMCEBlvfdONwcZbAjAvo",
+            authDomain: "roulette-run-challenge.firebaseapp.com",
+            databaseURL: "https://roulette-run-challenge-default-rtdb.europe-west1.firebasedatabase.app",
+            projectId: "roulette-run-challenge",
+            storageBucket: "roulette-run-challenge.firebasestorage.app",
+            messagingSenderId: "994019156093",
+            appId: "1:994019156093:web:9792bdce75c486f589d114"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app);
+
+        let currentPool = [];
+        let wonPokemon = null;
+        let wonPokemonKey = null;
+        let isSpinning = false;
+        let spinsRemaining = 5;
+
+        const natures = [
+            "Hardy", "Lonely", "Brave", "Adamant", "Naughty",
+            "Bold", "Docile", "Relaxed", "Impish", "Lax",
+            "Timid", "Hasty", "Serious", "Jolly", "Naive",
+            "Modest", "Mild", "Quiet", "Bashful", "Rash",
+            "Calm", "Gentle", "Sassy", "Careful", "Quirky"
+        ];
+
+        function padNumber(num) {
+            return String(num).padStart(3, '0');
+        }
+
+        function getPokemonImageUrl(nationalNumber) {
+            return `https://www.pokemon.com/static-assets/content-assets/cms2/img/pokedex/full/${padNumber(nationalNumber)}.png`;
+        }
+
+        function getCurrentPlayer() {
+            return localStorage.getItem('playerName') || '';
+        }
+
+        function updateSpinCounter() {
+            document.getElementById('spinCounter').textContent = `Spin rimanenti: ${spinsRemaining}`;
+            document.getElementById('respinBtn').style.display = spinsRemaining > 0 ? 'block' : 'none';
+        }
+
+        function loadPool() {
+            const poolRef = ref(database, `pools/starter`);
+            
+            onValue(poolRef, (snapshot) => {
+                const data = snapshot.val();
+                currentPool = data ? Object.entries(data).map(([key, value]) => ({
+                    key: key,
+                    ...value
+                })) : [];
+                
+                setupSlotMachine();
+            }, { onlyOnce: true });
+        }
+
+        function setupSlotMachine() {
+            const reel = document.getElementById('slotReel');
+            
+            if (currentPool.length === 0) {
+                reel.innerHTML = '<div style="color: #fff; padding: 50px;">Pool vuoto!</div>';
+                return;
+            }
+
+            const totalSlots = Math.max(50, currentPool.length * 3);
+            const slots = [];
+            
+            for (let i = 0; i < totalSlots; i++) {
+                const pokemon = currentPool[i % currentPool.length];
+                slots.push(pokemon);
+            }
+
+            reel.innerHTML = slots.map(pokemon => `
+                <div class="pokemon-slot">
+                    <img src="${getPokemonImageUrl(pokemon.national_number)}" 
+                         alt="${pokemon.english_name}">
+                </div>
+            `).join('');
+
+            reel.style.transition = 'none';
+            reel.style.transform = 'translateX(100px)';
+        }
+
+        window.startSpin = async function() {
+            if (isSpinning || spinsRemaining <= 0) return;
+            
+            if (currentPool.length === 0) {
+                alert('Pool vuoto!');
+                return;
+            }
+
+            isSpinning = true;
+            document.getElementById('spinBtn').disabled = true;
+            document.getElementById('resultPanel').classList.remove('show');
+
+            spinsRemaining--;
+            updateSpinCounter();
+
+            const randomIndex = Math.floor(Math.random() * currentPool.length);
+            wonPokemon = currentPool[randomIndex];
+            wonPokemonKey = wonPokemon.key;
+
+            const randomNature = natures[Math.floor(Math.random() * natures.length)];
+            
+            const abilities = [
+                wonPokemon.abilities_0,
+                wonPokemon.abilities_1,
+                wonPokemon.abilities_2
+            ].filter(a => a && a.trim() !== '');
+            
+            const randomAbility = abilities.length > 0 
+                ? abilities[Math.floor(Math.random() * abilities.length)]
+                : 'Unknown';
+
+            wonPokemon.rolled_nature = randomNature;
+            wonPokemon.rolled_ability = randomAbility;
+
+            const reel = document.getElementById('slotReel');
+            const slotWidth = 170;
+            const reelChildren = reel.children;
+            let targetSlotIndex = -1;
+            
+            for (let i = Math.floor(reelChildren.length / 2); i < reelChildren.length; i++) {
+                const slotPokemon = currentPool[i % currentPool.length];
+                if (slotPokemon.national_number === wonPokemon.national_number && 
+                    slotPokemon.english_name === wonPokemon.english_name) {
+                    targetSlotIndex = i;
+                    break;
+                }
+            }
+
+            if (targetSlotIndex === -1) {
+                targetSlotIndex = Math.floor(reelChildren.length * 0.7);
+            }
+
+            const machineCenter = document.querySelector('.slot-machine').offsetWidth / 2;
+            const slotCenter = slotWidth / 2;
+            const targetPosition = (targetSlotIndex * slotWidth) + slotCenter;
+            const finalTransform = machineCenter - targetPosition;
+
+            reel.style.transition = 'transform 5s cubic-bezier(0.25, 0.1, 0.25, 1)';
+            reel.style.transform = `translateX(${finalTransform}px)`;
+
+            setTimeout(() => {
+                showResult();
+                isSpinning = false;
+                if (spinsRemaining > 0) {
+                    document.getElementById('spinBtn').disabled = false;
+                }
+            }, 5000);
+        };
+
+        function showResult() {
+            const resultPanel = document.getElementById('resultPanel');
+            const resultPokemon = document.getElementById('resultPokemon');
+
+            const types = [wonPokemon.primary_type];
+            if (wonPokemon.secondary_type) types.push(wonPokemon.secondary_type);
+
+            resultPokemon.innerHTML = `
+                <img src="${getPokemonImageUrl(wonPokemon.national_number)}" 
+                     alt="${wonPokemon.english_name}">
+                <div class="result-info">
+                    <h2>${wonPokemon.english_name}</h2>
+                    <div class="result-stat"><strong>Numero:</strong> #${padNumber(wonPokemon.national_number)}</div>
+                    <div class="result-stat"><strong>Tipo:</strong> ${types.join(' / ')}</div>
+                    <div class="result-stat"><strong>BST:</strong> ${wonPokemon.bst}</div>
+                    <div class="result-stat"><strong>Natura:</strong> ${wonPokemon.rolled_nature}</div>
+                    <div class="result-stat"><strong>Abilità:</strong> ${wonPokemon.rolled_ability}</div>
+                </div>
+            `;
+
+            resultPanel.classList.add('show');
+        }
+
+        window.respin = function() {
+            if (spinsRemaining <= 0) {
+                alert('Non hai più spin disponibili!');
+                return;
+            }
+
+            document.getElementById('resultPanel').classList.remove('show');
+            document.getElementById('spinBtn').disabled = false;
+        };
+
+        window.addToTeam = async function() {
+            const player = getCurrentPlayer();
+
+            if (!player || !wonPokemon) return;
+
+            try {
+                const playerRef = ref(database, `players/${player}`);
+                const playerSnapshot = await get(playerRef);
+                
+                let playerData = playerSnapshot.val() || { coins: 0, team: [] };
+                if (!playerData.team) playerData.team = [];
+
+                playerData.team.push({
+                    ...wonPokemon,
+                    nature: wonPokemon.rolled_nature,
+                    ability: wonPokemon.rolled_ability,
+                    won_from: 'starter',
+                    won_at: Date.now()
+                });
+
+                await set(playerRef, playerData);
+
+                const pokemonRef = ref(database, `pools/starter/${wonPokemonKey}`);
+                await remove(pokemonRef);
+
+                alert(`${wonPokemon.english_name} aggiunto al team!`);
+                
+                window.location.href = 'index.html';
+
+            } catch (error) {
+                console.error('Errore:', error);
+                alert('Errore durante l\'aggiunta del Pokemon!');
+            }
+        };
+
+        // Inizializzazione
+        const playerName = getCurrentPlayer();
+        if (!playerName) {
+            alert('Devi impostare il tuo nome dalla home page!');
+            window.location.href = 'index.html';
+        } else {
+            document.getElementById('playerInfo').textContent = `Giocatore: ${playerName}`;
+            updateSpinCounter();
+            loadPool();
+        }
+    </script>
+</body>
+</html>
