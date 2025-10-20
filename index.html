@@ -13,10 +13,10 @@
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: #0a0a0a;
             min-height: 100vh;
             padding: 20px;
-            color: white;
+            color: #e0e0e0;
         }
 
         .container {
@@ -26,58 +26,150 @@
 
         header {
             text-align: center;
-            margin-bottom: 40px;
-            padding: 30px 20px;
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            border-radius: 20px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+            padding: 20px;
+            position: relative;
         }
 
         h1 {
-            font-size: 3em;
-            margin-bottom: 10px;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+            font-size: 2em;
+            color: #ffffff;
             letter-spacing: 2px;
+            font-weight: 600;
         }
 
         .subtitle {
-            font-size: 1.2em;
-            opacity: 0.9;
+            font-size: 1em;
+            color: #888;
+            margin-top: 5px;
+        }
+
+        .coin-counter {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: #1a1a1a;
+            border: 1px solid #2a2a2a;
+            border-radius: 8px;
+            padding: 10px 20px;
+        }
+
+        .coin-img {
+            width: 32px;
+            height: 32px;
+            image-rendering: pixelated;
+            image-rendering: -moz-crisp-edges;
+            image-rendering: crisp-edges;
+        }
+
+        .coin-amount {
+            font-size: 1.3em;
+            font-weight: bold;
+            color: #ffd700;
+        }
+
+        .player-setup {
+            background: #1a1a1a;
+            border: 1px solid #2a2a2a;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .player-setup h2 {
+            margin-bottom: 15px;
+            color: #fff;
+            font-size: 1.3em;
+        }
+
+        .player-input {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        input {
+            padding: 12px 20px;
+            background: #0a0a0a;
+            border: 1px solid #3a3a3a;
+            border-radius: 8px;
+            color: #e0e0e0;
+            font-size: 1em;
+            width: 250px;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #555;
+        }
+
+        .set-name-btn {
+            padding: 12px 30px;
+            background: #2a2a2a;
+            color: #fff;
+            border: 1px solid #3a3a3a;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: all 0.2s ease;
+        }
+
+        .set-name-btn:hover {
+            background: #3a3a3a;
+        }
+
+        .current-player {
+            margin-top: 10px;
+            color: #888;
         }
 
         .events-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
             gap: 20px;
             margin-bottom: 30px;
         }
 
         .event-card {
-            background: rgba(255, 255, 255, 0.95);
-            border-radius: 15px;
+            background: #1a1a1a;
+            border: 1px solid #2a2a2a;
+            border-radius: 12px;
             padding: 20px;
             display: flex;
             align-items: center;
-            gap: 15px;
+            gap: 20px;
             cursor: pointer;
             transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-            color: #333;
         }
 
         .event-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+            border-color: #3a3a3a;
+            background: #1f1f1f;
+            transform: translateY(-2px);
+        }
+
+        .event-card.joined {
+            border-color: #4a4a4a;
+            background: #252525;
         }
 
         .trainer-img {
-            width: 80px;
-            height: 80px;
-            border-radius: 50%;
-            object-fit: cover;
-            border: 3px solid #667eea;
+            width: 128px;
+            height: 128px;
+            object-fit: contain;
+            border: none;
+            border-radius: 0;
             flex-shrink: 0;
+            image-rendering: pixelated;
+            image-rendering: -moz-crisp-edges;
+            image-rendering: crisp-edges;
+            -ms-interpolation-mode: nearest-neighbor;
         }
 
         .event-info {
@@ -85,87 +177,140 @@
         }
 
         .event-name {
-            font-size: 1.3em;
-            font-weight: bold;
-            margin-bottom: 8px;
-            color: #667eea;
+            font-size: 1.4em;
+            font-weight: 600;
+            margin-bottom: 12px;
+            color: #ffffff;
         }
 
-        .player-count {
+        .player-list {
             display: flex;
-            align-items: center;
-            gap: 10px;
-            font-size: 1.1em;
-        }
-
-        .player-badge {
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            color: white;
-            padding: 5px 15px;
-            border-radius: 20px;
-            font-weight: bold;
-        }
-
-        .counter-buttons {
-            display: flex;
+            flex-direction: column;
             gap: 5px;
         }
 
-        .counter-btn {
-            background: #667eea;
-            color: white;
-            border: none;
-            width: 30px;
-            height: 30px;
-            border-radius: 50%;
-            cursor: pointer;
-            font-size: 1.2em;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.2s ease;
+        .player-item {
+            font-size: 0.95em;
+            color: #888;
+            padding: 4px 0;
         }
 
-        .counter-btn:hover {
-            background: #764ba2;
-            transform: scale(1.1);
+        .player-item.current-user {
+            color: #ccc;
+            font-weight: 600;
         }
 
-        .counter-btn:active {
-            transform: scale(0.95);
+        .no-players {
+            color: #555;
+            font-style: italic;
+        }
+
+        .join-status {
+            margin-top: 10px;
+            padding: 8px 16px;
+            background: #2a2a2a;
+            border-radius: 6px;
+            font-size: 0.9em;
+            color: #aaa;
+            display: inline-block;
+        }
+
+        .join-status.joined {
+            background: #2d2d2d;
+            color: #bbb;
         }
 
         .reset-btn {
             display: block;
             margin: 20px auto;
             padding: 15px 40px;
-            background: rgba(255, 255, 255, 0.2);
-            color: white;
-            border: 2px solid white;
-            border-radius: 30px;
+            background: #1a1a1a;
+            color: #e0e0e0;
+            border: 1px solid #2a2a2a;
+            border-radius: 8px;
             font-size: 1.1em;
             cursor: pointer;
             transition: all 0.3s ease;
-            backdrop-filter: blur(10px);
         }
 
         .reset-btn:hover {
-            background: rgba(255, 255, 255, 0.3);
-            transform: scale(1.05);
+            background: #252525;
+            border-color: #3a3a3a;
+        }
+
+        .markets-section {
+            margin-top: 50px;
+            padding-top: 30px;
+            border-top: 1px solid #2a2a2a;
+        }
+
+        .markets-title {
+            text-align: center;
+            color: #fff;
+            font-size: 2em;
+            margin-bottom: 30px;
+            letter-spacing: 1px;
+        }
+
+        .markets-grid {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            flex-wrap: wrap;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .market-card {
+            background: #1a1a1a;
+            border: 1px solid #2a2a2a;
+            border-radius: 12px;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            min-width: 350px;
+        }
+
+        .market-card:hover {
+            border-color: #3a3a3a;
+            background: #1f1f1f;
+            transform: translateY(-2px);
+        }
+
+        .market-card.joined {
+            border-color: #4a4a4a;
+            background: #252525;
         }
 
         @media (max-width: 768px) {
             h1 {
-                font-size: 2em;
+                font-size: 1.5em;
+            }
+
+            .subtitle {
+                font-size: 0.9em;
+            }
+
+            .coin-counter {
+                position: static;
+                margin: 15px auto 0;
+                justify-content: center;
             }
 
             .events-grid {
                 grid-template-columns: 1fr;
             }
 
-            .event-card {
+            .player-input {
                 flex-direction: column;
-                text-align: center;
+                width: 100%;
+            }
+
+            input {
+                width: 100%;
             }
         }
     </style>
@@ -173,87 +318,214 @@
 <body>
     <div class="container">
         <header>
-            <h1>🎰 ROULETTE RUN CHALLENGE 🎰</h1>
+            <h1>🎰 ROULETTE RUN CHALLENGE</h1>
             <p class="subtitle">Sfida il destino, gira la roulette!</p>
+            <div class="coin-counter">
+                <img src="https://raw.githubusercontent.com/lucaremix/roulette-run-challenge/main/pixel-art-red-chinese-gold-coin-png.png" 
+                     alt="Coins" 
+                     class="coin-img"
+                     onerror="this.style.display='none'">
+                <span class="coin-amount" id="coinAmount">0</span>
+            </div>
         </header>
+
+        <div class="player-setup">
+            <h2>Inserisci il tuo nome</h2>
+            <div class="player-input">
+                <input type="text" id="playerNameInput" placeholder="Nome giocatore..." maxlength="20">
+                <button class="set-name-btn" onclick="setPlayerName()">Salva Nome</button>
+            </div>
+            <div class="current-player" id="currentPlayerDisplay"></div>
+        </div>
 
         <div class="events-grid" id="eventsGrid"></div>
 
-        <button class="reset-btn" onclick="resetAllCounters()">🔄 Reset Tutti i Contatori</button>
+        <div class="markets-section">
+            <h2 class="markets-title">Markets</h2>
+            <div class="markets-grid" id="marketsGrid"></div>
+        </div>
     </div>
 
     <script>
         const events = [
-            { id: 'starters', name: 'Starters', trainer: 'lyra' },
-            { id: 'silver', name: 'Defeated Silver', trainer: 'silver' },
-            { id: 'falkner', name: 'Defeated Falkner', trainer: 'falkner' },
-            { id: 'proton', name: 'Defeated Proton', trainer: 'proton' },
-            { id: 'bugsy', name: 'Defeated Bugsy', trainer: 'bugsy' },
-            { id: 'whitney', name: 'Defeated Whitney', trainer: 'whitney' },
-            { id: 'morty', name: 'Defeated Morty', trainer: 'morty' },
-            { id: 'eusine', name: 'Defeated Eusine', trainer: 'eusine' },
-            { id: 'chuck', name: 'Defeated Chuck', trainer: 'chuck' },
-            { id: 'jasmine', name: 'Defeated Jasmine', trainer: 'jasmine' },
-            { id: 'pryce', name: 'Defeated Pryce', trainer: 'pryce' },
-            { id: 'archer', name: 'Defeated Archer', trainer: 'archer' },
-            { id: 'clair', name: 'Defeated Clair', trainer: 'clair' }
+            { id: 'starters', name: 'Starters', trainer: 'red' },
+            { id: 'silver', name: 'Silver', trainer: 'silver' },
+            { id: 'falkner', name: 'Falkner', trainer: 'falkner' },
+            { id: 'proton', name: 'Proton', trainer: 'proton' },
+            { id: 'bugsy', name: 'Bugsy', trainer: 'bugsy' },
+            { id: 'whitney', name: 'Whitney', trainer: 'whitney' },
+            { id: 'morty', name: 'Morty', trainer: 'morty' },
+            { id: 'eusine', name: 'Eusine', trainer: 'eusine' },
+            { id: 'chuck', name: 'Chuck', trainer: 'chuck' },
+            { id: 'jasmine', name: 'Jasmine', trainer: 'jasmine' },
+            { id: 'pryce', name: 'Pryce', trainer: 'pryce' },
+            { id: 'archer', name: 'Archer', trainer: 'archer' },
+            { id: 'clair', name: 'Clair', trainer: 'clair' }
         ];
 
-        function getPlayerCount(eventId) {
-            const saved = localStorage.getItem(`event_${eventId}`);
-            return saved ? parseInt(saved) : 0;
+        const markets = [
+            { id: 'black-market', name: 'Black Market', image: 'https://img.nuzlocke.app/leaders/frlg-giovanni.png' },
+            { id: 'mt-market', name: 'MT Market', image: 'https://img.nuzlocke.app/leaders/dp-cynthia.png' }
+        ];
+
+        function getCurrentPlayer() {
+            return localStorage.getItem('playerName') || '';
         }
 
-        function setPlayerCount(eventId, count) {
-            localStorage.setItem(`event_${eventId}`, count);
-            renderEvents();
+        function getCoins() {
+            return parseInt(localStorage.getItem('playerCoins')) || 0;
         }
 
-        function changeCount(eventId, delta) {
-            const current = getPlayerCount(eventId);
-            const newCount = Math.max(0, Math.min(2, current + delta));
-            setPlayerCount(eventId, newCount);
+        function setCoins(amount) {
+            localStorage.setItem('playerCoins', amount);
+            updateCoinDisplay();
+        }
+
+        function updateCoinDisplay() {
+            document.getElementById('coinAmount').textContent = getCoins();
+        }
+
+        function setPlayerName() {
+            const input = document.getElementById('playerNameInput');
+            const name = input.value.trim();
+            if (name) {
+                localStorage.setItem('playerName', name);
+                input.value = '';
+                updatePlayerDisplay();
+                renderEvents();
+                renderMarkets();
+            } else {
+                alert('Inserisci un nome valido!');
+            }
+        }
+
+        function updatePlayerDisplay() {
+            const display = document.getElementById('currentPlayerDisplay');
+            const name = getCurrentPlayer();
+            if (name) {
+                display.textContent = `Giocatore attuale: ${name}`;
+            } else {
+                display.textContent = 'Nessun nome impostato';
+            }
+        }
+
+        function getEventPlayers(eventId) {
+            const saved = localStorage.getItem(`event_players_${eventId}`);
+            return saved ? JSON.parse(saved) : [];
+        }
+
+        function togglePlayerInEvent(eventId) {
+            const playerName = getCurrentPlayer();
+            if (!playerName) {
+                alert('Imposta prima il tuo nome!');
+                return;
+            }
+
+            // Reindirizza alla pagina dell'evento
+            window.location.href = `${eventId}.html`;
         }
 
         function renderEvents() {
             const grid = document.getElementById('eventsGrid');
+            const currentPlayer = getCurrentPlayer();
+
             grid.innerHTML = events.map(event => {
-                const count = getPlayerCount(event.id);
-                const playerText = count === 0 ? 'Nessun giocatore' : 
-                                   count === 1 ? '1 giocatore' : 
-                                   '2 giocatori';
-                
+                const players = getEventPlayers(event.id);
+                const isJoined = players.includes(currentPlayer);
+                const joinedClass = isJoined ? 'joined' : '';
+
+                let playersHTML;
+                if (players.length === 0) {
+                    playersHTML = '<div class="no-players">Nessun giocatore</div>';
+                } else {
+                    playersHTML = players.map(player => {
+                        const currentClass = player === currentPlayer ? 'current-user' : '';
+                        return `<div class="player-item ${currentClass}">• ${player}</div>`;
+                    }).join('');
+                }
+
+                const statusText = isJoined ? 'Clicca per uscire' : 'Clicca per entrare';
+
                 return `
-                    <div class="event-card">
+                    <div class="event-card ${joinedClass}" onclick="togglePlayerInEvent('${event.id}')">
                         <img src="https://img.nuzlocke.app/leaders/gs-${event.trainer}.png" 
                              alt="${event.name}" 
                              class="trainer-img"
-                             onerror="this.src='https://via.placeholder.com/80?text=${event.trainer}'">
+                             onerror="this.src='https://via.placeholder.com/128x128/1a1a1a/888?text=${event.trainer}'">
                         <div class="event-info">
                             <div class="event-name">${event.name}</div>
-                            <div class="player-count">
-                                <span class="player-badge">${playerText}</span>
-                                <div class="counter-buttons">
-                                    <button class="counter-btn" onclick="changeCount('${event.id}', -1)">−</button>
-                                    <button class="counter-btn" onclick="changeCount('${event.id}', 1)">+</button>
-                                </div>
+                            <div class="player-list">
+                                ${playersHTML}
                             </div>
+                            ${currentPlayer ? `<div class="join-status ${isJoined ? 'joined' : ''}">${statusText}</div>` : ''}
                         </div>
                     </div>
                 `;
             }).join('');
         }
 
-        function resetAllCounters() {
-            if (confirm('Sei sicuro di voler resettare tutti i contatori?')) {
+        function renderMarkets() {
+            const grid = document.getElementById('marketsGrid');
+            const currentPlayer = getCurrentPlayer();
+
+            grid.innerHTML = markets.map(market => {
+                const players = getEventPlayers(market.id);
+                const isJoined = players.includes(currentPlayer);
+                const joinedClass = isJoined ? 'joined' : '';
+
+                let playersHTML;
+                if (players.length === 0) {
+                    playersHTML = '<div class="no-players">Nessun giocatore</div>';
+                } else {
+                    playersHTML = players.map(player => {
+                        const currentClass = player === currentPlayer ? 'current-user' : '';
+                        return `<div class="player-item ${currentClass}">• ${player}</div>`;
+                    }).join('');
+                }
+
+                const statusText = isJoined ? 'Clicca per uscire' : 'Clicca per entrare';
+
+                return `
+                    <div class="market-card ${joinedClass}" onclick="togglePlayerInEvent('${market.id}')">
+                        <img src="${market.image}" 
+                             alt="${market.name}" 
+                             class="trainer-img"
+                             onerror="this.src='https://via.placeholder.com/128x128/1a1a1a/888?text=Market'">
+                        <div class="event-info">
+                            <div class="event-name">${market.name}</div>
+                            <div class="player-list">
+                                ${playersHTML}
+                            </div>
+                            ${currentPlayer ? `<div class="join-status ${isJoined ? 'joined' : ''}">${statusText}</div>` : ''}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function resetAllEvents() {
+            if (confirm('Sei sicuro di voler resettare tutti gli eventi?')) {
                 events.forEach(event => {
-                    localStorage.removeItem(`event_${event.id}`);
+                    localStorage.removeItem(`event_players_${event.id}`);
+                });
+                markets.forEach(market => {
+                    localStorage.removeItem(`event_players_${market.id}`);
                 });
                 renderEvents();
+                renderMarkets();
             }
         }
 
+        document.getElementById('playerNameInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                setPlayerName();
+            }
+        });
+
+        updatePlayerDisplay();
+        updateCoinDisplay();
         renderEvents();
+        renderMarkets();
     </script>
 </body>
 </html>
