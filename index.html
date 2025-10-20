@@ -135,6 +135,11 @@
             border-radius: 12px;
             padding: 20px;
             margin-bottom: 20px;
+            display: none;
+        }
+
+        .team-bar.show {
+            display: block;
         }
 
         .team-bar-title {
@@ -180,10 +185,9 @@
             width: 100%;
             height: 100%;
             object-fit: contain;
-            image-rendering: auto;
         }
 
-        .team-slot .pokemon-tooltip {
+        .team-tooltip {
             position: absolute;
             bottom: 100%;
             left: 50%;
@@ -202,7 +206,7 @@
             min-width: 150px;
         }
 
-        .team-slot:hover .pokemon-tooltip {
+        .team-slot:hover .team-tooltip {
             opacity: 1;
         }
 
@@ -355,53 +359,7 @@
             background: #252525;
         }
 
-        .team-card {
-            background: #1a1a1a;
-            border: 1px solid #2a2a2a;
-            border-radius: 12px;
-            padding: 20px;
-        }
-
-        .team-header {
-            font-size: 1.5em;
-            font-weight: bold;
-            color: #fff;
-            margin-bottom: 15px;
-            text-align: center;
-        }
-
-        .team-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 10px;
-        }
-
-        .team-pokemon {
-            aspect-ratio: 1;
-            background: #0a0a0a;
-            border: 2px solid #2a2a2a;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            position: relative;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-
-        .team-pokemon:hover {
-            border-color: #4a4a4a;
-            transform: scale(1.05);
-        }
-
-        .team-pokemon img {
-            width: 100%;
-            height: 100%;
-            object-fit: contain;
-            image-rendering: auto;
-        }
-
-                    @media (max-width: 768px) {
+        @media (max-width: 768px) {
             h1 {
                 font-size: 1.5em;
             }
@@ -458,7 +416,7 @@
             <div class="current-player" id="currentPlayerDisplay"></div>
         </div>
 
-        <div class="team-bar" id="teamBar" style="display: none;">
+        <div class="team-bar" id="teamBar">
             <div class="team-bar-title">Il tuo Team</div>
             <div class="team-bar-grid" id="teamBarGrid"></div>
         </div>
@@ -479,9 +437,8 @@
     <!-- Firebase SDK -->
     <script type="module">
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
-        import { getDatabase, ref, set, onValue, remove } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js';
+        import { getDatabase, ref, set, onValue, remove, push } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js';
 
-        // Firebase configuration
         const firebaseConfig = {
             apiKey: "AIzaSyDNuD9wViLLxteHMCEBlvfdONwcZbAjAvo",
             authDomain: "roulette-run-challenge.firebaseapp.com",
@@ -492,7 +449,6 @@
             appId: "1:994019156093:web:9792bdce75c486f589d114"
         };
 
-        // Initialize Firebase
         const app = initializeApp(firebaseConfig);
         const database = getDatabase(app);
 
@@ -517,20 +473,11 @@
             { id: 'mt-market', name: 'MT Market', image: 'https://img.nuzlocke.app/leaders/dp-cynthia.png' }
         ];
 
-        // Esponi le funzioni globalmente
         window.setPlayerName = setPlayerName;
         window.togglePlayerInEvent = togglePlayerInEvent;
 
         function getCurrentPlayer() {
             return localStorage.getItem('playerName') || '';
-        }
-
-        function getCoins() {
-            return parseInt(localStorage.getItem('playerCoins')) || 0;
-        }
-
-        function setCoins(amount) {
-            localStorage.setItem('playerCoins', amount);
         }
 
         function setPlayerName() {
@@ -540,6 +487,9 @@
                 localStorage.setItem('playerName', name);
                 input.value = '';
                 updatePlayerDisplay();
+                updatePlayerTeam();
+                renderEvents();
+                renderMarkets();
             } else {
                 alert('Inserisci un nome valido!');
             }
@@ -555,6 +505,65 @@
             }
         }
 
+        function updatePlayerTeam() {
+            const playerName = getCurrentPlayer();
+            const teamBar = document.getElementById('teamBar');
+            
+            if (!playerName) {
+                teamBar.classList.remove('show');
+                document.getElementById('coinAmount').textContent = '0';
+                return;
+            }
+
+            teamBar.classList.add('show');
+
+            // Aggiorna coins
+            const coinsRef = ref(database, `players/${playerName}/coins`);
+            onValue(coinsRef, (snapshot) => {
+                const coins = snapshot.val() || 0;
+                document.getElementById('coinAmount').textContent = coins;
+            });
+
+            // Aggiorna team
+            const teamRef = ref(database, `players/${playerName}/team`);
+            onValue(teamRef, (snapshot) => {
+                const team = snapshot.val() || [];
+                renderTeamBar(team);
+            });
+        }
+
+        function renderTeamBar(team) {
+            const grid = document.getElementById('teamBarGrid');
+            const maxSlots = 10;
+
+            grid.innerHTML = '';
+
+            for (let i = 0; i < maxSlots; i++) {
+                const pokemon = team[i];
+                const slot = document.createElement('div');
+                
+                if (pokemon) {
+                    const paddedNum = String(pokemon.national_number).padStart(3, '0');
+                    const imgUrl = `https://www.pokemon.com/static-assets/content-assets/cms2/img/pokedex/full/${paddedNum}.png`;
+                    
+                    slot.className = 'team-slot';
+                    slot.innerHTML = `
+                        <img src="${imgUrl}" alt="${pokemon.english_name}">
+                        <div class="team-tooltip">
+                            <div class="tooltip-name">${pokemon.english_name}</div>
+                            <div class="tooltip-stat">Natura: ${pokemon.nature}</div>
+                            <div class="tooltip-stat">Abilità: ${pokemon.ability}</div>
+                        </div>
+                    `;
+                } else {
+                    slot.className = 'team-slot empty';
+                    slot.innerHTML = '<span style="color: #444; font-size: 1.5em;">?</span>';
+                }
+                
+                grid.appendChild(slot);
+            }
+        }
+
         function togglePlayerInEvent(eventId) {
             const playerName = getCurrentPlayer();
             if (!playerName) {
@@ -562,7 +571,6 @@
                 return;
             }
 
-            // Reindirizza alla pagina dell'evento
             window.location.href = `${eventId}.html`;
         }
 
@@ -580,7 +588,6 @@
                     });
 
                     const isJoined = players.includes(currentPlayer);
-                    const joinedClass = isJoined ? 'joined' : '';
 
                     let playersHTML;
                     if (players.length === 0) {
@@ -592,32 +599,32 @@
                         }).join('');
                     }
 
-                    const statusText = isJoined ? 'Clicca per entrare' : 'Clicca per entrare';
+                    const statusText = 'Clicca per entrare';
 
-                    const cardHTML = `
-                        <div class="event-card ${joinedClass}" onclick="togglePlayerInEvent('${event.id}')">
-                            <img src="https://img.nuzlocke.app/leaders/gs-${event.trainer}.png" 
-                                 alt="${event.name}" 
-                                 class="trainer-img"
-                                 onerror="this.src='https://via.placeholder.com/128x128/1a1a1a/888?text=${event.trainer}'">
-                            <div class="event-info">
-                                <div class="event-name">${event.name}</div>
-                                <div class="player-list">
-                                    ${playersHTML}
-                                </div>
-                                ${currentPlayer ? `<div class="join-status ${isJoined ? 'joined' : ''}">${statusText}</div>` : ''}
-                            </div>
-                        </div>
-                    `;
-
-                    // Trova o crea la card
                     let card = grid.querySelector(`[data-event-id="${event.id}"]`);
                     if (!card) {
                         card = document.createElement('div');
                         card.setAttribute('data-event-id', event.id);
+                        card.className = `event-card ${isJoined ? 'joined' : ''}`;
+                        card.onclick = () => togglePlayerInEvent(event.id);
                         grid.appendChild(card);
+                    } else {
+                        card.className = `event-card ${isJoined ? 'joined' : ''}`;
                     }
-                    card.innerHTML = cardHTML.replace('<div class="event-card', `<div data-event-id="${event.id}" class="event-card`);
+
+                    card.innerHTML = `
+                        <img src="https://img.nuzlocke.app/leaders/gs-${event.trainer}.png" 
+                             alt="${event.name}" 
+                             class="trainer-img"
+                             onerror="this.src='https://via.placeholder.com/128x128/1a1a1a/888?text=${event.trainer}'">
+                        <div class="event-info">
+                            <div class="event-name">${event.name}</div>
+                            <div class="player-list">
+                                ${playersHTML}
+                            </div>
+                            ${currentPlayer ? `<div class="join-status ${isJoined ? 'joined' : ''}">${statusText}</div>` : ''}
+                        </div>
+                    `;
                 });
             });
         }
@@ -636,7 +643,6 @@
                     });
 
                     const isJoined = players.includes(currentPlayer);
-                    const joinedClass = isJoined ? 'joined' : '';
 
                     let playersHTML;
                     if (players.length === 0) {
@@ -648,47 +654,35 @@
                         }).join('');
                     }
 
-                    const statusText = isJoined ? 'Clicca per entrare' : 'Clicca per entrare';
-
-                    const cardHTML = `
-                        <div class="market-card ${joinedClass}" onclick="togglePlayerInEvent('${market.id}')">
-                            <img src="${market.image}" 
-                                 alt="${market.name}" 
-                                 class="trainer-img"
-                                 onerror="this.src='https://via.placeholder.com/128x128/1a1a1a/888?text=Market'">
-                            <div class="event-info">
-                                <div class="event-name">${market.name}</div>
-                                <div class="player-list">
-                                    ${playersHTML}
-                                </div>
-                                ${currentPlayer ? `<div class="join-status ${isJoined ? 'joined' : ''}">${statusText}</div>` : ''}
-                            </div>
-                        </div>
-                    `;
+                    const statusText = 'Clicca per entrare';
 
                     let card = grid.querySelector(`[data-market-id="${market.id}"]`);
                     if (!card) {
                         card = document.createElement('div');
                         card.setAttribute('data-market-id', market.id);
+                        card.className = `market-card ${isJoined ? 'joined' : ''}`;
+                        card.onclick = () => togglePlayerInEvent(market.id);
                         grid.appendChild(card);
+                    } else {
+                        card.className = `market-card ${isJoined ? 'joined' : ''}`;
                     }
-                    card.innerHTML = cardHTML.replace('<div class="market-card', `<div data-market-id="${market.id}" class="market-card`);
+
+                    card.innerHTML = `
+                        <img src="${market.image}" 
+                             alt="${market.name}" 
+                             class="trainer-img"
+                             onerror="this.src='https://via.placeholder.com/128x128/1a1a1a/888?text=Market'">
+                        <div class="event-info">
+                            <div class="event-name">${market.name}</div>
+                            <div class="player-list">
+                                ${playersHTML}
+                            </div>
+                            ${currentPlayer ? `<div class="join-status ${isJoined ? 'joined' : ''}">${statusText}</div>` : ''}
+                        </div>
+                    `;
                 });
             });
         }
-
-        document.getElementById('playerNameInput').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                setPlayerName();
-            }
-        });
-
-        // Inizializza tutto
-        updatePlayerDisplay();
-        updatePlayerTeam();
-        renderEvents();
-        renderMarkets();
-        renderTeams();
 
         function renderTeams() {
             const players = ['lucaremix', 'crmagno'];
@@ -704,25 +698,26 @@
                     if (!teamCard) {
                         teamCard = document.createElement('div');
                         teamCard.className = 'team-card';
+                        teamCard.style.cssText = 'background:#1a1a1a;border:1px solid #2a2a2a;border-radius:12px;padding:20px';
                         teamCard.setAttribute('data-player', playerName);
                         teamsSection.appendChild(teamCard);
                     }
 
                     teamCard.innerHTML = `
-                        <div class="team-header">${playerName} - ${team.length} Pokemon</div>
-                        <div class="team-grid">
+                        <div style="font-size:1.5em;font-weight:bold;color:#fff;margin-bottom:15px;text-align:center">${playerName} - ${team.length} Pokemon</div>
+                        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px">
                             ${team.slice(0, 6).map(p => {
                                 const paddedNum = String(p.national_number).padStart(3, '0');
                                 const imgUrl = `https://www.pokemon.com/static-assets/content-assets/cms2/img/pokedex/full/${paddedNum}.png`;
                                 return `
-                                    <div class="team-pokemon" title="${p.english_name}\n${p.nature} | ${p.ability}">
-                                        <img src="${imgUrl}" alt="${p.english_name}">
+                                    <div style="aspect-ratio:1;background:#0a0a0a;border:2px solid #2a2a2a;border-radius:8px;display:flex;align-items:center;justify-content:center" title="${p.english_name}\n${p.nature} | ${p.ability}">
+                                        <img src="${imgUrl}" style="width:100%;height:100%;object-fit:contain">
                                     </div>
                                 `;
                             }).join('')}
                             ${Array(Math.max(0, 6 - team.length)).fill(0).map(() => `
-                                <div class="team-pokemon" style="border-style: dashed; opacity: 0.3;">
-                                    <span style="color: #444; font-size: 2em;">?</span>
+                                <div style="aspect-ratio:1;background:#0a0a0a;border:2px dashed #2a2a2a;border-radius:8px;display:flex;align-items:center;justify-content:center;opacity:0.3">
+                                    <span style="color:#444;font-size:2em">?</span>
                                 </div>
                             `).join('')}
                         </div>
@@ -730,6 +725,19 @@
                 });
             });
         }
+
+        document.getElementById('playerNameInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                setPlayerName();
+            }
+        });
+
+        // Inizializzazione
+        updatePlayerDisplay();
+        updatePlayerTeam();
+        renderEvents();
+        renderMarkets();
+        renderTeams();
     </script>
 </body>
 </html>
