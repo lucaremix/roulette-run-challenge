@@ -828,31 +828,50 @@
             const eventRef = ref(database, 'events/lenora/game');
             const snapshot = await get(eventRef);
             
+            // Ottieni i giocatori dall'evento
+            const playersSnapshot = await get(ref(database, 'events/lenora/players'));
+            const players = [];
+            playersSnapshot.forEach(child => players.push(child.val()));
+            
             if (snapshot.exists()) {
                 gameState = snapshot.val();
+                // Assicurati che i nomi dei giocatori siano aggiornati
+                if (players.length >= 2) {
+                    if (!gameState.player1.name) gameState.player1.name = players[0];
+                    if (!gameState.player2.name) gameState.player2.name = players[1];
+                }
             } else {
-                const playersSnapshot = await get(ref(database, 'events/lenora/players'));
-                const players = [];
-                playersSnapshot.forEach(child => players.push(child.val()));
-                
                 if (players.length >= 2) {
                     gameState.player1.name = players[0];
                     gameState.player2.name = players[1];
+                    gameState.player1.score = 0;
+                    gameState.player2.score = 0;
+                    gameState.currentRound = 0;
+                    gameState.roundsToWin = 5;
+                    gameState.isGameOver = false;
                 }
                 
                 await set(eventRef, gameState);
             }
 
+            console.log('Game state:', gameState);
             updateUI();
             
             if (!gameState.isGameOver) {
-                generateSharedRound();
+                await generateSharedRound();
             }
 
             onValue(eventRef, (snapshot) => {
                 if (snapshot.exists()) {
                     gameState = snapshot.val();
                     updateUI();
+                    
+                    // Se c'è un nuovo BST, aggiorna la UI
+                    if (gameState.currentBST && currentBST !== gameState.currentBST) {
+                        currentBST = gameState.currentBST;
+                        document.getElementById('bstValue').textContent = currentBST;
+                        correctPokemon = allPokemon.filter(p => p.bst === currentBST);
+                    }
                 }
             });
         };
