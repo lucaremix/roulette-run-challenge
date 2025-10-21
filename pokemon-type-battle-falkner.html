@@ -539,6 +539,11 @@
             document.getElementById('waitingScreen').style.display = 'none';
             document.getElementById('battleScreen').style.display = 'block';
 
+            // Start timer if not already started
+            if (!timerStarted) {
+                startTimer();
+            }
+
             // Check winner
             if (gameState.winner !== null) {
                 showResult();
@@ -610,27 +615,48 @@
             });
         }
 
+        let timerStarted = false;
+
         async function startGame() {
             const gameRef = ref(database, 'events/falkner/gameState');
-            await update(gameRef, { started: true });
-            
-            // Start timer
-            startTimer();
+            await update(gameRef, { 
+                started: true,
+                timeLeft: 15,
+                timerLastUpdate: Date.now()
+            });
         }
 
         function startTimer() {
+            if (timerStarted) return;
+            timerStarted = true;
+
             setInterval(async () => {
                 if (!gameState || !gameState.started || gameState.winner !== null) return;
 
-                const gameRef = ref(database, 'events/falkner/gameState');
-                const newTime = gameState.timeLeft - 1;
+                // Solo il primo giocatore aggiorna il timer per evitare conflitti
+                if (currentPlayer !== gameState.players[0]) return;
 
-                if (newTime <= 0) {
-                    // Time's up - other player wins
-                    const winnerIndex = gameState.currentPlayerIndex === 0 ? 1 : 0;
-                    await update(gameRef, { winner: winnerIndex });
-                } else {
-                    await update(gameRef, { timeLeft: newTime });
+                const gameRef = ref(database, 'events/falkner/gameState');
+                const now = Date.now();
+                const lastUpdate = gameState.timerLastUpdate || now;
+                const elapsed = Math.floor((now - lastUpdate) / 1000);
+
+                if (elapsed >= 1) {
+                    const newTime = Math.max(0, gameState.timeLeft - elapsed);
+
+                    if (newTime <= 0) {
+                        // Time's up - other player wins
+                        const winnerIndex = gameState.currentPlayerIndex === 0 ? 1 : 0;
+                        await update(gameRef, { 
+                            winner: winnerIndex,
+                            timeLeft: 0
+                        });
+                    } else {
+                        await update(gameRef, { 
+                            timeLeft: newTime,
+                            timerLastUpdate: now
+                        });
+                    }
                 }
             }, 1000);
         }
@@ -646,7 +672,7 @@
             if (!searchText || searchText.length < 2) return [];
             
             const search = searchText.toLowerCase();
-            return validPokemon
+            return allPokemon
                 .filter(p => 
                     p.name.toLowerCase().includes(search) && 
                     !gameState.usedPokemon.includes(p.name)
@@ -679,19 +705,34 @@
 
         async function submitPokemon(playerNum) {
             if (!selectedPokemonName) {
-                alert('Seleziona un Pokémon valido dalla lista!');
+                alert('Seleziona un Pokémon dalla lista!');
                 return;
             }
 
-            const pokemon = validPokemon.find(p => p.name === selectedPokemonName);
+            const pokemon = allPokemon.find(p => p.name === selectedPokemonName);
             
             if (!pokemon) {
-                alert('Pokémon non valido per questo tipo!');
+                alert('Pokémon non trovato!');
+                return;
+            }
+
+            // Check if pokemon is of the correct type
+            const isCorrectType = pokemon.primaryType === gameState.selectedType || 
+                                 pokemon.secondaryType === gameState.selectedType;
+            
+            if (!isCorrectType) {
+                alert(`${pokemon.name} non è di tipo ${typeTranslations[gameState.selectedType]}! Hai perso!`);
+                const gameRef = ref(database, 'events/falkner/gameState');
+                const winnerIndex = gameState.currentPlayerIndex === 0 ? 1 : 0;
+                await update(gameRef, { winner: winnerIndex });
                 return;
             }
 
             if (gameState.usedPokemon.includes(pokemon.name)) {
-                alert('Questo Pokémon è già stato usato!');
+                alert('Questo Pokémon è già stato usato! Hai perso!');
+                const gameRef = ref(database, 'events/falkner/gameState');
+                const winnerIndex = gameState.currentPlayerIndex === 0 ? 1 : 0;
+                await update(gameRef, { winner: winnerIndex });
                 return;
             }
 
@@ -702,7 +743,8 @@
             await update(gameRef, {
                 usedPokemon: newUsedPokemon,
                 currentPlayerIndex: nextPlayerIndex,
-                timeLeft: 15
+                timeLeft: 15,
+                timerLastUpdate: Date.now()
             });
 
             document.getElementById(`pokemonInput${playerNum}`).value = '';
@@ -713,8 +755,9 @@
             document.getElementById('waitingScreen').style.display = 'none';
             document.getElementById('battleScreen').style.display = 'none';
             
-            const winner = gameState.players[gameState.winner];
-            const loser = gameState.players[1 - gameState.winner];
+            const winnerIndex = gameState.winner;
+            const winner = gameState.players[winnerIndex];
+            const loser = gameState.players[1 - winnerIndex];
             const isWinner = winner === currentPlayer;
 
             const resultTitle = document.getElementById('resultTitle');
@@ -723,22 +766,22 @@
             if (isWinner) {
                 resultTitle.textContent = '🎉 Vittoria!';
                 resultTitle.className = 'result-title winner';
-                resultMessage.textContent = `Complimenti ${winner}, hai vinto!`;
+                resultMessage.textContent = `Complimenti ${winner}, hai vinto la sfida!`;
             } else {
                 resultTitle.textContent = '😢 Sconfitta';
                 resultTitle.className = 'result-title loser';
                 resultMessage.textContent = `${winner} ha vinto la sfida!`;
             }
 
-            await giveRewards(winner, loser);
+            await giveRewards(isWinner);
             document.getElementById('resultScreen').classList.add('show');
         }
 
-        async function giveRewards(winner, loser) {
+        async function giveRewards(isWinner) {
             const rewardsList = document.getElementById('rewardsList');
             rewardsList.innerHTML = '';
 
-            if (currentPlayer === winner) {
+            if (isWinner) {
                 const rewards = [
                     { text: '🎰 1 Spin dal Pool B', highlight: true },
                     { text: '💰 50 Coins', highlight: true }
