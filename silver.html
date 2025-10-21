@@ -224,93 +224,97 @@
         }
 
         .intro-screen {
-            background: #ffffff;
-            border: none;
+            background: #1a1a1a;
+            border: 1px solid #2a2a2a;
             border-radius: 12px;
             padding: 40px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
         }
-
+        
         .intro-content {
             display: flex;
             gap: 40px;
             align-items: center;
             margin: 40px 0;
         }
-
+        
         .silver-image {
             width: 300px;
             height: auto;
             flex-shrink: 0;
+            image-rendering: pixelated;
         }
-
+        
         .intro-text {
             flex: 1;
+            color: #e0e0e0;
         }
-
+        
         .intro-text h2 {
             font-size: 2em;
-            color: #c0c0c0;
+            color: #ffffff;
             margin-bottom: 20px;
-            text-shadow: none;
+            text-shadow: 0 0 10px rgba(192,192,192,0.2);
         }
-
+        
         .intro-text p {
-            font-size: 1.3em;
+            font-size: 1.2em;
             line-height: 1.8;
-            color: #000;
+            color: #cccccc;
             margin-bottom: 15px;
         }
-
+        
         .intro-text .important {
-            color: #c41e3a;
+            color: #ff6b6b;
             font-weight: bold;
         }
-
+        
         .hint-list {
-            background: #f0f0f0;
+            background: #0f0f0f;
             padding: 20px;
             border-radius: 8px;
             margin: 20px 0;
+            border: 1px solid #2a2a2a;
         }
-
+        
         .hint-list h3 {
-            color: #333;
+            color: #c0c0c0;
             margin-bottom: 15px;
             font-size: 1.2em;
         }
-
+        
         .hint-item {
             margin: 10px 0;
-            padding: 10px;
-            background: white;
+            padding: 12px 15px;
+            background: #1e1e1e;
             border-radius: 6px;
             border-left: 4px solid #c0c0c0;
+            color: #e0e0e0;
         }
-
+        
         .hint-number {
             font-weight: bold;
             color: #c0c0c0;
             margin-right: 8px;
         }
-
+        
         .start-btn {
             display: block;
             margin: 30px auto 0;
             padding: 20px 60px;
-            background: #c0c0c0;
-            color: white;
+            background: linear-gradient(135deg, #888, #b0b0b0);
+            color: #0a0a0a;
             border: none;
             border-radius: 12px;
             font-size: 1.5em;
             font-weight: bold;
             cursor: pointer;
-            transition: all 0.3s;
+            transition: all 0.3s ease;
             box-shadow: 0 4px 15px rgba(192, 192, 192, 0.4);
         }
-
+        
         .start-btn:hover {
-            background: #a8a8a8;
+            background: linear-gradient(135deg, #a0a0a0, #c0c0c0);
             transform: scale(1.05);
             box-shadow: 0 6px 20px rgba(192, 192, 192, 0.6);
         }
