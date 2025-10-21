@@ -454,19 +454,19 @@
         const database = getDatabase(app);
 
         const events = [
-            { id: 'alder', name: 'Starters', trainer: 'alder' },
+            { id: 'alder', name: 'Starters', trainer: 'https://img.nuzlocke.app/leaders/blwh-alder.png' },
             { id: 'n-1', name: 'N', trainer: 'n-2' },
-            { id: 'ccc', name: 'Chili, Cress & Cilian', trainer: 'ccc' },
-            { id: 'cheren', name: 'Cheren', trainer: 'cheren' },
-            { id: 'lenora', name: 'Lenora', trainer: 'lenora' },
-            { id: 'burgh', name: 'Burgh', trainer: 'burgh' },
-            { id: 'elesa', name: 'Elesa', trainer: 'elesa' },
-            { id: 'clay', name: 'Clay', trainer: 'clay' },
+            { id: 'ccc', name: 'Chili, Cress & Cilian', trainer: 'https://img.nuzlocke.app/leaders/blwh-ccc.png' },
+            { id: 'cheren', name: 'Cheren', trainer: 'https://img.nuzlocke.app/leaders/blwh-cheren.png' },
+            { id: 'lenora', name: 'Lenora', trainer: 'https://img.nuzlocke.app/leaders/blwh-lenora.png' },
+            { id: 'burgh', name: 'Burgh', trainer: 'https://img.nuzlocke.app/leaders/blwh-burgh.png' },
+            { id: 'elesa', name: 'Elesa', trainer: 'https://img.nuzlocke.app/leaders/blwh-elesa.png' },
+            { id: 'clay', name: 'Clay', trainer: 'https://img.nuzlocke.app/leaders/blwh-clay.png' },
             { id: 'n-2', name: 'N (Chargestone Cave)', trainer: 'n-2' },
-            { id: 'skyla', name: 'Skyla', trainer: 'skyla' },
-            { id: 'brycen', name: 'Brycen', trainer: 'brycen' },
-            { id: 'bianca', name: 'Bianca', trainer: 'bianca' },
-            { id: 'drayden', name: 'Drayden', trainer: 'drayden' }
+            { id: 'skyla', name: 'Skyla', trainer: 'https://img.nuzlocke.app/leaders/blwh-skyla.png' },
+            { id: 'brycen', name: 'Brycen', trainer: 'https://img.nuzlocke.app/leaders/blwh-brycen.png' },
+            { id: 'bianca', name: 'Bianca', trainer: 'https://img.nuzlocke.app/leaders/blwh-bianca.png' },
+            { id: 'drayden', name: 'Drayden', trainer: 'https://img.nuzlocke.app/leaders/blwh-drayden.png' }
         ];
 
         const markets = [
@@ -614,7 +614,7 @@
                     }
 
                     card.innerHTML = `
-                        <img src="https://img.nuzlocke.app/leaders/blwh-${event.trainer}.png" 
+                        <img src="${event.trainer}" 
                              alt="${event.name}" 
                              class="trainer-img"
                              onerror="this.src='https://via.placeholder.com/128x128/1a1a1a/888?text=${event.trainer}'">
