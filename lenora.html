@@ -1133,29 +1133,6 @@
             return `https://www.pokemon.com/static-assets/content-assets/cms2/img/pokedex/full/${padNumber(nationalNumber)}.png`;
         }
 
-        async function giveRewards(state) {
-            const winner = state.player1.score >= state.roundsToWin ? state.player1.name : state.player2.name;
-            const loser = winner === state.player1.name ? state.player2.name : state.player1.name;
-
-            const winnerRef = ref(database, `players/${winner}`);
-            const loserRef = ref(database, `players/${loser}`);
-
-            const winnerSnap = await get(winnerRef);
-            const loserSnap = await get(loserRef);
-
-            let winnerData = winnerSnap.val() || { coins: 0, team: [] };
-            let loserData = loserSnap.val() || { coins: 0, team: [] };
-
-            winnerData.coins = (winnerData.coins || 0) + 100;
-            winnerData.pendingSpin = { pool: 'a-tier', from: 'lenora' };
-
-            loserData.coins = (loserData.coins || 0) + 75;
-            loserData.pendingSpin = { pool: 'c-tier', from: 'lenora' };
-
-            await set(winnerRef, winnerData);
-            await set(loserRef, loserData);
-        }
-
         function showResult(message, isCorrect, pokemon = null) {
             const resultDiv = document.getElementById('resultMessage');
             resultDiv.className = `result-message ${isCorrect ? 'correct' : 'wrong'}`;
@@ -1203,6 +1180,29 @@
         window.goToSpin = function() {
             window.location.href = 'pokemon-spin.html';
         };
+
+        async function giveRewards(state) {
+            const winner = state.player1.score >= state.roundsToWin ? state.player1.name : state.player2.name;
+            const loser = winner === state.player1.name ? state.player2.name : state.player1.name;
+
+            const winnerRef = ref(database, `players/${winner}`);
+            const loserRef = ref(database, `players/${loser}`);
+
+            const winnerSnap = await get(winnerRef);
+            const loserSnap = await get(loserRef);
+
+            let winnerData = winnerSnap.val() || { coins: 0, team: [] };
+            let loserData = loserSnap.val() || { coins: 0, team: [] };
+
+            winnerData.coins = (winnerData.coins || 0) + 100;
+            winnerData.pendingSpin = { pool: 'a-tier', from: 'lenora' };
+
+            loserData.coins = (loserData.coins || 0) + 75;
+            loserData.pendingSpin = { pool: 'c-tier', from: 'lenora' };
+
+            await set(winnerRef, winnerData);
+            await set(loserRef, loserData);
+        }
 
         const input = document.getElementById('pokemonInput');
         const suggestionsDiv = document.getElementById('suggestions');
