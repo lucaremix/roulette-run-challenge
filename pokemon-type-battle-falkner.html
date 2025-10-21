@@ -705,34 +705,19 @@
 
         async function submitPokemon(playerNum) {
             if (!selectedPokemonName) {
-                alert('Seleziona un Pokémon dalla lista!');
+                alert('Seleziona un Pokémon valido dalla lista!');
                 return;
             }
 
-            const pokemon = allPokemon.find(p => p.name === selectedPokemonName);
+            const pokemon = validPokemon.find(p => p.name === selectedPokemonName);
             
             if (!pokemon) {
-                alert('Pokémon non trovato!');
-                return;
-            }
-
-            // Check if pokemon is of the correct type
-            const isCorrectType = pokemon.primaryType === gameState.selectedType || 
-                                 pokemon.secondaryType === gameState.selectedType;
-            
-            if (!isCorrectType) {
-                alert(`${pokemon.name} non è di tipo ${typeTranslations[gameState.selectedType]}! Hai perso!`);
-                const gameRef = ref(database, 'events/falkner/gameState');
-                const winnerIndex = gameState.currentPlayerIndex === 0 ? 1 : 0;
-                await update(gameRef, { winner: winnerIndex });
+                alert('Pokémon non valido per questo tipo!');
                 return;
             }
 
             if (gameState.usedPokemon.includes(pokemon.name)) {
-                alert('Questo Pokémon è già stato usato! Hai perso!');
-                const gameRef = ref(database, 'events/falkner/gameState');
-                const winnerIndex = gameState.currentPlayerIndex === 0 ? 1 : 0;
-                await update(gameRef, { winner: winnerIndex });
+                alert('Questo Pokémon è già stato usato!');
                 return;
             }
 
@@ -743,8 +728,7 @@
             await update(gameRef, {
                 usedPokemon: newUsedPokemon,
                 currentPlayerIndex: nextPlayerIndex,
-                timeLeft: 15,
-                timerLastUpdate: Date.now()
+                timeLeft: 15
             });
 
             document.getElementById(`pokemonInput${playerNum}`).value = '';
