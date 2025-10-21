@@ -478,11 +478,20 @@
                 return;
             }
 
-            // Inizializza stato del gioco
+            // Inizializza o resetta stato del gioco
             const gameRef = ref(database, 'events/falkner/gameState');
             const gameSnapshot = await get(gameRef);
             
-            if (!gameSnapshot.exists()) {
+            // Se il gameState esiste ma ha giocatori diversi, o ha un winner, lo resettiamo
+            const existingState = gameSnapshot.val();
+            const needsReset = !existingState || 
+                              existingState.winner !== null ||
+                              !existingState.players ||
+                              existingState.players.length !== 2 ||
+                              existingState.players.sort().join(',') !== players.sort().join(',');
+            
+            if (needsReset) {
+                console.log('Resetting gameState for new game');
                 const types = ['normal', 'fire', 'water', 'electric', 'grass', 'ice', 'fighting', 
                               'poison', 'ground', 'flying', 'psychic', 'bug', 'rock', 'ghost', 
                               'dragon', 'dark', 'steel', 'fairy'];
@@ -511,7 +520,10 @@
         }
 
         function updateUI() {
-            if (!gameState) return;
+            if (!gameState || !gameState.players) {
+                console.log('Waiting for gameState...', gameState);
+                return;
+            }
 
             // Check ready status
             const myReady = gameState.ready?.[currentPlayer] || false;
@@ -530,24 +542,28 @@
                 document.getElementById('readyBtn').textContent = myReady ? '✓ Pronto!' : '✓ Sono Pronto!';
 
                 if (allReady && readyCount === 2) {
+                    console.log('Both players ready, starting game...');
                     setTimeout(() => startGame(), 1000);
                 }
                 return;
             }
 
-            // Game started
-            document.getElementById('waitingScreen').style.display = 'none';
-            document.getElementById('battleScreen').style.display = 'block';
-
-            // Start timer if not already started
-            if (!timerStarted) {
-                startTimer();
-            }
-
-            // Check winner
-            if (gameState.winner !== null) {
+            // Check winner BEFORE showing battle screen
+            if (gameState.winner !== null && gameState.winner !== undefined) {
+                console.log('Winner detected:', gameState.winner);
                 showResult();
                 return;
+            }
+
+            // Game started - show battle screen
+            document.getElementById('waitingScreen').style.display = 'none';
+            document.getElementById('battleScreen').style.display = 'block';
+            document.getElementById('resultScreen').classList.remove('show');
+
+            // Start timer if not already started
+            if (!timerStarted && gameState.started) {
+                console.log('Starting timer...');
+                setTimeout(() => startTimer(), 500);
             }
 
             // Update type display
@@ -765,6 +781,11 @@
         }
 
         async function showResult() {
+            if (!gameState || !gameState.players || gameState.players.length !== 2) {
+                console.error('Invalid gameState in showResult:', gameState);
+                return;
+            }
+
             document.getElementById('waitingScreen').style.display = 'none';
             document.getElementById('battleScreen').style.display = 'none';
             
@@ -772,6 +793,8 @@
             const winner = gameState.players[winnerIndex];
             const loser = gameState.players[1 - winnerIndex];
             const isWinner = winner === currentPlayer;
+
+            console.log('Showing result:', { winner, loser, isWinner, winnerIndex });
 
             const resultTitle = document.getElementById('resultTitle');
             const resultMessage = document.getElementById('resultMessage');
@@ -838,17 +861,27 @@
             const gameRef = ref(database, 'events/falkner/gameState');
             const eventSnapshot = await get(eventRef);
             
+            // Rimuovi il giocatore corrente dall'evento
             eventSnapshot.forEach((childSnapshot) => {
                 if (childSnapshot.val() === currentPlayer) {
                     remove(ref(database, `events/falkner/players/${childSnapshot.key}`));
                 }
             });
 
-            // Se entrambi hanno lasciato, pulisci il gameState
-            const remainingPlayers = await get(eventRef);
-            if (!remainingPlayers.exists() || remainingPlayers.size === 0) {
-                await remove(gameRef);
-            }
+            // Controlla se ci sono ancora giocatori nell'evento
+            setTimeout(async () => {
+                const checkSnapshot = await get(eventRef);
+                let playersCount = 0;
+                checkSnapshot.forEach(() => playersCount++);
+                
+                console.log('Remaining players:', playersCount);
+                
+                // Se non ci sono più giocatori, rimuovi il gameState
+                if (playersCount === 0) {
+                    console.log('No players left, removing gameState');
+                    await remove(gameRef);
+                }
+            }, 1000);
         }
 
         window.goHome = function() {
