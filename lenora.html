@@ -820,41 +820,56 @@
         }
 
         window.startGame = async function() {
+            console.log('=== STARTING GAME ===');
             await loadPokemon();
             
             document.getElementById('landingScreen').style.display = 'none';
             document.getElementById('gameScreen').classList.add('show');
             
-            const eventRef = ref(database, 'events/lenora/game');
-            const snapshot = await get(eventRef);
-            
             // Ottieni i giocatori dall'evento
             const playersSnapshot = await get(ref(database, 'events/lenora/players'));
             const players = [];
-            playersSnapshot.forEach(child => players.push(child.val()));
+            playersSnapshot.forEach(child => {
+                const playerName = child.val();
+                console.log('Found player:', playerName);
+                players.push(playerName);
+            });
+            
+            console.log('All players:', players);
+            
+            if (players.length < 2) {
+                alert('Servono 2 giocatori per iniziare!');
+                window.location.href = 'index.html';
+                return;
+            }
+            
+            const eventRef = ref(database, 'events/lenora/game');
+            const snapshot = await get(eventRef);
             
             if (snapshot.exists()) {
                 gameState = snapshot.val();
-                // Assicurati che i nomi dei giocatori siano aggiornati
-                if (players.length >= 2) {
-                    if (!gameState.player1.name) gameState.player1.name = players[0];
-                    if (!gameState.player2.name) gameState.player2.name = players[1];
+                console.log('Existing game state:', gameState);
+                // Aggiorna i nomi se mancano
+                if (!gameState.player1 || !gameState.player1.name) {
+                    gameState.player1 = { name: players[0], score: 0 };
+                }
+                if (!gameState.player2 || !gameState.player2.name) {
+                    gameState.player2 = { name: players[1], score: 0 };
                 }
             } else {
-                if (players.length >= 2) {
-                    gameState.player1.name = players[0];
-                    gameState.player2.name = players[1];
-                    gameState.player1.score = 0;
-                    gameState.player2.score = 0;
-                    gameState.currentRound = 0;
-                    gameState.roundsToWin = 5;
-                    gameState.isGameOver = false;
-                }
-                
-                await set(eventRef, gameState);
+                console.log('Creating new game state');
+                gameState = {
+                    player1: { name: players[0], score: 0 },
+                    player2: { name: players[1], score: 0 },
+                    currentRound: 0,
+                    roundsToWin: 5,
+                    isGameOver: false
+                };
             }
+            
+            console.log('Final game state:', gameState);
+            await set(eventRef, gameState);
 
-            console.log('Game state:', gameState);
             updateUI();
             
             if (!gameState.isGameOver) {
@@ -864,6 +879,7 @@
             onValue(eventRef, (snapshot) => {
                 if (snapshot.exists()) {
                     gameState = snapshot.val();
+                    console.log('Game state updated from Firebase:', gameState);
                     updateUI();
                     
                     // Se c'è un nuovo BST, aggiorna la UI
@@ -877,10 +893,17 @@
         };
 
         function updateUI() {
-            document.getElementById('player1Name').textContent = gameState.player1.name || 'Giocatore 1';
-            document.getElementById('player2Name').textContent = gameState.player2.name || 'Giocatore 2';
-            document.getElementById('player1Score').textContent = gameState.player1.score;
-            document.getElementById('player2Score').textContent = gameState.player2.score;
+            const player1Name = gameState.player1?.name || 'Giocatore 1';
+            const player2Name = gameState.player2?.name || 'Giocatore 2';
+            const player1Score = gameState.player1?.score || 0;
+            const player2Score = gameState.player2?.score || 0;
+            
+            console.log('Updating UI:', player1Name, player1Score, player2Name, player2Score);
+            
+            document.getElementById('player1Name').textContent = player1Name;
+            document.getElementById('player2Name').textContent = player2Name;
+            document.getElementById('player1Score').textContent = player1Score;
+            document.getElementById('player2Score').textContent = player2Score;
 
             if (gameState.isGameOver) {
                 showFinalResult();
@@ -1148,6 +1171,11 @@
         input.addEventListener('input', function(e) {
             const value = e.target.value.toLowerCase().trim();
             
+            // Abilita il bottone se c'è del testo
+            if (value.length > 0) {
+                document.getElementById('submitBtn').disabled = false;
+            }
+            
             if (value.length < 2) {
                 suggestionsDiv.classList.remove('show');
                 return;
@@ -1168,8 +1196,11 @@
         });
 
         window.selectPokemon = function(name) {
+            const input = document.getElementById('pokemonInput');
             input.value = name;
             suggestionsDiv.classList.remove('show');
+            // Abilita il bottone quando viene selezionato un pokemon
+            document.getElementById('submitBtn').disabled = false;
         };
 
         document.addEventListener('click', function(e) {
@@ -1181,6 +1212,33 @@
         input.addEventListener('keypress', function(e) {
             if (e.key === 'Enter') {
                 submitGuess();
+            }
+        });
+
+        input.addEventListener('input', function(e) {
+            const value = e.target.value.toLowerCase().trim();
+            
+            // Abilita il bottone se c'è del testo
+            if (value.length > 0) {
+                document.getElementById('submitBtn').disabled = false;
+            }
+            
+            if (value.length < 2) {
+                suggestionsDiv.classList.remove('show');
+                return;
+            }
+
+            const matches = allPokemon
+                .filter(p => p.name.toLowerCase().startsWith(value))
+                .slice(0, 8);
+
+            if (matches.length > 0) {
+                suggestionsDiv.innerHTML = matches
+                    .map(p => `<div class="suggestion-item" onclick="selectPokemon('${p.name}')">${p.name}</div>`)
+                    .join('');
+                suggestionsDiv.classList.add('show');
+            } else {
+                suggestionsDiv.classList.remove('show');
             }
         });
 
