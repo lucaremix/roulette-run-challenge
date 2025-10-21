@@ -622,16 +622,28 @@
             await update(gameRef, { 
                 started: true,
                 timeLeft: 15,
-                timerLastUpdate: Date.now()
+                timerLastUpdate: Date.now(),
+                currentPlayerIndex: 0,
+                usedPokemon: []
             });
         }
 
         function startTimer() {
             if (timerStarted) return;
+            
+            // Aspetta che il gameState sia pronto
+            if (!gameState || !gameState.started || !gameState.players || gameState.players.length !== 2) {
+                console.log('Waiting for gameState to be ready...');
+                setTimeout(() => startTimer(), 500);
+                return;
+            }
+            
             timerStarted = true;
+            console.log('Timer started!');
 
             setInterval(async () => {
                 if (!gameState || !gameState.started || gameState.winner !== null) return;
+                if (!gameState.players || gameState.players.length !== 2) return;
 
                 // Solo il primo giocatore aggiorna il timer per evitare conflitti
                 if (currentPlayer !== gameState.players[0]) return;
@@ -647,6 +659,7 @@
                     if (newTime <= 0) {
                         // Time's up - other player wins
                         const winnerIndex = gameState.currentPlayerIndex === 0 ? 1 : 0;
+                        console.log(`Time's up! Winner: ${gameState.players[winnerIndex]}`);
                         await update(gameRef, { 
                             winner: winnerIndex,
                             timeLeft: 0
@@ -705,19 +718,34 @@
 
         async function submitPokemon(playerNum) {
             if (!selectedPokemonName) {
-                alert('Seleziona un Pokémon valido dalla lista!');
+                alert('Seleziona un Pokémon dalla lista!');
                 return;
             }
 
-            const pokemon = validPokemon.find(p => p.name === selectedPokemonName);
+            const pokemon = allPokemon.find(p => p.name === selectedPokemonName);
             
             if (!pokemon) {
-                alert('Pokémon non valido per questo tipo!');
+                alert('Pokémon non trovato!');
+                return;
+            }
+
+            // Check if pokemon is of the correct type
+            const isCorrectType = pokemon.primaryType === gameState.selectedType || 
+                                 pokemon.secondaryType === gameState.selectedType;
+            
+            if (!isCorrectType) {
+                alert(`${pokemon.name} non è di tipo ${typeTranslations[gameState.selectedType]}! Hai perso!`);
+                const gameRef = ref(database, 'events/falkner/gameState');
+                const winnerIndex = gameState.currentPlayerIndex === 0 ? 1 : 0;
+                await update(gameRef, { winner: winnerIndex });
                 return;
             }
 
             if (gameState.usedPokemon.includes(pokemon.name)) {
-                alert('Questo Pokémon è già stato usato!');
+                alert('Questo Pokémon è già stato usato! Hai perso!');
+                const gameRef = ref(database, 'events/falkner/gameState');
+                const winnerIndex = gameState.currentPlayerIndex === 0 ? 1 : 0;
+                await update(gameRef, { winner: winnerIndex });
                 return;
             }
 
@@ -728,7 +756,8 @@
             await update(gameRef, {
                 usedPokemon: newUsedPokemon,
                 currentPlayerIndex: nextPlayerIndex,
-                timeLeft: 15
+                timeLeft: 15,
+                timerLastUpdate: Date.now()
             });
 
             document.getElementById(`pokemonInput${playerNum}`).value = '';
