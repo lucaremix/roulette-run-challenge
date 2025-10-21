@@ -897,6 +897,7 @@
             
             document.getElementById('bstValue').textContent = currentBST;
             document.getElementById('pokemonInput').value = '';
+            document.getElementById('pokemonInput').disabled = false;
             document.getElementById('resultMessage').innerHTML = '';
             document.getElementById('submitBtn').disabled = false;
         }
@@ -937,6 +938,7 @@
                 showResult(`Hai scelto: ${guessedPokemon.name} (BST: ${guessedPokemon.bst})<br>In attesa dell'altro giocatore...`, false);
                 
                 document.getElementById('submitBtn').disabled = true;
+                document.getElementById('pokemonInput').disabled = true;
             } else {
                 // Secondo giocatore - confronta le risposte
                 const otherGuess = currentState.currentGuess;
@@ -1040,7 +1042,6 @@
 
                 if (!currentState.isGameOver) {
                     setTimeout(() => {
-                        document.getElementById('submitBtn').disabled = false;
                         generateSharedRound();
                     }, 5000);
                 }
