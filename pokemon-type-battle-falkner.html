@@ -424,39 +424,36 @@
         }
 
         async function loadPokemonData() {
-            try {
-                const response = await fetch('https://raw.githubusercontent.com/lucaremix/roulette-run-challenge/main/pokemon.csv');
-                const csvText = await response.text();
-                
-                const lines = csvText.split('\n');
-                const headers = lines[0].split('\t').map(h => h.replace(/\uFEFF/g, '').replace(/\u0000/g, '').trim());
-                
-                const nameIndex = headers.findIndex(h => h.includes('english_name'));
-                const primaryTypeIndex = headers.findIndex(h => h.includes('primary_type'));
-                const secondaryTypeIndex = headers.findIndex(h => h.includes('secondary_type'));
-
-                for (let i = 1; i < lines.length; i++) {
-                    if (!lines[i].trim()) continue;
-                    
-                    const values = lines[i].split('\t');
-                    const name = values[nameIndex]?.replace(/\u0000/g, '').trim();
-                    const primaryType = values[primaryTypeIndex]?.replace(/\u0000/g, '').trim();
-                    const secondaryType = values[secondaryTypeIndex]?.replace(/\u0000/g, '').trim();
-                    
-                    if (name) {
-                        allPokemon.push({
-                            name: name,
-                            primaryType: primaryType,
-                            secondaryType: secondaryType
-                        });
-                    }
-                }
-
-                console.log(`✓ Caricati ${allPokemon.length} Pokémon`);
-            } catch (error) {
-                console.error('Errore caricamento CSV:', error);
+          try {
+            const response = await fetch('https://raw.githubusercontent.com/lucaremix/roulette-run-challenge/main/pokemon.csv');
+            const csvTextRaw = await response.text();
+            const csvText = csvTextRaw.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+        
+            // Auto-detect delimiter
+            const firstLine = (csvText.split('\n')[0] || '');
+            const delimiter = (firstLine.split('\t').length > firstLine.split(',').length) ? '\t' : ',';
+        
+            const lines = csvText.split('\n').filter(l => l.trim().length);
+            const headers = lines[0].split(delimiter).map(h => h.replace(/\uFEFF/g, '').trim());
+        
+            const nameIndex = headers.findIndex(h => /english_name/i.test(h) || /name/i.test(h));
+            const primaryTypeIndex = headers.findIndex(h => /primary_type/i.test(h) || /type_1|type1/i.test(h));
+            const secondaryTypeIndex = headers.findIndex(h => /secondary_type/i.test(h) || /type_2|type2/i.test(h));
+        
+            allPokemon = [];
+            for (let i = 1; i < lines.length; i++) {
+              const values = lines[i].split(delimiter).map(v => v.replace(/\u0000/g, '').trim());
+              const name = values[nameIndex];
+              const primaryType = values[primaryTypeIndex] || '';
+              const secondaryType = values[secondaryTypeIndex] || '';
+              if (name) allPokemon.push({ name, primaryType, secondaryType });
             }
+            console.log(`✓ Caricati ${allPokemon.length} Pokémon (delim='${delimiter}')`);
+          } catch (error) {
+            console.error('Errore caricamento CSV:', error);
+          }
         }
+
 
         async function initializeGame() {
             currentPlayer = getCurrentPlayer();
@@ -483,18 +480,16 @@
             console.log('My player index:', myPlayerIndex);
 
             const gameRef = ref(database, 'events/falkner/gameState');
+            const gameSnap = await get(gameRef);
             
-            // SEMPRE pulisci e ricrea il gameState quando entri
-            const types = ['normal', 'fire', 'water', 'electric', 'grass', 'ice', 'fighting', 
-                          'poison', 'ground', 'flying', 'psychic', 'bug', 'rock', 'ghost', 
-                          'dragon', 'dark', 'steel', 'fairy'];
+            const types = ['normal','fire','water','electric','grass','ice','fighting',
+              'poison','ground','flying','psychic','bug','rock','ghost','dragon','dark','steel','fairy'];
             
-            const selectedType = types[Math.floor(Math.random() * types.length)];
-            
-            console.log('Creating fresh gameState');
-            await set(gameRef, {
-                players: players,
-                selectedType: selectedType,
+            if (!gameSnap.exists()) {
+              console.log('Creating fresh gameState');
+              await set(gameRef, {
+                players,
+                selectedType: types[Math.floor(Math.random() * types.length)],
                 usedPokemon: [],
                 currentPlayerIndex: 0,
                 timeLeft: 15,
@@ -502,7 +497,29 @@
                 started: false,
                 winner: null,
                 lastUpdate: Date.now()
-            });
+              });
+            } else {
+              const gs = gameSnap.val();
+              const samePlayers = Array.isArray(gs.players)
+                && gs.players.length === players.length
+                && [...gs.players].sort().join('|') === [...players].sort().join('|');
+            
+              if (!samePlayers) {
+                console.log('Players changed, resetting gameState');
+                await set(gameRef, {
+                  players,
+                  selectedType: gs.selectedType || types[Math.floor(Math.random() * types.length)],
+                  usedPokemon: [],
+                  currentPlayerIndex: 0,
+                  timeLeft: 15,
+                  ready: {},
+                  started: false,
+                  winner: null,
+                  lastUpdate: Date.now()
+                });
+              }
+            }
+
 
             // Listener per lo stato del gioco
             onValue(gameRef, (snapshot) => {
@@ -536,15 +553,18 @@
 
                 // Se entrambi pronti, avvia il gioco
                 if (readyCount === 2 && myPlayerIndex === 0) {
-                    console.log('Both ready, starting game in 2 seconds...');
-                    setTimeout(async () => {
-                        const gameRef = ref(database, 'events/falkner/gameState');
-                        await update(gameRef, {
-                            started: true,
-                            lastUpdate: Date.now()
-                        });
-                    }, 2000);
+                  console.log('Both ready, starting game in 2 seconds...');
+                  setTimeout(async () => {
+                    const gameRef = ref(database, 'events/falkner/gameState');
+                    await update(gameRef, {
+                      started: true,
+                      winner: null,
+                      timeLeft: 15,
+                      lastUpdate: Date.now()
+                    });
+                  }, 2000);
                 }
+
                 return;
             }
 
@@ -578,10 +598,11 @@
             // Abilita/disabilita input
             const isMyTurn = gameState.currentPlayerIndex === myPlayerIndex;
             
-            document.getElementById('pokemonInput1').disabled = !(myPlayerIndex === 0 && isMyTurn);
-            document.getElementById('pokemonInput2').disabled = !(myPlayerIndex === 1 && isMyTurn);
+            document.getElementById('pokemonInput1').readOnly = !(myPlayerIndex === 0 && isMyTurn);
+            document.getElementById('pokemonInput2').readOnly = !(myPlayerIndex === 1 && isMyTurn);
             document.getElementById('submitBtn1').disabled = !(myPlayerIndex === 0 && isMyTurn);
             document.getElementById('submitBtn2').disabled = !(myPlayerIndex === 1 && isMyTurn);
+
 
             // Aggiorna liste pokemon usati
             updateUsedLists();
@@ -593,42 +614,33 @@
         let countdownInterval = null;
 
         function startCountdown() {
-            if (countdownInterval) return;
-
-            countdownInterval = setInterval(async () => {
-                if (!gameState || !gameState.started || gameState.winner !== null) {
-                    clearInterval(countdownInterval);
-                    countdownInterval = null;
-                    return;
-                }
-
-                // Solo player 0 aggiorna il timer
-                if (myPlayerIndex !== 0) return;
-
-                const now = Date.now();
-                const elapsed = Math.floor((now - gameState.lastUpdate) / 1000);
-
-                if (elapsed >= 1) {
-                    const newTime = Math.max(0, gameState.timeLeft - 1);
-                    const gameRef = ref(database, 'events/falkner/gameState');
-
-                    if (newTime <= 0) {
-                        // Tempo scaduto, l'altro giocatore vince
-                        const winnerIndex = gameState.currentPlayerIndex === 0 ? 1 : 0;
-                        console.log('Time up! Winner:', winnerIndex);
-                        await update(gameRef, {
-                            winner: winnerIndex,
-                            timeLeft: 0
-                        });
-                    } else {
-                        await update(gameRef, {
-                            timeLeft: newTime,
-                            lastUpdate: now
-                        });
-                    }
-                }
-            }, 1000);
+          if (countdownInterval) return;
+          console.log('Starting countdown timer...');
+          countdownInterval = setInterval(async () => {
+            if (!gameState || !gameState.started || gameState.winner !== null) {
+              clearInterval(countdownInterval);
+              countdownInterval = null;
+              return;
+            }
+            // Solo il player 0 aggiorna il timer
+            if (myPlayerIndex !== 0) return;
+        
+            const now = Date.now();
+            const elapsed = Math.floor((now - (gameState.lastUpdate || now)) / 1000);
+            if (elapsed < 1) return;
+        
+            const newTime = Math.max(0, gameState.timeLeft - elapsed);
+            const gameRef = ref(database, 'events/falkner/gameState');
+        
+            if (newTime <= 0) {
+              const winnerIndex = gameState.currentPlayerIndex === 0 ? 1 : 0;
+              await update(gameRef, { winner: winnerIndex, timeLeft: 0, lastUpdate: now });
+            } else {
+              await update(gameRef, { timeLeft: newTime, lastUpdate: now });
+            }
+          }, 250);
         }
+
 
         function updateTimers() {
             const timer1 = document.getElementById('timer1');
@@ -675,16 +687,21 @@
         };
 
         function filterPokemon(searchText) {
-            if (!searchText || searchText.length < 2) return [];
-            
-            const search = searchText.toLowerCase();
-            return allPokemon
-                .filter(p => 
-                    p.name.toLowerCase().includes(search) && 
-                    !gameState.usedPokemon.includes(p.name)
-                )
-                .slice(0, 10);
+          if (!searchText || searchText.length < 2) return [];
+          if (!gameState || !gameState.usedPokemon) return [];
+        
+          const s = searchText.toLowerCase();
+          const t = gameState.selectedType;
+        
+          return allPokemon
+            .filter(p =>
+              p.name.toLowerCase().includes(s) &&
+              !gameState.usedPokemon.includes(p.name) &&
+              (p.primaryType === t || p.secondaryType === t)
+            )
+            .slice(0, 12);
         }
+
 
         function showSuggestions(filtered, playerNum) {
             const container = document.getElementById(`suggestions${playerNum}`);
@@ -828,14 +845,12 @@
 
             // Se sono l'ultimo, rimuovi gameState
             setTimeout(async () => {
-                const checkSnapshot = await get(eventRef);
-                let count = 0;
-                checkSnapshot.forEach(() => count++);
-                
-                if (count === 0) {
-                    console.log('Removing gameState');
-                    await remove(ref(database, 'events/falkner/gameState'));
-                }
+              const checkSnapshot = await get(eventRef);
+              const num = checkSnapshot.exists() ? checkSnapshot.numChildren() : 0;
+              if (num === 0) {
+                console.log('Removing gameState');
+                await remove(ref(database, 'events/falkner/gameState'));
+              }
             }, 2000);
         }
 
