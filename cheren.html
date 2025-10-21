@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Proton - Roulette Run Challenge</title>
+    <title>Cheren - Roulette Run Challenge</title>
     <style>
         * {
             margin: 0;
@@ -198,7 +198,6 @@
             padding: 30px;
         }
 
-        /* Intro screen */
         .intro-screen {
             background: #1a1a1a;
             border: 1px solid #2a2a2a;
@@ -218,7 +217,7 @@
 
         .intro-text h2 {
             font-size: 2em;
-            color: #c41e3a;
+            color: #4a7a4a;
             margin-bottom: 20px;
             text-align: center;
         }
@@ -242,7 +241,7 @@
             display: block;
             margin: 30px auto 0;
             padding: 20px 60px;
-            background: #c41e3a;
+            background: #4a7a4a;
             color: white;
             border: none;
             border-radius: 12px;
@@ -253,11 +252,10 @@
         }
 
         .start-btn:hover {
-            background: #a01830;
+            background: #5a8a5a;
             transform: scale(1.05);
         }
 
-        /* Selection screen */
         .selection-screen {
             display: none;
         }
@@ -277,7 +275,7 @@
 
         .selection-header h2 {
             font-size: 2em;
-            color: #c41e3a;
+            color: #4a7a4a;
             margin-bottom: 10px;
         }
 
@@ -309,9 +307,9 @@
         }
 
         .pokemon-option.selected {
-            border-color: #c41e3a;
-            background: #2a1a1a;
-            box-shadow: 0 0 30px rgba(196, 30, 58, 0.3);
+            border-color: #4a7a4a;
+            background: #1a2a1a;
+            box-shadow: 0 0 30px rgba(74, 122, 74, 0.3);
         }
 
         .pokemon-option img {
@@ -355,7 +353,7 @@
             display: block;
             margin: 0 auto;
             padding: 20px 80px;
-            background: #c41e3a;
+            background: #4a7a4a;
             color: white;
             border: none;
             border-radius: 12px;
@@ -366,7 +364,7 @@
         }
 
         .confirm-btn:hover:not(:disabled) {
-            background: #a01830;
+            background: #5a8a5a;
             transform: scale(1.05);
         }
 
@@ -376,7 +374,6 @@
             opacity: 0.5;
         }
 
-        /* Waiting screen */
         .waiting-screen {
             background: #1a1a1a;
             border: 1px solid #2a2a2a;
@@ -400,7 +397,7 @@
             width: 60px;
             height: 60px;
             border: 5px solid #2a2a2a;
-            border-top-color: #c41e3a;
+            border-top-color: #4a7a4a;
             border-radius: 50%;
             animation: spin 1s linear infinite;
             margin: 30px auto;
@@ -410,7 +407,6 @@
             to { transform: rotate(360deg); }
         }
 
-        /* Results screen */
         .results-screen {
             background: #1a1a1a;
             border: 1px solid #2a2a2a;
@@ -514,11 +510,10 @@
             <span>Torna alla Home</span>
         </a>
 
-        <!-- Landing page -->
         <div id="landingScreen">
             <div class="event-header">
-                <img src="https://img.nuzlocke.app//leaders/blwh-cheren.png" 
-                     alt="Proton" 
+                <img src="https://img.nuzlocke.app/leaders/blwh-cheren.png" 
+                     alt="Cheren" 
                      class="event-trainer-img"
                      onerror="this.src='https://via.placeholder.com/160x160/1a1a1a/888?text=Cheren'">
                 <div class="event-info">
@@ -545,9 +540,9 @@
             <div class="intro-screen" id="introScreen">
                 <div class="intro-content">
                     <div class="intro-text">
-                        <h2>⚠️ Cheren - Preschool ⚠️</h2>
+                        <h2>📚 Cheren - Preschool 📚</h2>
                         <p>
-                            Proton vi sfida con un dilemma! Ogni giocatore vedrà DUE Pokémon differenti 
+                            Cheren vi sfida con un dilemma! Ogni giocatore vedrà gli STESSI DUE Pokémon 
                             del Pool B e dovrà sceglierne UNO in segreto.
                         </p>
                         <p>
@@ -572,7 +567,6 @@
             </div>
         </div>
 
-        <!-- Selection screen -->
         <div class="selection-screen" id="selectionScreen">
             <div class="selection-header">
                 <h2>Scegli il tuo Pokémon</h2>
@@ -586,7 +580,6 @@
             </button>
         </div>
 
-        <!-- Waiting screen -->
         <div class="waiting-screen" id="waitingScreen">
             <h2>In attesa dell'altro giocatore...</h2>
             <div class="waiting-spinner"></div>
@@ -595,7 +588,6 @@
             </p>
         </div>
 
-        <!-- Results screen -->
         <div class="results-screen" id="resultsScreen">
             <h2 class="results-title" id="resultsTitle">Risultato</h2>
             <div class="results-content" id="resultsContent"></div>
@@ -622,6 +614,7 @@
 
         let myPokemon = [];
         let selectedPokemonIndex = null;
+        let resultsProcessed = false;
 
         function getCurrentPlayer() {
             return localStorage.getItem('playerName') || '';
@@ -721,8 +714,6 @@
 
                 if (players.length === 2) {
                     document.getElementById('introScreen').classList.add('show');
-                    
-                    // Generate the 2 pokemon when both players join
                     generatePokemonForGame();
                 } else {
                     document.getElementById('introScreen').classList.remove('show');
@@ -734,10 +725,8 @@
             const gameRef = ref(database, `events/proton/game`);
             const gameSnapshot = await get(gameRef);
             
-            // Only generate if not already generated
             if (gameSnapshot.exists()) return;
             
-            // Generate 2 random pokemon from B tier pool
             const bTierRef = ref(database, 'pools/b_tier');
             const snapshot = await get(bTierRef);
             
@@ -751,13 +740,13 @@
                 return;
             }
 
-            // Shuffle and take 2 - SAME 2 for both players
             const shuffled = allPokemon.sort(() => Math.random() - 0.5);
             const selected2 = shuffled.slice(0, 2);
 
             await set(gameRef, {
                 pokemon: selected2.map(p => ({ key: p.key, ...p })),
-                players: {}
+                players: {},
+                processed: false
             });
         }
 
@@ -768,8 +757,6 @@
             document.getElementById('selectionScreen').classList.add('show');
             
             const gameRef = ref(database, `events/proton/game`);
-            
-            // Wait for game data - it should already exist
             const gameSnapshot = await get(gameRef);
             const gameData = gameSnapshot.val();
             
@@ -778,15 +765,11 @@
                 return;
             }
 
-            // Both players see the SAME 2 pokemon
             myPokemon = gameData.pokemon;
             showSelectionScreen();
         };
 
         function showSelectionScreen() {
-            document.getElementById('landingScreen').style.display = 'none';
-            document.getElementById('selectionScreen').classList.add('show');
-
             const container = document.getElementById('pokemonSelection');
             container.innerHTML = myPokemon.map((pokemon, index) => {
                 const types = [pokemon.primary_type];
@@ -844,21 +827,25 @@
             document.getElementById('selectionScreen').classList.remove('show');
             document.getElementById('waitingScreen').classList.add('show');
 
-            // Wait for both players
-            const allPlayersRef = ref(database, `events/proton/game/players`);
+            const allPlayersRef = ref(database, `events/proton/game`);
             onValue(allPlayersRef, async (snapshot) => {
-                const choices = snapshot.val();
-                if (!choices) return;
+                const gameData = snapshot.val();
+                if (!gameData || !gameData.players) return;
 
-                const playerNames = Object.keys(choices);
-                if (playerNames.length === 2) {
-                    // Both players chose
-                    await processResults(choices, playerNames);
+                const playerNames = Object.keys(gameData.players);
+                if (playerNames.length === 2 && !gameData.processed) {
+                    await processResults(gameData.players, playerNames);
                 }
             });
         };
 
         async function processResults(choices, playerNames) {
+            if (resultsProcessed) return;
+            resultsProcessed = true;
+
+            const gameRef = ref(database, `events/proton/game/processed`);
+            await set(gameRef, true);
+
             const player1Choice = choices[playerNames[0]].choice;
             const player2Choice = choices[playerNames[1]].choice;
 
@@ -872,7 +859,6 @@
             const resultsContent = document.getElementById('resultsContent');
 
             if (player1Choice === player2Choice) {
-                // Same choice - nobody wins
                 resultsTitle.textContent = '❌ Scelta Identica!';
                 resultsTitle.classList.add('failure');
 
@@ -890,10 +876,8 @@
                     </div>
                 `;
 
-                // Clean up
                 await cleanupEvent();
             } else {
-                // Different choices - both win
                 resultsTitle.textContent = '✅ Successo!';
                 resultsTitle.classList.add('success');
 
@@ -911,8 +895,7 @@
                     </div>
                 `;
 
-                // Add each player's chosen pokemon to their team
-                const addedToPool = new Set();
+                const removedFromPool = new Set();
                 
                 for (const playerName of playerNames) {
                     const playerChoice = choices[playerName];
@@ -944,25 +927,21 @@
 
                     await set(playerRef, playerData);
 
-                    // Remove from pool only once per pokemon
-                    if (!addedToPool.has(chosenPokemonKey)) {
+                    if (!removedFromPool.has(chosenPokemonKey)) {
                         const poolRef = ref(database, `pools/b_tier/${chosenPokemonKey}`);
                         await remove(poolRef);
-                        addedToPool.add(chosenPokemonKey);
+                        removedFromPool.add(chosenPokemonKey);
                     }
                 }
 
-                // Clean up
                 await cleanupEvent();
             }
         }
 
         async function cleanupEvent() {
-            // Remove game data
             const gameRef = ref(database, `events/proton/game`);
             await remove(gameRef);
 
-            // Remove players from event
             const eventPlayersRef = ref(database, `events/proton/players`);
             await remove(eventPlayersRef);
         }
@@ -971,7 +950,6 @@
             window.location.href = 'index.html';
         };
 
-        // Initialize
         const playerName = getCurrentPlayer();
         if (!playerName) {
             alert('Devi impostare il tuo nome dalla home page!');
