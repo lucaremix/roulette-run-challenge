@@ -1,632 +1,266 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Falkner Type Battle - Roulette Run Challenge</title>
-  <style>
-    * { margin:0; padding:0; box-sizing:border-box; }
-    body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background:#0a0a0a; color:#e0e0e0; padding:20px; min-height:100vh;
-    }
-    .container { max-width:1200px; margin:0 auto; }
-    header {
-      text-align:center; margin-bottom:30px; padding:20px;
-      background:#1a1a1a; border:1px solid #2a2a2a; border-radius:12px;
-    }
-    h1 { font-size:2.4em; color:#87CEEB; margin-bottom:10px; }
-    .type-display {
-      font-size:1.8em; padding:10px 20px; background:#2a2a2a; border-radius:8px; display:inline-block;
-      margin:10px 0; text-transform:capitalize; font-weight:bold;
-    }
-    .waiting-screen, .result-screen {
-      background:#1a1a1a; border:1px solid #2a2a2a; border-radius:12px; padding:40px; text-align:center;
-      margin-top:60px;
-    }
-    .ready-btn, .home-btn {
-      padding:14px 28px; background:#2a7a2a; color:#fff; border:none; border-radius:10px; font-size:1.1em; font-weight:700;
-      cursor:pointer; transition:all .2s ease; margin-top:16px;
-    }
-    .ready-btn:hover, .home-btn:hover { background:#357a35; transform:translateY(-1px); }
-    .ready-btn:disabled { background:#2a2a2a; opacity:.6; cursor:not-allowed; }
-    .battle-area {
-      display:grid; grid-template-columns:1fr 1fr; gap:20px; margin-bottom:30px;
-    }
-    .player-panel {
-      background:#1a1a1a; border:1px solid #2a2a2a; border-radius:12px; padding:24px;
-    }
-    .player-panel.active { border-color:#87CEEB; box-shadow:0 0 20px rgba(135,206,235,.25); }
-    .player-name { font-size:1.3em; margin-bottom:6px; }
-    .timer { font-size:2.6em; font-weight:800; color:#7fff7f; text-align:center; margin:8px 0 18px; }
-    .timer.warning { color:#ff6b6b; animation:pulse .6s infinite; }
-    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.55} }
-    .input-area { position:relative; }
-    .pokemon-input {
-      width:100%; padding:14px; background:#0a0a0a; border:1px solid #2a2a2a; border-radius:8px; color:#e0e0e0; font-size:1.05em;
-    }
-    .pokemon-input:focus { outline:none; border-color:#87CEEB; }
-    .pokemon-input[readonly] { opacity:.9; }
-    .submit-btn {
-      width:100%; padding:12px; background:#2a7a2a; color:#fff; border:none; border-radius:8px; font-size:1.05em; font-weight:700;
-      cursor:pointer; transition:.2s; margin-top:10px;
-    }
-    .submit-btn:disabled { background:#2a2a2a; opacity:.6; cursor:not-allowed; }
-    .submit-btn:hover:not(:disabled) { background:#357a35; transform:translateY(-1px); }
-    .suggestions {
-      position:absolute; left:0; right:0; top:calc(100% + 6px); max-height:220px; overflow:auto;
-      background:#0a0a0a; border:1px solid #2a2a2a; border-radius:8px; display:none; z-index:20;
-    }
-    .suggestions.show { display:block; }
-    .suggestion-item {
-      padding:10px 12px; border-bottom:1px solid #1a1a1a; cursor:pointer;
-    }
-    .suggestion-item:last-child { border-bottom:none; }
-    .suggestion-item:hover { background:#1a1a1a; }
-    .used-pokemon { margin-top:16px; }
-    .used-title { font-size:.95em; color:#aaa; margin-bottom:8px; }
-    .used-list { display:flex; flex-wrap:wrap; gap:8px; }
-    .used-tag { background:#2a2a2a; padding:6px 10px; border-radius:6px; font-size:.9em; color:#ccc; }
-    .result-title { font-size:2.2em; margin-bottom:10px; }
-    .result-title.winner { color:#7fff7f; }
-    .result-title.loser { color:#ff6b6b; }
-    @media (max-width:968px){ .battle-area { grid-template-columns:1fr; } }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Falkner Type Battle</title>
+<style>
+body{
+  background:#0a0a0a;color:#e0e0e0;
+  font-family:'Segoe UI',sans-serif;
+  padding:20px;
+}
+.container{max-width:900px;margin:auto}
+.waiting-screen,.battle-screen,.result-screen{
+  background:#1a1a1a;border:1px solid #2a2a2a;border-radius:12px;
+  padding:40px;text-align:center;display:none
+}
+button{
+  border:none;border-radius:8px;padding:15px 25px;font-size:1.2em;
+  cursor:pointer;transition:0.2s;
+}
+.ready-btn{background:#2a7a2a;color:#fff}
+.ready-btn:hover{background:#3d9c3d}
+.submit-btn{background:#2a7a2a;color:#fff;width:100%;margin-top:10px}
+.submit-btn:hover{background:#3d9c3d}
+input{
+  width:100%;padding:10px;background:#0a0a0a;border:1px solid #2a2a2a;
+  border-radius:8px;color:#e0e0e0;font-size:1em
+}
+.suggestions{
+  background:#0a0a0a;border:1px solid #2a2a2a;border-radius:8px;
+  text-align:left;margin-top:5px;display:none;max-height:200px;overflow-y:auto
+}
+.suggestion-item{padding:8px 10px;cursor:pointer}
+.suggestion-item:hover{background:#222}
+.timer{font-size:2.5em;margin:10px 0;color:#7fff7f}
+.player-panel.active{border:2px solid #87CEEB;padding:20px;border-radius:10px}
+.used-tag{
+  display:inline-block;background:#2a2a2a;padding:5px 10px;border-radius:6px;margin:3px
+}
+</style>
 </head>
 <body>
 <div class="container">
-  <!-- WAITING -->
-  <div class="waiting-screen" id="waitingScreen">
-    <h2>⏳ In attesa…</h2>
-    <p id="waitingMessage">Preparazione della battaglia…</p>
-    <button class="ready-btn" id="readyBtn" onclick="setReady()">✓ Sono Pronto!</button>
+  <div id="waitingScreen" class="waiting-screen">
+    <h2>⏳ In attesa...</h2>
+    <p id="waitingMessage">In attesa di giocatori...</p>
+    <button id="readyBtn" class="ready-btn">✅ Sono pronto!</button>
   </div>
 
-  <!-- BATTLE -->
-  <div id="battleScreen" style="display:none;">
-    <header>
-      <h1>🦅 Sfida di Tipo Falkner</h1>
-      <div id="typeDisplay" class="type-display">Caricamento…</div>
-    </header>
+  <div id="battleScreen" class="battle-screen">
+    <h1>🦅 Sfida di Tipo Falkner</h1>
+    <div id="typeDisplay" style="font-size:1.5em;margin-bottom:20px;"></div>
+    <div class="timer" id="timerDisplay">15</div>
 
-    <div class="battle-area">
-      <!-- PLAYER 1 -->
-      <div class="player-panel" id="player1Panel">
-        <div class="player-name" id="player1Name">Giocatore 1</div>
-        <div class="timer" id="timer1">15</div>
+    <div id="turnDisplay" style="margin:10px 0 20px;"></div>
 
-        <div class="input-area">
-          <input type="text" class="pokemon-input" id="pokemonInput1"
-                 placeholder="Scrivi il nome del Pokémon…" autocomplete="off">
-          <div class="suggestions" id="suggestions1"></div>
-        </div>
-
-        <button class="submit-btn" id="submitBtn1" disabled>Conferma</button>
-
-        <div class="used-pokemon">
-          <div class="used-title">Pokémon usati:</div>
-          <div class="used-list" id="usedList1"></div>
-        </div>
-      </div>
-
-      <!-- PLAYER 2 -->
-      <div class="player-panel" id="player2Panel">
-        <div class="player-name" id="player2Name">Giocatore 2</div>
-        <div class="timer" id="timer2">15</div>
-
-        <div class="input-area">
-          <input type="text" class="pokemon-input" id="pokemonInput2"
-                 placeholder="Scrivi il nome del Pokémon…" autocomplete="off">
-          <div class="suggestions" id="suggestions2"></div>
-        </div>
-
-        <button class="submit-btn" id="submitBtn2" disabled>Conferma</button>
-
-        <div class="used-pokemon">
-          <div class="used-title">Pokémon usati:</div>
-          <div class="used-list" id="usedList2"></div>
-        </div>
-      </div>
+    <div class="player-panel" id="playerPanel">
+      <h3 id="playerName"></h3>
+      <input type="text" id="pokemonInput" placeholder="Scrivi un Pokémon...">
+      <div class="suggestions" id="suggestions"></div>
+      <button id="submitBtn" class="submit-btn">Conferma</button>
+      <div id="usedList" style="margin-top:20px;text-align:left"></div>
     </div>
   </div>
 
-  <!-- RESULT -->
-  <div class="result-screen" id="resultScreen" style="display:none;">
-    <h2 class="result-title" id="resultTitle">Vittoria!</h2>
-    <p id="resultMessage" style="font-size:1.15em; margin:12px 0 6px;"></p>
-    <button class="home-btn" onclick="goHome()">🏠 Torna alla Home</button>
+  <div id="resultScreen" class="result-screen">
+    <h2 id="resultTitle"></h2>
+    <p id="resultMessage"></p>
+    <button class="ready-btn" onclick="window.location.href='index.html'">🏠 Torna alla Home</button>
   </div>
 </div>
 
 <script type="module">
-  import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
-  import { getDatabase, ref, onValue, set, get, remove, update, onDisconnect } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js';
+import {initializeApp} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import {getDatabase,ref,set,get,update,onValue,remove,onDisconnect} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-  // === FIREBASE CONFIG (uguale al tuo progetto) ===
-  const firebaseConfig = {
-    apiKey: "AIzaSyDNuD9wViLLxteHMCEBlvfdONwcZbAjAvo",
-    authDomain: "roulette-run-challenge.firebaseapp.com",
-    databaseURL: "https://roulette-run-challenge-default-rtdb.europe-west1.firebasedatabase.app",
-    projectId: "roulette-run-challenge",
-    storageBucket: "roulette-run-challenge.firebasestorage.app",
-    messagingSenderId: "994019156093",
-    appId: "1:994019156093:web:9792bdce75c486f589d114"
-  };
+const firebaseConfig={
+ apiKey:"AIzaSyDNuD9wViLLxteHMCEBlvfdONwcZbAjAvo",
+ authDomain:"roulette-run-challenge.firebaseapp.com",
+ databaseURL:"https://roulette-run-challenge-default-rtdb.europe-west1.firebasedatabase.app",
+ projectId:"roulette-run-challenge",
+ storageBucket:"roulette-run-challenge.firebasestorage.app",
+ messagingSenderId:"994019156093",
+ appId:"1:994019156093:web:9792bdce75c486f589d114"
+};
+const app=initializeApp(firebaseConfig);
+const db=getDatabase(app);
 
-  const app = initializeApp(firebaseConfig);
-  const database = getDatabase(app);
+let currentPlayer=localStorage.getItem('playerName')||'';
+let allPokemon=[],gameState=null,myIndex=-1,countdown=null;
 
-  // === STATE ===
-  let allPokemon = [];                 // {name, primaryType, secondaryType}
-  let currentPlayer = '';              // localStorage playerName
-  let myPlayerIndex = -1;              // 0/1
-  let gameState = null;                // snapshot value
-  let countdownInterval = null;        // setInterval id
-  let selectedPokemonName = '';        // from suggestions
-
-  const typeTranslations = {
-    normal:'Normale', fire:'Fuoco', water:'Acqua', electric:'Elettro', grass:'Erba',
-    ice:'Ghiaccio', fighting:'Lotta', poison:'Veleno', ground:'Terra', flying:'Volante',
-    psychic:'Psico', bug:'Coleottero', rock:'Roccia', ghost:'Spettro', dragon:'Drago',
-    dark:'Buio', steel:'Acciaio', fairy:'Folletto'
-  };
-
-  function getCurrentPlayer(){ return localStorage.getItem('playerName') || ''; }
-
-  // === CSV LOAD (autodetect delimitatore , / \t) ===
-  async function loadPokemonData() {
-    try {
-      const resp = await fetch('https://raw.githubusercontent.com/lucaremix/roulette-run-challenge/main/pokemon.csv');
-      const raw = await resp.text();
-      const text = raw.replace(/\r\n/g,'\n').replace(/\r/g,'\n');
-      const first = (text.split('\n')[0] || '');
-      const delim = (first.split('\t').length > first.split(',').length) ? '\t' : ',';
-
-      const lines = text.split('\n').filter(l=>l.trim().length);
-      const headers = lines[0].split(delim).map(h=>h.replace(/\uFEFF/g,'').trim());
-
-      const nameIdx  = headers.findIndex(h=>/english_name/i.test(h) || /^name$/i.test(h));
-      const pTypeIdx = headers.findIndex(h=>/primary_type/i.test(h) || /type_1|type1/i.test(h));
-      const sTypeIdx = headers.findIndex(h=>/secondary_type/i.test(h) || /type_2|type2/i.test(h));
-
-      allPokemon = [];
-      for (let i=1;i<lines.length;i++){
-        const vals = lines[i].split(delim).map(v=>v.replace(/\u0000/g,'').trim());
-        const name = vals[nameIdx];
-        if (!name) continue;
-        allPokemon.push({
-          name,
-          primaryType: vals[pTypeIdx] || '',
-          secondaryType: vals[sTypeIdx] || ''
-        });
-      }
-      console.log(`✓ Pokémon caricati: ${allPokemon.length} (delim='${delim}')`);
-    } catch (e) {
-      console.error('Errore caricamento CSV:', e);
-    }
+// --- carica CSV ---
+async function loadPokemonData(){
+  const r=await fetch('https://raw.githubusercontent.com/lucaremix/roulette-run-challenge/main/pokemon.csv');
+  const t=await r.text();const lines=t.split('\n').filter(l=>l.trim());
+  const h=lines[0].split('\t');const ni=h.findIndex(x=>x.includes('english_name'));
+  for(let i=1;i<lines.length;i++){const v=lines[i].split('\t');
+    if(v[ni]) allPokemon.push(v[ni].trim());
   }
+  console.log("Caricati",allPokemon.length,"Pokémon");
+}
 
-  async function joinEventAndWait() {
-    const playersRef = ref(database, 'events/falkner/players');
-  
-    // 1) Registrati nella stanza se non ci sei
-    const snap = await get(playersRef);
-    const names = [];
-    snap.forEach(cs => names.push(cs.val()));
-  
-    if (!names.includes(currentPlayer)) {
-      // chiave = nome giocatore per semplicità (così è facile rimuoverlo)
-      await set(ref(database, `events/falkner/players/${currentPlayer}`), currentPlayer);
-  
-      // pulizia automatica se chiudi la pagina (se usi onDisconnect)
-      try {
-        onDisconnect(ref(database, `events/falkner/players/${currentPlayer}`)).remove();
-      } catch(e) { /* opzionale */ }
-    }
-  
-    // 2) Ascolta in realtime finché non ci sono esattamente 2 giocatori (incluso te)
-    return new Promise((resolve, reject) => {
-      const off = onValue(playersRef, (s) => {
-        const curr = [];
-        s.forEach(cs => curr.push(cs.val()));
-  
-        // Mostra la waiting screen qui (se vuoi feedback)
-        document.getElementById('waitingScreen').style.display = 'block';
-        document.getElementById('waitingMessage').textContent =
-          `Giocatori collegati: ${curr.length}/2`;
-  
-        if (curr.length === 2) {
-          off();                // smetti di ascoltare qui
-          resolve(curr);        // passa i due nomi
-        }
-        // Se >2 puoi decidere di bloccare la stanza:
-        if (curr.length > 2 && !curr.includes(currentPlayer)) {
-          off();
-          reject(new Error('La stanza è piena.'));
-        }
-      }, reject);
+// --- entra nell'evento ---
+async function joinEventAndWait(){
+  const playersRef=ref(db,'events/falkner/players');
+  const snap=await get(playersRef);const arr=[];
+  snap.forEach(s=>arr.push(s.val()));
+  if(!arr.includes(currentPlayer)){
+    await set(ref(db,`events/falkner/players/${currentPlayer}`),currentPlayer);
+    try{onDisconnect(ref(db,`events/falkner/players/${currentPlayer}`)).remove();}catch{}
+  }
+  return new Promise((resolve)=>{
+    onValue(playersRef,s=>{
+      const p=[];s.forEach(cs=>p.push(cs.val()));
+      document.getElementById('waitingScreen').style.display='block';
+      document.getElementById('waitingMessage').textContent=`Giocatori collegati: ${p.length}/2`;
+      if(p.length===2) resolve(p);
     });
-  }
-
-  
-  // === INIT / LOBBY ===
-  async function initializeGame() {
-  currentPlayer = getCurrentPlayer();
-  if (!currentPlayer) {
-    alert('Devi impostare il tuo nome dalla home page!');
-    window.location.href = 'index.html';
-    return;
-  }
-
-  // ➜ Qui aspettiamo finché non ci sono due giocatori registrati
-  let players;
-  try {
-    players = await joinEventAndWait();
-  } catch (e) {
-    alert(e.message || 'Impossibile entrare nella stanza.');
-    window.location.href = 'index.html';
-    return;
-  }
-
-  myPlayerIndex = players.indexOf(currentPlayer);
-  if (myPlayerIndex === -1) {
-    alert('Il tuo nome non coincide con i giocatori dell’evento. Reimposta il nome dalla home.');
-    window.location.href = 'index.html';
-    return;
-  }
-
-  // GameState: crea/riusa in modo coerente
-  const gameRef = ref(database, 'events/falkner/gameState');
-  const gsSnap = await get(gameRef);
-
-  const types = ['normal','fire','water','electric','grass','ice','fighting',
-    'poison','ground','flying','psychic','bug','rock','ghost','dragon','dark','steel','fairy'];
-
-  if (!gsSnap.exists()) {
-    await set(gameRef, {
-      players,
-      selectedType: types[Math.floor(Math.random() * types.length)],
-      usedPokemon: [],
-      currentPlayerIndex: 0,    // comincia il player 0
-      timeLeft: 15,
-      lastUpdate: Date.now(),
-      ready: {},
-      started: false,
-      winner: null,
-      winReason: null
-    });
-  } else {
-    const gs = gsSnap.val();
-    const samePlayers = Array.isArray(gs.players)
-      && gs.players.length === players.length
-      && [...gs.players].sort().join('|') === [...players].sort().join('|');
-
-    if (!samePlayers) {
-      await set(gameRef, {
-        players,
-        selectedType: gs.selectedType || types[Math.floor(Math.random() * types.length)],
-        usedPokemon: [],
-        currentPlayerIndex: 0,
-        timeLeft: 15,
-        lastUpdate: Date.now(),
-        ready: {},
-        started: false,
-        winner: null,
-        winReason: null
-      });
-    }
-  }
-
-  // Listener sul gameState (UI + timer)
-  onValue(gameRef, (snapshot) => {
-    const st = snapshot.val();
-    if (!st) return;
-    gameState = st;
-    updateUI();
-    if (gameState.started && gameState.winner === null) startTimer();
   });
 }
 
-
-  // === UI UPDATE ===
-  function updateUI() {
-    if (!gameState) return;
-
-    // Waiting / Ready phase
-    if (!gameState.started) {
-      document.getElementById('waitingScreen').style.display = 'block';
-      document.getElementById('battleScreen').style.display  = 'none';
-      document.getElementById('resultScreen').style.display  = 'none';
-
-      const myReady = gameState.ready?.[currentPlayer] || false;
-      const readyCount = Object.keys(gameState.ready || {}).length;
-      document.getElementById('waitingMessage').textContent = `Giocatori pronti: ${readyCount}/2`;
-      const btn = document.getElementById('readyBtn');
-      btn.disabled = myReady;
-      btn.textContent = myReady ? '✓ Pronto!' : '✓ Sono Pronto!';
-
-      // Entrambi pronti? Player 0 avvia
-      if (readyCount === 2 && myPlayerIndex === 0) {
-        const gameRef = ref(database, 'events/falkner/gameState');
-        // non cambiamo selectedType qui; usiamo quello creato a init
-        update(gameRef, {
-          started: true,
-          winner: null,
-          winReason: null,
-          timeLeft: 15,
-          lastUpdate: Date.now()
-        });
-      }
-      return;
-    }
-
-    // Game ended?
-    if (gameState.winner !== null) {
-      showResult();
-      return;
-    }
-
-    // Battle screen
-    document.getElementById('waitingScreen').style.display = 'none';
-    document.getElementById('battleScreen').style.display  = 'block';
-    document.getElementById('resultScreen').style.display  = 'none';
-
-    // Tipo
-    document.getElementById('typeDisplay').textContent =
-      typeTranslations[gameState.selectedType] || gameState.selectedType;
-
-    // Nomi giocatori
-    document.getElementById('player1Name').textContent = gameState.players[0] || 'Giocatore 1';
-    document.getElementById('player2Name').textContent = gameState.players[1] || 'Giocatore 2';
-
-    // Timer in UI
-    const t1 = document.getElementById('timer1');
-    const t2 = document.getElementById('timer2');
-    const idx = gameState.currentPlayerIndex;
-
-    if (idx === 0) {
-      t1.textContent = gameState.timeLeft;
-      t2.textContent = '--';
-      t1.classList.toggle('warning', gameState.timeLeft <= 5);
-      t2.classList.remove('warning');
-    } else {
-      t1.textContent = '--';
-      t2.textContent = gameState.timeLeft;
-      t1.classList.remove('warning');
-      t2.classList.toggle('warning', gameState.timeLeft <= 5);
-    }
-
-    // Pannelli attivi
-    document.getElementById('player1Panel').classList.toggle('active', idx === 0);
-    document.getElementById('player2Panel').classList.toggle('active', idx === 1);
-
-    // Input: turno a chi ha l'indice
-    const isMyTurn = (idx === myPlayerIndex);
-
-    const in1 = document.getElementById('pokemonInput1');
-    const in2 = document.getElementById('pokemonInput2');
-    const sb1 = document.getElementById('submitBtn1');
-    const sb2 = document.getElementById('submitBtn2');
-
-    // Gli input rimangono attivi solo al giocatore di turno
-    in1.readOnly = !(myPlayerIndex === 0 && isMyTurn);
-    in2.readOnly = !(myPlayerIndex === 1 && isMyTurn);
-    sb1.disabled = !(myPlayerIndex === 0 && isMyTurn);
-    sb2.disabled = !(myPlayerIndex === 1 && isMyTurn);
-
-    // Lista usati
-    renderUsed();
-  }
-
-  function renderUsed() {
-    const l1 = document.getElementById('usedList1');
-    const l2 = document.getElementById('usedList2');
-    l1.innerHTML = ''; l2.innerHTML = '';
-
-    (gameState.usedPokemon || []).forEach((name, i) => {
-      const tag = document.createElement('div');
-      tag.className = 'used-tag';
-      tag.textContent = name;
-      (i % 2 === 0 ? l1 : l2).appendChild(tag);
+// --- inizio gioco ---
+async function initializeGame(){
+  if(!currentPlayer){alert("Imposta il nome dalla home.");window.location.href='index.html';return;}
+  const players=await joinEventAndWait();
+  myIndex=players.indexOf(currentPlayer);
+  const gameRef=ref(db,'events/falkner/gameState');
+  const gsSnap=await get(gameRef);
+  if(!gsSnap.exists()){
+    const types=['normal','fire','water','electric','grass','ice','fighting','poison','ground','flying','psychic','bug','rock','ghost','dragon','dark','steel','fairy'];
+    const t=types[Math.floor(Math.random()*types.length)];
+    await set(gameRef,{
+      players,selectedType:t,usedPokemon:[],
+      currentPlayerIndex:0,timeLeft:15,started:false,winner:null,lastUpdate:Date.now(),ready:{}
     });
   }
-
-  // === TIMER (solo player 0 fa tick) ===
-  function startTimer() {
-    if (countdownInterval) return;
-    countdownInterval = setInterval(async () => {
-      if (!gameState || !gameState.started || gameState.winner !== null) {
-        clearInterval(countdownInterval); countdownInterval = null; return;
-      }
-      if (myPlayerIndex !== 0) return; // solo player 0 aggiorna
-
-      const now = Date.now();
-      const elapsed = Math.floor((now - (gameState.lastUpdate || now)) / 1000);
-      if (elapsed < 1) return;
-
-      const newTime = Math.max(0, gameState.timeLeft - elapsed);
-      const gameRef = ref(database, 'events/falkner/gameState');
-
-      if (newTime <= 0) {
-        // Tempo scaduto → perde il giocatore di turno
-        const loser = gameState.currentPlayerIndex;
-        const winnerIndex = loser === 0 ? 1 : 0;
-        await update(gameRef, {
-          winner: winnerIndex,
-          winReason: 'timeout',
-          timeLeft: 0,
-          lastUpdate: now
-        });
-      } else {
-        await update(gameRef, { timeLeft: newTime, lastUpdate: now });
-      }
-    }, 300);
-  }
-
-  // === READY ===
-  window.setReady = async function(){
-    const gameRef = ref(database, 'events/falkner/gameState');
-    await update(gameRef, { [`ready/${currentPlayer}`]: true });
-  };
-
-  // === AUTOCOMPLETE: da tutti i Pokémon del CSV (non filtrati per tipo), esclusi gli usati) ===
-  function filterPokemon(search) {
-    if (!search || search.trim().length < 2) return [];
-    const s = search.toLowerCase();
-    const used = new Set(gameState?.usedPokemon || []);
-    return allPokemon
-      .filter(p => p.name.toLowerCase().includes(s) && !used.has(p.name))
-      .slice(0, 14); // limitiamo per UI
-  }
-
-  function showSuggestions(results, playerNum) {
-    const box = document.getElementById(`suggestions${playerNum}`);
-    if (!results.length) { box.classList.remove('show'); box.innerHTML = ''; return; }
-    box.innerHTML = results.map(p => `
-      <div class="suggestion-item" onclick="selectPokemon('${p.name.replace(/'/g, "\\'")}', ${playerNum})">${p.name}</div>
-    `).join('');
-    box.classList.add('show');
-  }
-
-  window.selectPokemon = function(name, playerNum) {
-    selectedPokemonName = name;
-    document.getElementById(`pokemonInput${playerNum}`).value = name;
-    document.getElementById(`suggestions${playerNum}`).classList.remove('show');
-  };
-
-  document.addEventListener('click', (e)=>{
-    if (!e.target.closest('.input-area')) {
-      document.getElementById('suggestions1').classList.remove('show');
-      document.getElementById('suggestions2').classList.remove('show');
-    }
+  onValue(gameRef,s=>{
+    gameState=s.val();if(!gameState)return;updateUI(gameRef);
   });
+}
 
-  // === SUBMIT ===
-  async function submitPokemon(playerNum) {
-    const input = document.getElementById(`pokemonInput${playerNum}`);
-    const raw = (input.value || selectedPokemonName || '').trim();
-    if (!raw) { alert('Scrivi o seleziona un Pokémon'); return; }
-
-    // Turno?
-    const isMyTurn = (gameState.currentPlayerIndex === myPlayerIndex);
-    if (!isMyTurn) { alert('Non è il tuo turno!'); return; }
-
-    // Trova Pokémon (case-insensitive)
-    const nameLower = raw.toLowerCase();
-    const pokemon = allPokemon.find(p => p.name.toLowerCase() === nameLower);
-    if (!pokemon) { alert('Pokémon non trovato! Selezionalo dai suggerimenti.'); return; }
-
-    // Già usato?
-    if ((gameState.usedPokemon || []).includes(pokemon.name)) {
-      await loseFor('repeat');
-      return;
-    }
-
-    // Tipo corretto (deve combaciare col selectedType)
-    const t = gameState.selectedType;
-    const okType = [pokemon.primaryType, pokemon.secondaryType].includes(t);
-    if (!okType) {
-      await loseFor('wrongType');
-      return;
-    }
-
-    // Mossa valida → aggiungi, passa turno, reset timer
-    const gameRef = ref(database, 'events/falkner/gameState');
-    const next = gameState.currentPlayerIndex === 0 ? 1 : 0;
-    const newUsed = [...(gameState.usedPokemon || []), pokemon.name];
-
-    await update(gameRef, {
-      usedPokemon: newUsed,
-      currentPlayerIndex: next,
-      timeLeft: 15,
-      lastUpdate: Date.now()
-    });
-
-    input.value = '';
-    selectedPokemonName = '';
+// --- UI update ---
+async function updateUI(gameRef){
+  const w=document.getElementById('waitingScreen');
+  const b=document.getElementById('battleScreen');
+  const r=document.getElementById('resultScreen');
+  if(!gameState.started){
+    w.style.display='block';b.style.display='none';r.style.display='none';
+    const ready=gameState.ready?.[currentPlayer];const n=Object.keys(gameState.ready||{}).length;
+    document.getElementById('waitingMessage').textContent=`Giocatori pronti: ${n}/2`;
+    document.getElementById('readyBtn').disabled=ready;
+    if(n===2 && myIndex===0) await update(gameRef,{started:true,lastUpdate:Date.now()});
+    return;
   }
+  w.style.display='none';b.style.display='block';r.style.display='none';
+  if(gameState.winner!==null){showResult();return;}
+  document.getElementById('typeDisplay').textContent=`Tipo: ${gameState.selectedType}`;
+  document.getElementById('playerName').textContent=currentPlayer;
+  document.getElementById('turnDisplay').textContent=`Turno di: ${gameState.players[gameState.currentPlayerIndex]}`;
+  document.getElementById('timerDisplay').textContent=gameState.timeLeft;
+  const isMyTurn=(myIndex===gameState.currentPlayerIndex);
+  document.getElementById('pokemonInput').disabled=!isMyTurn;
+  document.getElementById('submitBtn').disabled=!isMyTurn;
+  const used=document.getElementById('usedList');
+  used.innerHTML=gameState.usedPokemon.map(p=>`<span class='used-tag'>${p}</span>`).join('');
+  if(!countdown && gameState.started && myIndex===0) startTimer(gameRef);
+}
 
-  async function loseFor(reason) {
-    const gameRef = ref(database, 'events/falkner/gameState');
-    const winnerIndex = myPlayerIndex === 0 ? 1 : 0;
-    await update(gameRef, {
-      winner: winnerIndex,
-      winReason: reason,
-      timeLeft: 0,
-      lastUpdate: Date.now()
-    });
-  }
-
-  // === RESULT ===
-  function showResult() {
-    // Stop timer loop
-    if (countdownInterval) { clearInterval(countdownInterval); countdownInterval = null; }
-
-    const win = gameState.winner; // 0 / 1
-    const winnerName = (win === 'timeout' ? null : gameState.players[win]);
-    const iAmWinner = (win === myPlayerIndex);
-
-    document.getElementById('battleScreen').style.display  = 'none';
-    document.getElementById('waitingScreen').style.display = 'none';
-    document.getElementById('resultScreen').style.display  = 'block';
-
-    const title = document.getElementById('resultTitle');
-    const msg   = document.getElementById('resultMessage');
-
-    if (win === 'timeout') {
-      title.textContent = '⏰ Tempo scaduto';
-      title.className = 'result-title loser';
-      msg.textContent = 'Il tempo è scaduto. Partita terminata.';
-      return;
+// --- timer globale ---
+function startTimer(gameRef){
+  countdown=setInterval(async()=>{
+    if(!gameState||gameState.winner!==null)return;
+    const now=Date.now();
+    const elapsed=Math.floor((now-(gameState.lastUpdate||now))/1000);
+    if(elapsed<1)return;
+    const newTime=Math.max(0,gameState.timeLeft-1);
+    if(newTime<=0){
+      const winner=(gameState.currentPlayerIndex===0)?1:0;
+      await update(gameRef,{winner});
+      clearInterval(countdown);countdown=null;
+    }else{
+      await update(gameRef,{timeLeft:newTime,lastUpdate:now});
     }
+  },1000);
+}
 
-    if (iAmWinner) {
-      title.textContent = '🎉 Vittoria!';
-      title.className = 'result-title winner';
-      const reasonMap = { timeout:'tempo scaduto', wrongType:'tipo errato', repeat:'ripetizione' };
-      msg.textContent = `Hai vinto! Motivo: ${reasonMap[gameState.winReason] || '—'}.`;
-    } else {
-      title.textContent = '😢 Sconfitta';
-      title.className = 'result-title loser';
-      const reasonMap = { timeout:'tempo scaduto', wrongType:'tipo errato', repeat:'ripetizione' };
-      msg.textContent = `${winnerName} ha vinto (motivo: ${reasonMap[gameState.winReason] || '—'}).`;
-    }
-  }
+// --- pronto ---
+document.getElementById('readyBtn').addEventListener('click',async()=>{
+  const gameRef=ref(db,'events/falkner/gameState');
+  await update(gameRef,{[`ready/${currentPlayer}`]:true});
+});
 
-  // === NAV ===
-  window.goHome = function(){ window.location.href = 'index.html'; };
-
-  // === INPUT / EVENTS ===
-  const in1 = document.getElementById('pokemonInput1');
-  const in2 = document.getElementById('pokemonInput2');
-
-  in1.addEventListener('input', (e)=>{
-    const results = filterPokemon(e.target.value);
-    showSuggestions(results, 1);
-  });
-  in2.addEventListener('input', (e)=>{
-    const results = filterPokemon(e.target.value);
-    showSuggestions(results, 2);
-  });
-
-  document.getElementById('submitBtn1').addEventListener('click', ()=>submitPokemon(1));
-  document.getElementById('submitBtn2').addEventListener('click', ()=>submitPokemon(2));
-
-  in1.addEventListener('keypress', (e)=>{ if (e.key==='Enter') submitPokemon(1); });
-  in2.addEventListener('keypress', (e)=>{ if (e.key==='Enter') submitPokemon(2); });
-
-  window.addEventListener('beforeunload', () => {
-  if (currentPlayer) {
-    remove(ref(database, `events/falkner/players/${currentPlayer}`));
+// --- suggerimenti ---
+const input=document.getElementById('pokemonInput');
+const sugg=document.getElementById('suggestions');
+input.addEventListener('input',()=>{
+  const val=input.value.toLowerCase();
+  if(val.length<2){sugg.style.display='none';return;}
+  const res=allPokemon.filter(p=>p.toLowerCase().includes(val)).slice(0,10);
+  sugg.innerHTML=res.map(p=>`<div class='suggestion-item'>${p}</div>`).join('');
+  sugg.style.display=res.length?'block':'none';
+});
+sugg.addEventListener('click',e=>{
+  if(e.target.classList.contains('suggestion-item')){
+    input.value=e.target.textContent;sugg.style.display='none';
   }
 });
 
-  
-  // === BOOT ===
-  (async function boot(){
-    await loadPokemonData();
-    await initializeGame();
-  })();
+// --- invio Pokémon ---
+document.getElementById('submitBtn').addEventListener('click',submitPokemon);
+async function submitPokemon(){
+  const name=input.value.trim();
+  if(!name)return;
+  const gameRef=ref(db,'events/falkner/gameState');
+  const p=allPokemon.find(n=>n.toLowerCase()===name.toLowerCase());
+  if(!p){alert('Pokémon non trovato!');return;}
+  if(gameState.usedPokemon.includes(p)){
+    await update(gameRef,{winner:(myIndex===0)?1:0});
+    return;
+  }
+  // Tipo corretto?
+  const url='https://raw.githubusercontent.com/lucaremix/roulette-run-challenge/main/pokemon.csv';
+  const r=await fetch(url);const t=await r.text();const lines=t.split('\n');const headers=lines[0].split('\t');
+  const ni=headers.findIndex(h=>h.includes('english_name'));
+  const pti=headers.findIndex(h=>h.includes('primary_type'));
+  const sti=headers.findIndex(h=>h.includes('secondary_type'));
+  const row=lines.find(l=>l.split('\t')[ni]?.trim()===p);
+  if(!row){alert('Pokémon non trovato nel CSV');return;}
+  const vals=row.split('\t');const type1=vals[pti]?.trim();const type2=vals[sti]?.trim();
+  if(type1!==gameState.selectedType && type2!==gameState.selectedType){
+    await update(gameRef,{winner:(myIndex===0)?1:0});
+    return;
+  }
+  // OK
+  const next=(gameState.currentPlayerIndex===0)?1:0;
+  await update(gameRef,{
+    usedPokemon:[...gameState.usedPokemon,p],
+    currentPlayerIndex:next,
+    timeLeft:15,
+    lastUpdate:Date.now()
+  });
+  input.value='';sugg.style.display='none';
+}
+
+// --- risultato ---
+function showResult(){
+  clearInterval(countdown);countdown=null;
+  document.getElementById('battleScreen').style.display='none';
+  document.getElementById('resultScreen').style.display='block';
+  const win=gameState.winner===myIndex;
+  document.getElementById('resultTitle').textContent=win?'🎉 Vittoria!':'💀 Sconfitta!';
+  document.getElementById('resultMessage').textContent=win?'Hai vinto la sfida!':'Hai perso la sfida!';
+}
+
+// --- cleanup ---
+window.addEventListener('beforeunload',()=>{
+  if(currentPlayer) remove(ref(db,`events/falkner/players/${currentPlayer}`));
+});
+
+// --- avvio ---
+await loadPokemonData();
+await initializeGame();
 </script>
 </body>
 </html>
