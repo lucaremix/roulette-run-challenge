@@ -675,19 +675,14 @@
 
             // Show rewards
             document.getElementById('gameArea').style.display = 'none';
-            document.getElementById('pokemonName').textContent = myPokemon.english_name;
             document.getElementById('rewardPokemonImage').src = getPokemonImageUrl(myPokemon.national_number);
+            
+            // Add pokemon name display
+            const rewardsTitle = document.querySelector('.rewards-title');
+            rewardsTitle.textContent = `🎉 Hai indovinato: ${myPokemon.english_name}!`;
             
             const rewardsList = document.getElementById('rewardsList');
             rewardsList.innerHTML = '';
-
-            // Add pokemon name display
-            const pokemonDisplay = document.createElement('p');
-            pokemonDisplay.style.fontSize = '1.3em';
-            pokemonDisplay.style.color = '#e0e0e0';
-            pokemonDisplay.style.margin = '20px 0';
-            pokemonDisplay.innerHTML = `Hai indovinato: <strong style="color: #7fff7f;">${myPokemon.english_name}</strong>`;
-            document.querySelector('.rewards-title').after(pokemonDisplay);
 
             if (coins > 0) {
                 const coinReward = document.createElement('div');
