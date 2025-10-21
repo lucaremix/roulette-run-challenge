@@ -454,19 +454,19 @@
         const database = getDatabase(app);
 
         const events = [
-            { id: 'blwh-alder', name: 'Starters', trainer: 'blwh-alder' },
-            { id: 'N', name: 'N', trainer: 'blwh-n-2' },
-            { id: 'blwh-ccc', name: 'Chili, Cress & Cilian', trainer: 'blwh-ccc' },
-            { id: 'proton', name: 'Proton', trainer: 'proton' },
-            { id: 'bugsy', name: 'Bugsy', trainer: 'bugsy' },
-            { id: 'whitney', name: 'Whitney', trainer: 'whitney' },
-            { id: 'morty', name: 'Morty', trainer: 'morty' },
+            { id: 'alder', name: 'Starters', trainer: 'alder' },
+            { id: 'N', name: 'N', trainer: 'n-2' },
+            { id: 'ccc', name: 'Chili, Cress & Cilian', trainer: 'ccc' },
+            { id: 'cheren', name: 'Cheren', trainer: 'cheren' },
+            { id: 'lenora', name: 'Lenora', trainer: 'lenora' },
+            { id: 'burgh', name: 'Burgh', trainer: 'burgh' },
+            { id: 'elesa', name: 'Elesa', trainer: 'elesa' },
+            { id: 'clay', name: 'Clay', trainer: 'clay' },
             { id: 'eusine', name: 'Eusine', trainer: 'eusine' },
-            { id: 'chuck', name: 'Chuck', trainer: 'chuck' },
-            { id: 'jasmine', name: 'Jasmine', trainer: 'jasmine' },
-            { id: 'pryce', name: 'Pryce', trainer: 'pryce' },
-            { id: 'archer', name: 'Archer', trainer: 'archer' },
-            { id: 'clair', name: 'Clair', trainer: 'clair' }
+            { id: 'skyla', name: 'Skyla', trainer: 'skyla' },
+            { id: 'brycen', name: 'Brycen', trainer: 'brycen' },
+            { id: 'bianca', name: 'Bianca', trainer: 'bianca' },
+            { id: 'Dryden', name: 'Dryden', trainer: 'dryden' }
         ];
 
         const markets = [
@@ -614,7 +614,7 @@
                     }
 
                     card.innerHTML = `
-                        <img src="https://img.nuzlocke.app/leaders/gs-${event.trainer}.png" 
+                        <img src="https://img.nuzlocke.app/leaders/blwh-${event.trainer}.png" 
                              alt="${event.name}" 
                              class="trainer-img"
                              onerror="this.src='https://via.placeholder.com/128x128/1a1a1a/888?text=${event.trainer}'">
