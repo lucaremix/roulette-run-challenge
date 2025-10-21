@@ -321,14 +321,12 @@
 </head>
 <body>
     <div class="container">
-        <!-- Waiting Screen -->
         <div class="waiting-screen" id="waitingScreen">
             <h2>⏳ In attesa...</h2>
             <p id="waitingMessage">Preparazione della battaglia...</p>
             <button class="ready-btn" id="readyBtn" onclick="setReady()">✓ Sono Pronto!</button>
         </div>
 
-        <!-- Battle Screen -->
         <div id="battleScreen" style="display: none;">
             <header>
                 <h1>🦅 Sfida di Tipo Falkner</h1>
@@ -382,7 +380,6 @@
             </div>
         </div>
 
-        <!-- Result Screen -->
         <div class="result-screen" id="resultScreen">
             <h2 class="result-title" id="resultTitle">Vittoria!</h2>
             <p id="resultMessage" style="font-size: 1.3em; margin: 20px 0;"></p>
@@ -409,10 +406,10 @@
         const database = getDatabase(app);
 
         let allPokemon = [];
-        let validPokemon = [];
         let currentPlayer = '';
         let selectedPokemonName = '';
         let gameState = null;
+        let myPlayerIndex = -1;
 
         const typeTranslations = {
             'normal': 'Normale', 'fire': 'Fuoco', 'water': 'Acqua', 'electric': 'Elettro',
@@ -455,7 +452,7 @@
                     }
                 }
 
-                console.log(`Caricati ${allPokemon.length} Pokémon`);
+                console.log(`✓ Caricati ${allPokemon.length} Pokémon`);
             } catch (error) {
                 console.error('Errore caricamento CSV:', error);
             }
@@ -463,6 +460,7 @@
 
         async function initializeGame() {
             currentPlayer = getCurrentPlayer();
+            console.log('Current player:', currentPlayer);
             
             const eventRef = ref(database, 'events/falkner/players');
             const snapshot = await get(eventRef);
@@ -472,48 +470,46 @@
                 players.push(childSnapshot.val());
             });
 
+            console.log('Players in event:', players);
+
             if (players.length !== 2) {
                 alert('Errore: devono esserci esattamente 2 giocatori!');
                 window.location.href = 'falkner.html';
                 return;
             }
 
-            // Inizializza o resetta stato del gioco
+            // Trova il mio indice
+            myPlayerIndex = players.indexOf(currentPlayer);
+            console.log('My player index:', myPlayerIndex);
+
             const gameRef = ref(database, 'events/falkner/gameState');
-            const gameSnapshot = await get(gameRef);
             
-            // Se il gameState esiste ma ha giocatori diversi, o ha un winner, lo resettiamo
-            const existingState = gameSnapshot.val();
-            const needsReset = !existingState || 
-                              existingState.winner !== null ||
-                              !existingState.players ||
-                              existingState.players.length !== 2 ||
-                              existingState.players.sort().join(',') !== players.sort().join(',');
+            // SEMPRE pulisci e ricrea il gameState quando entri
+            const types = ['normal', 'fire', 'water', 'electric', 'grass', 'ice', 'fighting', 
+                          'poison', 'ground', 'flying', 'psychic', 'bug', 'rock', 'ghost', 
+                          'dragon', 'dark', 'steel', 'fairy'];
             
-            if (needsReset) {
-                console.log('Resetting gameState for new game');
-                const types = ['normal', 'fire', 'water', 'electric', 'grass', 'ice', 'fighting', 
-                              'poison', 'ground', 'flying', 'psychic', 'bug', 'rock', 'ghost', 
-                              'dragon', 'dark', 'steel', 'fairy'];
-                
-                const selectedType = types[Math.floor(Math.random() * types.length)];
-                
-                await set(gameRef, {
-                    players: players,
-                    selectedType: selectedType,
-                    usedPokemon: [],
-                    currentPlayerIndex: 0,
-                    timeLeft: 15,
-                    ready: {},
-                    started: false,
-                    winner: null
-                });
-            }
+            const selectedType = types[Math.floor(Math.random() * types.length)];
+            
+            console.log('Creating fresh gameState');
+            await set(gameRef, {
+                players: players,
+                selectedType: selectedType,
+                usedPokemon: [],
+                currentPlayerIndex: 0,
+                timeLeft: 15,
+                ready: {},
+                started: false,
+                winner: null,
+                lastUpdate: Date.now()
+            });
 
             // Listener per lo stato del gioco
             onValue(gameRef, (snapshot) => {
-                gameState = snapshot.val();
-                if (gameState) {
+                const newState = snapshot.val();
+                if (newState) {
+                    console.log('GameState updated:', newState);
+                    gameState = newState;
                     updateUI();
                 }
             });
@@ -521,64 +517,120 @@
 
         function updateUI() {
             if (!gameState || !gameState.players) {
-                console.log('Waiting for gameState...', gameState);
+                console.log('Waiting for valid gameState...');
                 return;
             }
 
-            // Check ready status
-            const myReady = gameState.ready?.[currentPlayer] || false;
-            const allReady = gameState.players.every(p => gameState.ready?.[p]);
-
+            // SCHERMATA WAITING
             if (!gameState.started) {
                 document.getElementById('waitingScreen').style.display = 'block';
                 document.getElementById('battleScreen').style.display = 'none';
                 document.getElementById('resultScreen').classList.remove('show');
                 
+                const myReady = gameState.ready?.[currentPlayer] || false;
                 const readyCount = Object.keys(gameState.ready || {}).length;
-                document.getElementById('waitingMessage').textContent = 
-                    `Giocatori pronti: ${readyCount}/2`;
                 
+                document.getElementById('waitingMessage').textContent = `Giocatori pronti: ${readyCount}/2`;
                 document.getElementById('readyBtn').disabled = myReady;
                 document.getElementById('readyBtn').textContent = myReady ? '✓ Pronto!' : '✓ Sono Pronto!';
 
-                if (allReady && readyCount === 2) {
-                    console.log('Both players ready, starting game...');
-                    setTimeout(() => startGame(), 1000);
+                // Se entrambi pronti, avvia il gioco
+                if (readyCount === 2 && myPlayerIndex === 0) {
+                    console.log('Both ready, starting game in 2 seconds...');
+                    setTimeout(async () => {
+                        const gameRef = ref(database, 'events/falkner/gameState');
+                        await update(gameRef, {
+                            started: true,
+                            lastUpdate: Date.now()
+                        });
+                    }, 2000);
                 }
                 return;
             }
 
-            // Check winner BEFORE showing battle screen
+            // SCHERMATA RISULTATO
             if (gameState.winner !== null && gameState.winner !== undefined) {
-                console.log('Winner detected:', gameState.winner);
+                console.log('Game ended, winner:', gameState.winner);
                 showResult();
                 return;
             }
 
-            // Game started - show battle screen
+            // SCHERMATA BATTAGLIA
             document.getElementById('waitingScreen').style.display = 'none';
             document.getElementById('battleScreen').style.display = 'block';
             document.getElementById('resultScreen').classList.remove('show');
 
-            // Start timer if not already started
-            if (!timerStarted && gameState.started) {
-                console.log('Starting timer...');
-                setTimeout(() => startTimer(), 500);
-            }
-
-            // Update type display
-            validPokemon = allPokemon.filter(p => 
-                p.primaryType === gameState.selectedType || 
-                p.secondaryType === gameState.selectedType
-            );
+            // Mostra tipo
             document.getElementById('typeDisplay').textContent = 
                 typeTranslations[gameState.selectedType] || gameState.selectedType;
 
-            // Update player names
+            // Mostra nomi giocatori
             document.getElementById('player1Name').textContent = gameState.players[0];
             document.getElementById('player2Name').textContent = gameState.players[1];
 
-            // Update timers
+            // Aggiorna timer
+            updateTimers();
+
+            // Evidenzia pannello attivo
+            document.getElementById('player1Panel').classList.toggle('active', gameState.currentPlayerIndex === 0);
+            document.getElementById('player2Panel').classList.toggle('active', gameState.currentPlayerIndex === 1);
+
+            // Abilita/disabilita input
+            const isMyTurn = gameState.currentPlayerIndex === myPlayerIndex;
+            
+            document.getElementById('pokemonInput1').disabled = !(myPlayerIndex === 0 && isMyTurn);
+            document.getElementById('pokemonInput2').disabled = !(myPlayerIndex === 1 && isMyTurn);
+            document.getElementById('submitBtn1').disabled = !(myPlayerIndex === 0 && isMyTurn);
+            document.getElementById('submitBtn2').disabled = !(myPlayerIndex === 1 && isMyTurn);
+
+            // Aggiorna liste pokemon usati
+            updateUsedLists();
+
+            // Avvia countdown timer
+            startCountdown();
+        }
+
+        let countdownInterval = null;
+
+        function startCountdown() {
+            if (countdownInterval) return;
+
+            countdownInterval = setInterval(async () => {
+                if (!gameState || !gameState.started || gameState.winner !== null) {
+                    clearInterval(countdownInterval);
+                    countdownInterval = null;
+                    return;
+                }
+
+                // Solo player 0 aggiorna il timer
+                if (myPlayerIndex !== 0) return;
+
+                const now = Date.now();
+                const elapsed = Math.floor((now - gameState.lastUpdate) / 1000);
+
+                if (elapsed >= 1) {
+                    const newTime = Math.max(0, gameState.timeLeft - 1);
+                    const gameRef = ref(database, 'events/falkner/gameState');
+
+                    if (newTime <= 0) {
+                        // Tempo scaduto, l'altro giocatore vince
+                        const winnerIndex = gameState.currentPlayerIndex === 0 ? 1 : 0;
+                        console.log('Time up! Winner:', winnerIndex);
+                        await update(gameRef, {
+                            winner: winnerIndex,
+                            timeLeft: 0
+                        });
+                    } else {
+                        await update(gameRef, {
+                            timeLeft: newTime,
+                            lastUpdate: now
+                        });
+                    }
+                }
+            }, 1000);
+        }
+
+        function updateTimers() {
             const timer1 = document.getElementById('timer1');
             const timer2 = document.getElementById('timer2');
             
@@ -593,22 +645,6 @@
                 timer1.classList.remove('warning');
                 timer2.classList.toggle('warning', gameState.timeLeft <= 5);
             }
-
-            // Update active panels
-            document.getElementById('player1Panel').classList.toggle('active', gameState.currentPlayerIndex === 0);
-            document.getElementById('player2Panel').classList.toggle('active', gameState.currentPlayerIndex === 1);
-
-            // Update inputs
-            const currentTurnPlayer = gameState.players[gameState.currentPlayerIndex];
-            const isMyTurn = currentTurnPlayer === currentPlayer;
-
-            document.getElementById('pokemonInput1').disabled = !(isMyTurn && gameState.currentPlayerIndex === 0);
-            document.getElementById('pokemonInput2').disabled = !(isMyTurn && gameState.currentPlayerIndex === 1);
-            document.getElementById('submitBtn1').disabled = !(isMyTurn && gameState.currentPlayerIndex === 0);
-            document.getElementById('submitBtn2').disabled = !(isMyTurn && gameState.currentPlayerIndex === 1);
-
-            // Update used pokemon lists
-            updateUsedLists();
         }
 
         function updateUsedLists() {
@@ -629,65 +665,6 @@
                     list2.appendChild(tag);
                 }
             });
-        }
-
-        let timerStarted = false;
-
-        async function startGame() {
-            const gameRef = ref(database, 'events/falkner/gameState');
-            await update(gameRef, { 
-                started: true,
-                timeLeft: 15,
-                timerLastUpdate: Date.now(),
-                currentPlayerIndex: 0,
-                usedPokemon: []
-            });
-        }
-
-        function startTimer() {
-            if (timerStarted) return;
-            
-            // Aspetta che il gameState sia pronto
-            if (!gameState || !gameState.started || !gameState.players || gameState.players.length !== 2) {
-                console.log('Waiting for gameState to be ready...');
-                setTimeout(() => startTimer(), 500);
-                return;
-            }
-            
-            timerStarted = true;
-            console.log('Timer started!');
-
-            setInterval(async () => {
-                if (!gameState || !gameState.started || gameState.winner !== null) return;
-                if (!gameState.players || gameState.players.length !== 2) return;
-
-                // Solo il primo giocatore aggiorna il timer per evitare conflitti
-                if (currentPlayer !== gameState.players[0]) return;
-
-                const gameRef = ref(database, 'events/falkner/gameState');
-                const now = Date.now();
-                const lastUpdate = gameState.timerLastUpdate || now;
-                const elapsed = Math.floor((now - lastUpdate) / 1000);
-
-                if (elapsed >= 1) {
-                    const newTime = Math.max(0, gameState.timeLeft - elapsed);
-
-                    if (newTime <= 0) {
-                        // Time's up - other player wins
-                        const winnerIndex = gameState.currentPlayerIndex === 0 ? 1 : 0;
-                        console.log(`Time's up! Winner: ${gameState.players[winnerIndex]}`);
-                        await update(gameRef, { 
-                            winner: winnerIndex,
-                            timeLeft: 0
-                        });
-                    } else {
-                        await update(gameRef, { 
-                            timeLeft: newTime,
-                            timerLastUpdate: now
-                        });
-                    }
-                }
-            }, 1000);
         }
 
         window.setReady = async function() {
@@ -745,26 +722,28 @@
                 return;
             }
 
-            // Check if pokemon is of the correct type
+            // Verifica tipo
             const isCorrectType = pokemon.primaryType === gameState.selectedType || 
                                  pokemon.secondaryType === gameState.selectedType;
             
             if (!isCorrectType) {
                 alert(`${pokemon.name} non è di tipo ${typeTranslations[gameState.selectedType]}! Hai perso!`);
                 const gameRef = ref(database, 'events/falkner/gameState');
-                const winnerIndex = gameState.currentPlayerIndex === 0 ? 1 : 0;
+                const winnerIndex = myPlayerIndex === 0 ? 1 : 0;
                 await update(gameRef, { winner: winnerIndex });
                 return;
             }
 
+            // Verifica già usato
             if (gameState.usedPokemon.includes(pokemon.name)) {
                 alert('Questo Pokémon è già stato usato! Hai perso!');
                 const gameRef = ref(database, 'events/falkner/gameState');
-                const winnerIndex = gameState.currentPlayerIndex === 0 ? 1 : 0;
+                const winnerIndex = myPlayerIndex === 0 ? 1 : 0;
                 await update(gameRef, { winner: winnerIndex });
                 return;
             }
 
+            // Mossa valida
             const gameRef = ref(database, 'events/falkner/gameState');
             const newUsedPokemon = [...gameState.usedPokemon, pokemon.name];
             const nextPlayerIndex = gameState.currentPlayerIndex === 0 ? 1 : 0;
@@ -773,7 +752,7 @@
                 usedPokemon: newUsedPokemon,
                 currentPlayerIndex: nextPlayerIndex,
                 timeLeft: 15,
-                timerLastUpdate: Date.now()
+                lastUpdate: Date.now()
             });
 
             document.getElementById(`pokemonInput${playerNum}`).value = '';
@@ -781,20 +760,18 @@
         }
 
         async function showResult() {
-            if (!gameState || !gameState.players || gameState.players.length !== 2) {
-                console.error('Invalid gameState in showResult:', gameState);
-                return;
+            if (countdownInterval) {
+                clearInterval(countdownInterval);
+                countdownInterval = null;
             }
 
             document.getElementById('waitingScreen').style.display = 'none';
             document.getElementById('battleScreen').style.display = 'none';
             
-            const winnerIndex = gameState.winner;
-            const winner = gameState.players[winnerIndex];
-            const loser = gameState.players[1 - winnerIndex];
-            const isWinner = winner === currentPlayer;
+            const winner = gameState.players[gameState.winner];
+            const isWinner = (gameState.winner === myPlayerIndex);
 
-            console.log('Showing result:', { winner, loser, isWinner, winnerIndex });
+            console.log('Show result:', { winner, isWinner, myPlayerIndex, winnerIndex: gameState.winner });
 
             const resultTitle = document.getElementById('resultTitle');
             const resultMessage = document.getElementById('resultMessage');
@@ -817,77 +794,56 @@
             const rewardsList = document.getElementById('rewardsList');
             rewardsList.innerHTML = '';
 
-            if (isWinner) {
-                const rewards = [
-                    { text: '🎰 1 Spin dal Pool B', highlight: true },
-                    { text: '💰 50 Coins', highlight: true }
-                ];
+            const coins = isWinner ? 50 : 25;
+            const poolText = isWinner ? 'Pool B' : 'Pool C';
 
-                rewards.forEach(reward => {
-                    const item = document.createElement('div');
-                    item.className = reward.highlight ? 'reward-item highlight' : 'reward-item';
-                    item.textContent = reward.text;
-                    rewardsList.appendChild(item);
-                });
+            const rewards = [
+                { text: `🎰 1 Spin dal ${poolText}`, highlight: isWinner },
+                { text: `💰 ${coins} Coins`, highlight: isWinner }
+            ];
 
-                const playerRef = ref(database, `players/${currentPlayer}`);
-                const snapshot = await get(playerRef);
-                let playerData = snapshot.val() || { coins: 0, team: [] };
-                playerData.coins = (playerData.coins || 0) + 50;
-                await set(playerRef, playerData);
+            rewards.forEach(reward => {
+                const item = document.createElement('div');
+                item.className = reward.highlight ? 'reward-item highlight' : 'reward-item';
+                item.textContent = reward.text;
+                rewardsList.appendChild(item);
+            });
 
-            } else {
-                const rewards = [
-                    { text: '🎰 1 Spin dal Pool C', highlight: false },
-                    { text: '💰 25 Coins', highlight: false }
-                ];
+            // Aggiungi coins
+            const playerRef = ref(database, `players/${currentPlayer}`);
+            const snapshot = await get(playerRef);
+            let playerData = snapshot.val() || { coins: 0, team: [] };
+            playerData.coins = (playerData.coins || 0) + coins;
+            await set(playerRef, playerData);
 
-                rewards.forEach(reward => {
-                    const item = document.createElement('div');
-                    item.className = 'reward-item';
-                    item.textContent = reward.text;
-                    rewardsList.appendChild(item);
-                });
-
-                const playerRef = ref(database, `players/${currentPlayer}`);
-                const snapshot = await get(playerRef);
-                let playerData = snapshot.val() || { coins: 0, team: [] };
-                playerData.coins = (playerData.coins || 0) + 25;
-                await set(playerRef, playerData);
-            }
-
-            // Cleanup
+            // Rimuovi giocatore dall'evento
             const eventRef = ref(database, 'events/falkner/players');
-            const gameRef = ref(database, 'events/falkner/gameState');
             const eventSnapshot = await get(eventRef);
             
-            // Rimuovi il giocatore corrente dall'evento
             eventSnapshot.forEach((childSnapshot) => {
                 if (childSnapshot.val() === currentPlayer) {
                     remove(ref(database, `events/falkner/players/${childSnapshot.key}`));
                 }
             });
 
-            // Controlla se ci sono ancora giocatori nell'evento
+            // Se sono l'ultimo, rimuovi gameState
             setTimeout(async () => {
                 const checkSnapshot = await get(eventRef);
-                let playersCount = 0;
-                checkSnapshot.forEach(() => playersCount++);
+                let count = 0;
+                checkSnapshot.forEach(() => count++);
                 
-                console.log('Remaining players:', playersCount);
-                
-                // Se non ci sono più giocatori, rimuovi il gameState
-                if (playersCount === 0) {
-                    console.log('No players left, removing gameState');
-                    await remove(gameRef);
+                if (count === 0) {
+                    console.log('Removing gameState');
+                    await remove(ref(database, 'events/falkner/gameState'));
                 }
-            }, 1000);
+            }, 2000);
         }
 
         window.goHome = function() {
             window.location.href = 'index.html';
         };
 
+        // Event listeners per input
         document.getElementById('pokemonInput1').addEventListener('input', (e) => {
             const filtered = filterPokemon(e.target.value);
             showSuggestions(filtered, 1);
@@ -913,10 +869,12 @@
             }
         });
 
+        // Inizializzazione
         if (!getCurrentPlayer()) {
             alert('Devi impostare il tuo nome dalla home page!');
             window.location.href = 'index.html';
         } else {
+            console.log('=== Falkner Battle Starting ===');
             loadPokemonData().then(() => {
                 initializeGame();
             });
