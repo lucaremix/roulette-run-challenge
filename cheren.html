@@ -843,8 +843,20 @@
             if (resultsProcessed) return;
             resultsProcessed = true;
 
-            const gameRef = ref(database, `events/proton/game/processed`);
-            await set(gameRef, true);
+            // Mark as processed IMMEDIATELY to prevent race condition
+            const gameRef = ref(database, `events/proton/game`);
+            const processedRef = ref(database, `events/proton/game/processed`);
+            
+            // Try to claim processing rights
+            const processedSnapshot = await get(processedRef);
+            if (processedSnapshot.exists() && processedSnapshot.val() === true) {
+                // Another client already processed, just show results
+                await showResultsOnly(choices, playerNames);
+                return;
+            }
+            
+            // Claim processing rights
+            await set(processedRef, true);
 
             const player1Choice = choices[playerNames[0]].choice;
             const player2Choice = choices[playerNames[1]].choice;
@@ -895,8 +907,7 @@
                     </div>
                 `;
 
-                const removedFromPool = new Set();
-                
+                // Add pokemon to teams - ONLY ONCE
                 for (const playerName of playerNames) {
                     const playerChoice = choices[playerName];
                     const chosenPokemonKey = playerChoice.choice;
@@ -921,20 +932,73 @@
                         ...playerChoice.pokemon,
                         nature: randomNature,
                         ability: randomAbility,
-                        won_from: 'proton',
+                        won_from: 'cheren',
                         won_at: Date.now()
                     });
 
                     await set(playerRef, playerData);
+                }
 
-                    if (!removedFromPool.has(chosenPokemonKey)) {
-                        const poolRef = ref(database, `pools/b_tier/${chosenPokemonKey}`);
-                        await remove(poolRef);
-                        removedFromPool.add(chosenPokemonKey);
-                    }
+                // Remove from pool
+                const poolRef1 = ref(database, `pools/b_tier/${choices[playerNames[0]].choice}`);
+                const poolRef2 = ref(database, `pools/b_tier/${choices[playerNames[1]].choice}`);
+                
+                await remove(poolRef1);
+                if (choices[playerNames[0]].choice !== choices[playerNames[1]].choice) {
+                    await remove(poolRef2);
                 }
 
                 await cleanupEvent();
+            }
+        }
+
+        async function showResultsOnly(choices, playerNames) {
+            const player1Choice = choices[playerNames[0]].choice;
+            const player2Choice = choices[playerNames[1]].choice;
+
+            const currentPlayer = getCurrentPlayer();
+            const myChoice = choices[currentPlayer];
+
+            document.getElementById('waitingScreen').classList.remove('show');
+            document.getElementById('resultsScreen').classList.add('show');
+
+            const resultsTitle = document.getElementById('resultsTitle');
+            const resultsContent = document.getElementById('resultsContent');
+
+            if (player1Choice === player2Choice) {
+                resultsTitle.textContent = '❌ Scelta Identica!';
+                resultsTitle.classList.add('failure');
+
+                resultsContent.innerHTML = `
+                    <div class="result-message">
+                        Entrambi i giocatori hanno scelto lo stesso Pokémon!<br>
+                        Nessuno riceve nulla. 😔
+                    </div>
+                    <div class="pokemon-result">
+                        <img src="${getPokemonImageUrl(myChoice.pokemon.national_number)}" alt="${myChoice.pokemon.english_name}">
+                        <div class="pokemon-result-info">
+                            <div class="pokemon-result-name">${myChoice.pokemon.english_name}</div>
+                            <div style="color: #888; font-size: 1.1em;">Scelto da entrambi</div>
+                        </div>
+                    </div>
+                `;
+            } else {
+                resultsTitle.textContent = '✅ Successo!';
+                resultsTitle.classList.add('success');
+
+                resultsContent.innerHTML = `
+                    <div class="result-message">
+                        Avete scelto Pokémon diversi!<br>
+                        Entrambi ricevete il vostro Pokémon! 🎉
+                    </div>
+                    <div class="pokemon-result">
+                        <img src="${getPokemonImageUrl(myChoice.pokemon.national_number)}" alt="${myChoice.pokemon.english_name}">
+                        <div class="pokemon-result-info">
+                            <div class="pokemon-result-name">${myChoice.pokemon.english_name}</div>
+                            <div style="color: #7fff7f; font-size: 1.1em;">Aggiunto al tuo team!</div>
+                        </div>
+                    </div>
+                `;
             }
         }
 
