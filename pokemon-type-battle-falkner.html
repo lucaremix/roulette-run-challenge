@@ -140,7 +140,7 @@
 
 <script type="module">
   import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
-  import { getDatabase, ref, onValue, set, get, remove, update } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js';
+  import { getDatabase, ref, onValue, set, get, remove, update, onDisconnect } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js';
 
   // === FIREBASE CONFIG (uguale al tuo progetto) ===
   const firebaseConfig = {
@@ -206,85 +206,127 @@
     }
   }
 
+  async function joinEventAndWait() {
+    const playersRef = ref(database, 'events/falkner/players');
+  
+    // 1) Registrati nella stanza se non ci sei
+    const snap = await get(playersRef);
+    const names = [];
+    snap.forEach(cs => names.push(cs.val()));
+  
+    if (!names.includes(currentPlayer)) {
+      // chiave = nome giocatore per semplicità (così è facile rimuoverlo)
+      await set(ref(database, `events/falkner/players/${currentPlayer}`), currentPlayer);
+  
+      // pulizia automatica se chiudi la pagina (se usi onDisconnect)
+      try {
+        onDisconnect(ref(database, `events/falkner/players/${currentPlayer}`)).remove();
+      } catch(e) { /* opzionale */ }
+    }
+  
+    // 2) Ascolta in realtime finché non ci sono esattamente 2 giocatori (incluso te)
+    return new Promise((resolve, reject) => {
+      const off = onValue(playersRef, (s) => {
+        const curr = [];
+        s.forEach(cs => curr.push(cs.val()));
+  
+        // Mostra la waiting screen qui (se vuoi feedback)
+        document.getElementById('waitingScreen').style.display = 'block';
+        document.getElementById('waitingMessage').textContent =
+          `Giocatori collegati: ${curr.length}/2`;
+  
+        if (curr.length === 2) {
+          off();                // smetti di ascoltare qui
+          resolve(curr);        // passa i due nomi
+        }
+        // Se >2 puoi decidere di bloccare la stanza:
+        if (curr.length > 2 && !curr.includes(currentPlayer)) {
+          off();
+          reject(new Error('La stanza è piena.'));
+        }
+      }, reject);
+    });
+  }
+
+  
   // === INIT / LOBBY ===
   async function initializeGame() {
-    currentPlayer = getCurrentPlayer();
-    if (!currentPlayer) {
-      alert('Devi impostare il tuo nome dalla home page!');
-      window.location.href = 'index.html';
-      return;
-    }
+  currentPlayer = getCurrentPlayer();
+  if (!currentPlayer) {
+    alert('Devi impostare il tuo nome dalla home page!');
+    window.location.href = 'index.html';
+    return;
+  }
 
-    // Leggi i due giocatori dall’evento
-    const playersRef = ref(database, 'events/falkner/players');
-    const psSnap = await get(playersRef);
-    const players = [];
-    psSnap.forEach(ch => players.push(ch.val()));
+  // ➜ Qui aspettiamo finché non ci sono due giocatori registrati
+  let players;
+  try {
+    players = await joinEventAndWait();
+  } catch (e) {
+    alert(e.message || 'Impossibile entrare nella stanza.');
+    window.location.href = 'index.html';
+    return;
+  }
 
-    if (players.length !== 2) {
-      alert('Errore: devono esserci esattamente 2 giocatori!');
-      window.location.href = 'falkner.html';
-      return;
-    }
+  myPlayerIndex = players.indexOf(currentPlayer);
+  if (myPlayerIndex === -1) {
+    alert('Il tuo nome non coincide con i giocatori dell’evento. Reimposta il nome dalla home.');
+    window.location.href = 'index.html';
+    return;
+  }
 
-    myPlayerIndex = players.indexOf(currentPlayer);
-    if (myPlayerIndex === -1) {
-      alert('Il tuo nome non coincide con i giocatori dell’evento. Reimposta il nome dalla home.');
-      window.location.href = 'index.html';
-      return;
-    }
+  // GameState: crea/riusa in modo coerente
+  const gameRef = ref(database, 'events/falkner/gameState');
+  const gsSnap = await get(gameRef);
 
-    const gameRef = ref(database, 'events/falkner/gameState');
-    const gsSnap = await get(gameRef);
+  const types = ['normal','fire','water','electric','grass','ice','fighting',
+    'poison','ground','flying','psychic','bug','rock','ghost','dragon','dark','steel','fairy'];
 
-    // Se non esiste o i giocatori sono diversi → reset stato
-    const types = ['normal','fire','water','electric','grass','ice','fighting',
-      'poison','ground','flying','psychic','bug','rock','ghost','dragon','dark','steel','fairy'];
+  if (!gsSnap.exists()) {
+    await set(gameRef, {
+      players,
+      selectedType: types[Math.floor(Math.random() * types.length)],
+      usedPokemon: [],
+      currentPlayerIndex: 0,    // comincia il player 0
+      timeLeft: 15,
+      lastUpdate: Date.now(),
+      ready: {},
+      started: false,
+      winner: null,
+      winReason: null
+    });
+  } else {
+    const gs = gsSnap.val();
+    const samePlayers = Array.isArray(gs.players)
+      && gs.players.length === players.length
+      && [...gs.players].sort().join('|') === [...players].sort().join('|');
 
-    if (!gsSnap.exists()) {
+    if (!samePlayers) {
       await set(gameRef, {
         players,
-        selectedType: types[Math.floor(Math.random()*types.length)],
+        selectedType: gs.selectedType || types[Math.floor(Math.random() * types.length)],
         usedPokemon: [],
-        currentPlayerIndex: 0,     // INIZIA player 0
+        currentPlayerIndex: 0,
         timeLeft: 15,
         lastUpdate: Date.now(),
         ready: {},
         started: false,
-        winner: null,              // 0/1 o "timeout"
-        winReason: null            // "wrongType" | "repeat" | "timeout"
+        winner: null,
+        winReason: null
       });
-    } else {
-      const gs = gsSnap.val();
-      const samePlayers = Array.isArray(gs.players)
-        && gs.players.length === players.length
-        && [...gs.players].sort().join('|') === [...players].sort().join('|');
-
-      if (!samePlayers) {
-        await set(gameRef, {
-          players,
-          selectedType: gs.selectedType || types[Math.floor(Math.random()*types.length)],
-          usedPokemon: [],
-          currentPlayerIndex: 0,
-          timeLeft: 15,
-          lastUpdate: Date.now(),
-          ready: {},
-          started: false,
-          winner: null,
-          winReason: null
-        });
-      }
     }
-
-    // Listener UI
-    onValue(gameRef, (snap) => {
-      const st = snap.val();
-      if (!st) return;
-      gameState = st;
-      updateUI();
-      if (gameState.started && gameState.winner === null) startTimer();
-    });
   }
+
+  // Listener sul gameState (UI + timer)
+  onValue(gameRef, (snapshot) => {
+    const st = snapshot.val();
+    if (!st) return;
+    gameState = st;
+    updateUI();
+    if (gameState.started && gameState.winner === null) startTimer();
+  });
+}
+
 
   // === UI UPDATE ===
   function updateUI() {
@@ -573,6 +615,13 @@
   in1.addEventListener('keypress', (e)=>{ if (e.key==='Enter') submitPokemon(1); });
   in2.addEventListener('keypress', (e)=>{ if (e.key==='Enter') submitPokemon(2); });
 
+  window.addEventListener('beforeunload', () => {
+  if (currentPlayer) {
+    remove(ref(database, `events/falkner/players/${currentPlayer}`));
+  }
+});
+
+  
   // === BOOT ===
   (async function boot(){
     await loadPokemonData();
