@@ -784,28 +784,22 @@
 
         async function loadPokemon() {
             try {
-                // Usa fetch per caricare il CSV da GitHub Pages
-                const response = await fetch('pokemon.csv');
-                const csvContent = await response.text();
-                const cleanContent = csvContent.replace(/\0/g, '');
+                // Carica il JSON
+                const response = await fetch('pokemon.json');
+                const pokemonData = await response.json();
                 
-                const parsed = Papa.parse(cleanContent, {
-                    header: true,
-                    dynamicTyping: true,
-                    skipEmptyLines: true,
-                    delimitersToGuess: ['\t', ',', '|', ';']
-                });
+                console.log('JSON loaded, total entries:', pokemonData.length);
+                console.log('First entry:', pokemonData[0]);
 
-                allPokemon = parsed.data.map(p => {
-                    const name = (p.english_name || '').trim();
-                    // Pulisci il national_number da caratteri strani
-                    let nationalNum = p.national_number;
-                    if (typeof nationalNum === 'string') {
-                        nationalNum = nationalNum.replace(/[^\d]/g, '');
-                        nationalNum = parseInt(nationalNum) || 0;
-                    }
+                allPokemon = pokemonData.map(p => {
+                    const name = (p.english_name || p.name || '').trim();
+                    const nationalNum = parseInt(p.national_number || p.pokedex_number || p.id) || 0;
                     
-                    const bst = p.hp + p.attack + p.defense + p.sp_attack + p.sp_defense + p.speed;
+                    const bst = (p.hp || 0) + (p.attack || 0) + (p.defense || 0) + 
+                                (p.sp_attack || p.special_attack || 0) + 
+                                (p.sp_defense || p.special_defense || 0) + 
+                                (p.speed || 0);
+                    
                     return {
                         name,
                         national_number: nationalNum,
@@ -813,16 +807,21 @@
                         hp: p.hp || 0,
                         attack: p.attack || 0,
                         defense: p.defense || 0,
-                        sp_attack: p.sp_attack || 0,
-                        sp_defense: p.sp_defense || 0,
+                        sp_attack: p.sp_attack || p.special_attack || 0,
+                        sp_defense: p.sp_defense || p.special_defense || 0,
                         speed: p.speed || 0
                     };
                 }).filter(p => p.name && !isNaN(p.bst) && p.bst > 0 && p.national_number > 0);
 
                 console.log('Pokemon caricati:', allPokemon.length);
+                console.log('Primi 5 pokemon:', allPokemon.slice(0, 5));
+                
+                if (allPokemon.length === 0) {
+                    alert('ERRORE: Nessun Pokemon caricato! Controlla la console per i dettagli.');
+                }
             } catch (error) {
                 console.error('Errore caricamento Pokemon:', error);
-                alert('Errore nel caricamento del file pokemon.csv. Assicurati che sia nella stessa cartella.');
+                alert('Errore nel caricamento del file pokemon.json. Assicurati che sia nella stessa cartella.');
             }
         }
 
