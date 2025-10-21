@@ -922,6 +922,7 @@
         }
 
         async function generateSharedRound() {
+            console.log('=== GENERATING NEW ROUND ===');
             // Genera un BST condiviso che entrambi i giocatori vedono
             const eventRef = ref(database, 'events/lenora/game');
             const snapshot = await get(eventRef);
@@ -932,25 +933,42 @@
                 const randomPokemon = allPokemon[Math.floor(Math.random() * allPokemon.length)];
                 currentState.currentBST = randomPokemon.bst;
                 await set(eventRef, currentState);
+                console.log('Generated new BST:', randomPokemon.bst);
             }
 
             currentBST = currentState.currentBST;
             correctPokemon = allPokemon.filter(p => p.bst === currentBST);
             
+            console.log('Current BST:', currentBST);
+            console.log('Correct Pokemon:', correctPokemon.length);
+            
             document.getElementById('bstValue').textContent = currentBST;
             document.getElementById('pokemonInput').value = '';
             document.getElementById('pokemonInput').disabled = false;
             document.getElementById('resultMessage').innerHTML = '';
-            document.getElementById('submitBtn').disabled = false;
+            
+            // IMPORTANTE: riabilita sempre il bottone all'inizio di un nuovo round
+            const submitBtn = document.getElementById('submitBtn');
+            submitBtn.disabled = false;
+            console.log('Submit button enabled:', !submitBtn.disabled);
         }
 
         window.submitGuess = async function() {
+            console.log('=== SUBMIT GUESS CALLED ===');
             const input = document.getElementById('pokemonInput').value.trim();
-            if (!input) return;
+            console.log('Input value:', input);
+            
+            if (!input) {
+                console.log('No input, returning');
+                alert('Inserisci un nome di Pokémon!');
+                return;
+            }
 
             const guessedPokemon = allPokemon.find(p => 
                 p.name.toLowerCase() === input.toLowerCase()
             );
+
+            console.log('Guessed Pokemon:', guessedPokemon);
 
             if (!guessedPokemon) {
                 showResult('Pokémon non trovato!', false);
@@ -958,19 +976,32 @@
             }
 
             const distance = Math.abs(guessedPokemon.bst - currentBST);
+            console.log('Distance:', distance);
             
             const eventRef = ref(database, 'events/lenora/game');
             const snapshot = await get(eventRef);
             const currentState = snapshot.val();
 
             const currentPlayer = getCurrentPlayer();
+            console.log('Current player:', currentPlayer);
 
             if (!currentState.currentGuess) {
-                // Primo giocatore a rispondere
+                console.log('First player to answer');
+                // Primo giocatore a rispondere - salva solo i dati essenziali
                 currentState.currentGuess = {
                     player: currentPlayer,
                     pokemon: guessedPokemon.name,
-                    pokemonData: guessedPokemon,
+                    pokemonData: {
+                        name: guessedPokemon.name,
+                        national_number: parseInt(guessedPokemon.national_number) || 0,
+                        bst: guessedPokemon.bst,
+                        hp: guessedPokemon.hp || 0,
+                        attack: guessedPokemon.attack || 0,
+                        defense: guessedPokemon.defense || 0,
+                        sp_attack: guessedPokemon.sp_attack || 0,
+                        sp_defense: guessedPokemon.sp_defense || 0,
+                        speed: guessedPokemon.speed || 0
+                    },
                     distance: distance,
                     isCorrect: distance === 0
                 };
@@ -982,6 +1013,7 @@
                 document.getElementById('submitBtn').disabled = true;
                 document.getElementById('pokemonInput').disabled = true;
             } else {
+                console.log('Second player answering, comparing results');
                 // Secondo giocatore - confronta le risposte
                 const otherGuess = currentState.currentGuess;
                 const otherPlayer = otherGuess.player;
