@@ -517,12 +517,12 @@
         <!-- Landing page -->
         <div id="landingScreen">
             <div class="event-header">
-                <img src="https://img.nuzlocke.app/leaders/gs-proton.png" 
+                <img src="https://img.nuzlocke.app//leaders/blwh-cheren.png" 
                      alt="Proton" 
                      class="event-trainer-img"
-                     onerror="this.src='https://via.placeholder.com/160x160/1a1a1a/888?text=Proton'">
+                     onerror="this.src='https://via.placeholder.com/160x160/1a1a1a/888?text=Cheren'">
                 <div class="event-info">
-                    <h1 class="event-title">Proton - Slowpoke Well</h1>
+                    <h1 class="event-title">Cheren - Preschool</h1>
                     <div class="event-status">
                         <div class="status-badge" id="statusBadge">Non sei nell'evento</div>
                         <button class="join-leave-btn join-btn" id="joinLeaveBtn" onclick="toggleJoin()">
@@ -545,9 +545,9 @@
             <div class="intro-screen" id="introScreen">
                 <div class="intro-content">
                     <div class="intro-text">
-                        <h2>⚠️ Team Rocket - Slowpoke Well ⚠️</h2>
+                        <h2>⚠️ Cheren - Preschool ⚠️</h2>
                         <p>
-                            Proton vi sfida con un dilemma subdolo! Ogni giocatore vedrà DUE Pokémon differenti 
+                            Proton vi sfida con un dilemma! Ogni giocatore vedrà DUE Pokémon differenti 
                             del Pool B e dovrà sceglierne UNO in segreto.
                         </p>
                         <p>
@@ -721,18 +721,23 @@
 
                 if (players.length === 2) {
                     document.getElementById('introScreen').classList.add('show');
+                    
+                    // Generate the 2 pokemon when both players join
+                    generatePokemonForGame();
                 } else {
                     document.getElementById('introScreen').classList.remove('show');
                 }
             });
         }
 
-        window.toggleJoin = toggleJoin;
-
-        window.startSelection = async function() {
-            const playerName = getCurrentPlayer();
+        async function generatePokemonForGame() {
+            const gameRef = ref(database, `events/proton/game`);
+            const gameSnapshot = await get(gameRef);
             
-            // Get 4 random pokemon from B tier pool
+            // Only generate if not already generated
+            if (gameSnapshot.exists()) return;
+            
+            // Generate 2 random pokemon from B tier pool
             const bTierRef = ref(database, 'pools/b_tier');
             const snapshot = await get(bTierRef);
             
@@ -741,50 +746,41 @@
                 allPokemon.push({ key: childSnapshot.key, ...childSnapshot.val() });
             });
 
-            if (allPokemon.length < 4) {
+            if (allPokemon.length < 2) {
                 alert('Pool B non ha abbastanza Pokémon!');
                 return;
             }
 
-            // Shuffle and take 4
+            // Shuffle and take 2 - SAME 2 for both players
             const shuffled = allPokemon.sort(() => Math.random() - 0.5);
-            const selected4 = shuffled.slice(0, 4);
+            const selected2 = shuffled.slice(0, 2);
 
-            // Assign 2 to each player
-            const gameRef = ref(database, `events/proton/game`);
-            const gameSnapshot = await get(gameRef);
+            await set(gameRef, {
+                pokemon: selected2.map(p => ({ key: p.key, ...p })),
+                players: {}
+            });
+        }
+
+        window.toggleJoin = toggleJoin;
+
+        window.startSelection = async function() {
+            document.getElementById('landingScreen').style.display = 'none';
+            document.getElementById('selectionScreen').classList.add('show');
             
-            if (!gameSnapshot.exists()) {
-                // First player - assign pokemon
-                await set(gameRef, {
-                    pokemon: selected4.map(p => ({ key: p.key, ...p })),
-                    players: {}
-                });
+            const gameRef = ref(database, `events/proton/game`);
+            
+            // Wait for game data - it should already exist
+            const gameSnapshot = await get(gameRef);
+            const gameData = gameSnapshot.val();
+            
+            if (!gameData || !gameData.pokemon) {
+                alert('Errore: Pokémon non ancora generati!');
+                return;
             }
 
-            // Wait for game data
-            onValue(gameRef, (snap) => {
-                const gameData = snap.val();
-                if (!gameData || !gameData.pokemon) return;
-
-                const eventPlayersRef = ref(database, `events/proton/players`);
-                get(eventPlayersRef).then((playersSnap) => {
-                    const players = [];
-                    playersSnap.forEach((childSnapshot) => {
-                        players.push(childSnapshot.val());
-                    });
-
-                    const playerIndex = players.indexOf(playerName);
-                    
-                    if (playerIndex === 0) {
-                        myPokemon = [gameData.pokemon[0], gameData.pokemon[1]];
-                    } else if (playerIndex === 1) {
-                        myPokemon = [gameData.pokemon[2], gameData.pokemon[3]];
-                    }
-
-                    showSelectionScreen();
-                });
-            }, { onlyOnce: true });
+            // Both players see the SAME 2 pokemon
+            myPokemon = gameData.pokemon;
+            showSelectionScreen();
         };
 
         function showSelectionScreen() {
@@ -915,9 +911,12 @@
                     </div>
                 `;
 
-                // Add pokemon to teams
+                // Add each player's chosen pokemon to their team
+                const addedToPool = new Set();
+                
                 for (const playerName of playerNames) {
                     const playerChoice = choices[playerName];
+                    const chosenPokemonKey = playerChoice.choice;
                     
                     const playerRef = ref(database, `players/${playerName}`);
                     const playerSnapshot = await get(playerRef);
@@ -945,9 +944,12 @@
 
                     await set(playerRef, playerData);
 
-                    // Remove from pool
-                    const poolRef = ref(database, `pools/b_tier/${playerChoice.choice}`);
-                    await remove(poolRef);
+                    // Remove from pool only once per pokemon
+                    if (!addedToPool.has(chosenPokemonKey)) {
+                        const poolRef = ref(database, `pools/b_tier/${chosenPokemonKey}`);
+                        await remove(poolRef);
+                        addedToPool.add(chosenPokemonKey);
+                    }
                 }
 
                 // Clean up
