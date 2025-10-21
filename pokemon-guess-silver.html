@@ -450,7 +450,7 @@
         function updateHints() {
             const container = document.getElementById('hintsContainer');
             container.innerHTML = '';
-
+        
             revealedStats.forEach(stat => {
                 const hintDiv = document.createElement('div');
                 hintDiv.className = 'hint-item';
@@ -460,20 +460,20 @@
                 `;
                 container.appendChild(hintDiv);
             });
-
+        
             // Update bonus badges
             const bonusContainer = document.getElementById('bonusBadges');
             bonusContainer.innerHTML = '';
             
-            const currentAttempt = 6 - attemptsLeft;
+            const currentAttempt = 5 - attemptsLeft;
             let bonuses = [];
             
-            if (currentAttempt >= 1) bonuses = [...currentBonuses.attempt1];
-            if (currentAttempt >= 2) bonuses = currentBonuses.attempt2;
-            if (currentAttempt >= 3) bonuses = currentBonuses.attempt3;
-            if (currentAttempt >= 4) bonuses = currentBonuses.attempt4;
-            if (currentAttempt >= 5) bonuses = currentBonuses.attempt5;
-
+            if (currentAttempt === 0) bonuses = [...currentBonuses.attempt1];
+            else if (currentAttempt === 1) bonuses = currentBonuses.attempt2;
+            else if (currentAttempt === 2) bonuses = currentBonuses.attempt3;
+            else if (currentAttempt === 3) bonuses = currentBonuses.attempt4;
+            else if (currentAttempt === 4) bonuses = currentBonuses.attempt5;
+        
             bonuses.forEach(bonus => {
                 const badge = document.createElement('div');
                 badge.className = 'bonus-badge';
@@ -483,8 +483,8 @@
         }
 
         function revealHint(attemptNumber) {
-            if (attemptNumber === 1) {
-                // Reveal 2 random stats
+            if (attemptNumber === 0) {
+                // Initial hints: 2 random stats
                 const stats = getRandomStats(2);
                 stats.forEach(stat => {
                     revealedStats.push({
@@ -492,7 +492,7 @@
                         value: myPokemon[stat]
                     });
                 });
-            } else if (attemptNumber === 2) {
+            } else if (attemptNumber === 1) {
                 // Reveal 2 more stats + weakness
                 const stats = getRandomStats(2, revealedStats.map(s => 
                     Object.keys(statNames).find(key => statNames[key] === s.label)
@@ -509,7 +509,7 @@
                     label: 'Debolezza',
                     value: weakness
                 });
-            } else if (attemptNumber === 3) {
+            } else if (attemptNumber === 2) {
                 // Reveal last 2 stats + generation
                 const stats = getRandomStats(2, revealedStats.map(s => 
                     Object.keys(statNames).find(key => statNames[key] === s.label)
@@ -526,7 +526,7 @@
                     label: 'Generazione',
                     value: gen
                 });
-            } else if (attemptNumber === 4) {
+            } else if (attemptNumber === 3) {
                 // Reveal types
                 let types = myPokemon.primary_type;
                 if (myPokemon.secondary_type) {
@@ -536,14 +536,14 @@
                     label: 'Tipo',
                     value: types.charAt(0).toUpperCase() + types.slice(1)
                 });
-            } else if (attemptNumber === 5) {
+            } else if (attemptNumber === 4) {
                 // Reveal image
                 const img = document.getElementById('pokemonImage');
                 img.src = getPokemonImageUrl(myPokemon.national_number);
                 img.style.display = 'block';
                 img.classList.add('revealed');
             }
-
+        
             updateHints();
         }
 
@@ -749,6 +749,7 @@
                     window.location.href = 'index.html';
                 }
                 console.log('Il tuo Pokémon:', myPokemon.english_name); // For debugging
+                revealHint(0);
             });
         }
     </script>
