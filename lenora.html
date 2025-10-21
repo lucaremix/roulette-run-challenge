@@ -798,19 +798,26 @@
 
                 allPokemon = parsed.data.map(p => {
                     const name = (p.english_name || '').trim();
+                    // Pulisci il national_number da caratteri strani
+                    let nationalNum = p.national_number;
+                    if (typeof nationalNum === 'string') {
+                        nationalNum = nationalNum.replace(/[^\d]/g, '');
+                        nationalNum = parseInt(nationalNum) || 0;
+                    }
+                    
                     const bst = p.hp + p.attack + p.defense + p.sp_attack + p.sp_defense + p.speed;
                     return {
                         name,
-                        national_number: p.national_number,
+                        national_number: nationalNum,
                         bst,
-                        hp: p.hp,
-                        attack: p.attack,
-                        defense: p.defense,
-                        sp_attack: p.sp_attack,
-                        sp_defense: p.sp_defense,
-                        speed: p.speed
+                        hp: p.hp || 0,
+                        attack: p.attack || 0,
+                        defense: p.defense || 0,
+                        sp_attack: p.sp_attack || 0,
+                        sp_defense: p.sp_defense || 0,
+                        speed: p.speed || 0
                     };
-                }).filter(p => p.name && !isNaN(p.bst) && p.bst > 0);
+                }).filter(p => p.name && !isNaN(p.bst) && p.bst > 0 && p.national_number > 0);
 
                 console.log('Pokemon caricati:', allPokemon.length);
             } catch (error) {
