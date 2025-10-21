@@ -20,7 +20,7 @@
         }
 
         .container {
-            max-width: 900px;
+            max-width: 1200px;
             margin: 0 auto;
         }
 
@@ -41,6 +41,223 @@
 
         .back-btn:hover {
             background: #252525;
+        }
+
+        .event-header {
+            background: #1a1a1a;
+            border: 1px solid #2a2a2a;
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 30px;
+            display: flex;
+            align-items: center;
+            gap: 30px;
+        }
+
+        .event-trainer-img {
+            width: 160px;
+            height: 160px;
+            object-fit: contain;
+            border: none;
+            flex-shrink: 0;
+            image-rendering: pixelated;
+        }
+
+        .event-info {
+            flex: 1;
+        }
+
+        .event-title {
+            font-size: 2.5em;
+            color: #ffffff;
+            margin-bottom: 15px;
+        }
+
+        .event-status {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .status-badge {
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 1.1em;
+        }
+
+        .status-badge.joined {
+            background: #2d4a2d;
+            color: #7fff7f;
+        }
+
+        .status-badge.not-joined {
+            background: #2a2a2a;
+            color: #888;
+        }
+
+        .join-leave-btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+
+        .join-btn {
+            background: #2a7a2a;
+            color: white;
+        }
+
+        .join-btn:hover {
+            background: #357a35;
+        }
+
+        .leave-btn {
+            background: #7a2a2a;
+            color: white;
+        }
+
+        .leave-btn:hover {
+            background: #8a3535;
+        }
+
+        .players-section {
+            background: #1a1a1a;
+            border: 1px solid #2a2a2a;
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 30px;
+        }
+
+        .players-title {
+            font-size: 1.8em;
+            color: #ffffff;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .player-count-badge {
+            background: #2a2a2a;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.7em;
+            color: #888;
+        }
+
+        .players-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .player-card {
+            background: #0a0a0a;
+            border: 1px solid #2a2a2a;
+            border-radius: 8px;
+            padding: 15px 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .player-card.current-user {
+            border-color: #4a4a4a;
+            background: #1f1f1f;
+        }
+
+        .player-name {
+            font-size: 1.1em;
+            color: #e0e0e0;
+        }
+
+        .player-card.current-user .player-name {
+            color: #ffffff;
+            font-weight: 600;
+        }
+
+        .you-badge {
+            background: #2a7a2a;
+            color: white;
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 0.8em;
+            font-weight: 600;
+        }
+
+        .no-players {
+            text-align: center;
+            color: #555;
+            font-style: italic;
+            padding: 30px;
+        }
+
+        .intro-screen {
+            background: #1a1a1a;
+            border: 1px solid #2a2a2a;
+            border-radius: 12px;
+            padding: 40px;
+            display: none;
+        }
+
+        .intro-screen.show {
+            display: block;
+        }
+
+        .intro-content {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .intro-text h2 {
+            font-size: 2em;
+            color: #d4af37;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .intro-text p {
+            font-size: 1.2em;
+            line-height: 1.8;
+            color: #e0e0e0;
+            margin-bottom: 15px;
+        }
+
+        .intro-text .highlight {
+            color: #d4af37;
+            font-weight: bold;
+        }
+
+        .start-btn {
+            display: block;
+            margin: 30px auto 0;
+            padding: 20px 60px;
+            background: #d4af37;
+            color: #000;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.5em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .start-btn:hover {
+            background: #e5c158;
+            transform: scale(1.05);
+        }
+
+        .game-screen {
+            display: none;
+        }
+
+        .game-screen.show {
+            display: block;
         }
 
         header {
@@ -79,7 +296,7 @@
             text-align: center;
         }
 
-        .player-name {
+        .player-name-score {
             font-size: 1.1em;
             color: #fff;
             margin-bottom: 10px;
@@ -304,6 +521,11 @@
         }
 
         @media (max-width: 768px) {
+            .event-header {
+                flex-direction: column;
+                text-align: center;
+            }
+
             h1 {
                 font-size: 2em;
             }
@@ -329,52 +551,111 @@
             <span>Torna alla Home</span>
         </a>
 
-        <header>
-            <h1>📚 Sfida di Lenora 📚</h1>
-            <p class="subtitle">Indovina il Pokémon dal suo BST!</p>
-            <div class="scoreboard">
-                <div class="player-score">
-                    <div class="player-name" id="player1Name">Giocatore 1</div>
-                    <div class="score" id="player1Score">0</div>
-                </div>
-                <div class="player-score">
-                    <div class="player-name" id="player2Name">Giocatore 2</div>
-                    <div class="score" id="player2Score">0</div>
+        <div id="landingScreen">
+            <div class="event-header">
+                <img src="https://img.nuzlocke.app/leaders/blwh-lenora.png" 
+                     alt="Lenora" 
+                     class="event-trainer-img"
+                     onerror="this.src='https://via.placeholder.com/160x160/1a1a1a/888?text=Lenora'">
+                <div class="event-info">
+                    <h1 class="event-title">Lenora - BST Challenge</h1>
+                    <div class="event-status">
+                        <div class="status-badge" id="statusBadge">Non sei nell'evento</div>
+                        <button class="join-leave-btn join-btn" id="joinLeaveBtn" onclick="toggleJoin()">
+                            Entra nell'Evento
+                        </button>
+                    </div>
                 </div>
             </div>
-        </header>
 
-        <div class="bst-display">
-            <div class="bst-label">Base Stat Total</div>
-            <div class="bst-value" id="bstValue">---</div>
-        </div>
-
-        <div class="guess-section" id="guessSection">
-            <div class="input-group">
-                <input 
-                    type="text" 
-                    class="pokemon-input" 
-                    id="pokemonInput" 
-                    placeholder="Inserisci il nome del Pokémon..."
-                    autocomplete="off"
-                >
-                <div class="suggestions" id="suggestions"></div>
+            <div class="players-section">
+                <h2 class="players-title">
+                    Giocatori nell'evento
+                    <span class="player-count-badge" id="playerCountBadge">0</span>
+                </h2>
+                <div class="players-list" id="playersList">
+                    <div class="no-players">Nessun giocatore nell'evento</div>
+                </div>
             </div>
-            <button class="submit-btn" id="submitBtn" onclick="submitGuess()">Conferma</button>
-            <div id="resultMessage"></div>
+
+            <div class="intro-screen" id="introScreen">
+                <div class="intro-content">
+                    <div class="intro-text">
+                        <h2>📚 Lenora - Sfida della Conoscenza 📚</h2>
+                        <p>
+                            Benvenuti nella biblioteca di Lenora! Qui metteremo alla prova la vostra 
+                            conoscenza dei Pokémon attraverso una sfida di <span class="highlight">Base Stat Total (BST)</span>.
+                        </p>
+                        <p>
+                            Vi verrà mostrato un numero che rappresenta il <span class="highlight">BST totale</span> 
+                            di un Pokémon. Dovrete indovinare quale Pokémon ha quel valore!
+                        </p>
+                        <p>
+                            <span class="highlight">Chi si avvicina di più vince il round.</span> 
+                            Il primo giocatore a vincere <span class="highlight">5 round</span> vince la sfida!
+                        </p>
+                        <p style="text-align: center; margin-top: 30px;">
+                            <strong>🏆 Ricompense:</strong><br>
+                            Vincitore: 1 Spin Pool A + 100 Coins<br>
+                            Perdente: 1 Spin Pool C 💀 + 75 Coins
+                        </p>
+                    </div>
+
+                    <button class="start-btn" onclick="startGame()">
+                        🎯 Inizia la Sfida!
+                    </button>
+                </div>
+            </div>
         </div>
 
-        <div class="final-result" id="finalResult">
-            <div class="winner-badge">🏆</div>
-            <h2 id="winnerText">Vincitore!</h2>
-            <div class="rewards" id="rewardsDiv"></div>
-            <button class="continue-btn" onclick="goToSpin()">Continua allo Spin</button>
+        <div class="game-screen" id="gameScreen">
+            <header>
+                <h1>📚 Sfida di Lenora 📚</h1>
+                <p class="subtitle">Indovina il Pokémon dal suo BST!</p>
+                <div class="scoreboard">
+                    <div class="player-score">
+                        <div class="player-name-score" id="player1Name">Giocatore 1</div>
+                        <div class="score" id="player1Score">0</div>
+                    </div>
+                    <div class="player-score">
+                        <div class="player-name-score" id="player2Name">Giocatore 2</div>
+                        <div class="score" id="player2Score">0</div>
+                    </div>
+                </div>
+            </header>
+
+            <div class="bst-display">
+                <div class="bst-label">Base Stat Total</div>
+                <div class="bst-value" id="bstValue">---</div>
+            </div>
+
+            <div class="guess-section" id="guessSection">
+                <div class="input-group">
+                    <input 
+                        type="text" 
+                        class="pokemon-input" 
+                        id="pokemonInput" 
+                        placeholder="Inserisci il nome del Pokémon..."
+                        autocomplete="off"
+                    >
+                    <div class="suggestions" id="suggestions"></div>
+                </div>
+                <button class="submit-btn" id="submitBtn" onclick="submitGuess()">Conferma</button>
+                <div id="resultMessage"></div>
+            </div>
+
+            <div class="final-result" id="finalResult">
+                <div class="winner-badge">🏆</div>
+                <h2 id="winnerText">Vincitore!</h2>
+                <div class="rewards" id="rewardsDiv"></div>
+                <button class="continue-btn" onclick="goToSpin()">Continua allo Spin</button>
+            </div>
         </div>
     </div>
 
     <script type="module">
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
-        import { getDatabase, ref, set, onValue, get } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js';
+        import { getDatabase, ref, set, onValue, get, remove, push } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js';
         import Papa from 'https://cdn.jsdelivr.net/npm/papaparse@5.4.1/+esm';
 
         const firebaseConfig = {
@@ -407,6 +688,98 @@
 
         function padNumber(num) {
             return String(num).padStart(3, '0');
+        }
+
+        async function toggleJoin() {
+            const playerName = getCurrentPlayer();
+            if (!playerName) {
+                alert('Devi impostare il tuo nome dalla home page!');
+                window.location.href = 'index.html';
+                return;
+            }
+
+            const eventRef = ref(database, `events/lenora/players`);
+            
+            const snapshot = await new Promise((resolve) => {
+                onValue(eventRef, (snap) => resolve(snap), { onlyOnce: true });
+            });
+
+            let isInEvent = false;
+            let playerNodeKey = null;
+
+            snapshot.forEach((childSnapshot) => {
+                if (childSnapshot.val() === playerName) {
+                    isInEvent = true;
+                    playerNodeKey = childSnapshot.key;
+                }
+            });
+
+            if (isInEvent && playerNodeKey) {
+                await remove(ref(database, `events/lenora/players/${playerNodeKey}`));
+            } else {
+                const newPlayerRef = push(ref(database, `events/lenora/players`));
+                await set(newPlayerRef, playerName);
+            }
+        }
+
+        function renderLanding() {
+            const currentPlayer = getCurrentPlayer();
+            const eventRef = ref(database, `events/lenora/players`);
+
+            onValue(eventRef, (snapshot) => {
+                const players = [];
+                snapshot.forEach((childSnapshot) => {
+                    players.push(childSnapshot.val());
+                });
+
+                const isJoined = players.includes(currentPlayer);
+
+                const statusBadge = document.getElementById('statusBadge');
+                const joinLeaveBtn = document.getElementById('joinLeaveBtn');
+
+                if (statusBadge && joinLeaveBtn) {
+                    if (isJoined) {
+                        statusBadge.textContent = 'Sei nell\'evento';
+                        statusBadge.className = 'status-badge joined';
+                        joinLeaveBtn.textContent = 'Esci dall\'Evento';
+                        joinLeaveBtn.className = 'join-leave-btn leave-btn';
+                    } else {
+                        statusBadge.textContent = 'Non sei nell\'evento';
+                        statusBadge.className = 'status-badge not-joined';
+                        joinLeaveBtn.textContent = 'Entra nell\'Evento';
+                        joinLeaveBtn.className = 'join-leave-btn join-btn';
+                    }
+                }
+
+                const countBadge = document.getElementById('playerCountBadge');
+                if (countBadge) {
+                    countBadge.textContent = players.length;
+                }
+
+                const playersList = document.getElementById('playersList');
+                
+                if (playersList) {
+                    if (players.length === 0) {
+                        playersList.innerHTML = '<div class="no-players">Nessun giocatore nell\'evento</div>';
+                    } else {
+                        playersList.innerHTML = players.map(player => {
+                            const isCurrentUser = player === currentPlayer;
+                            return `
+                                <div class="player-card ${isCurrentUser ? 'current-user' : ''}">
+                                    <span class="player-name">${player}</span>
+                                    ${isCurrentUser ? '<span class="you-badge">TU</span>' : ''}
+                                </div>
+                            `;
+                        }).join('');
+                    }
+                }
+
+                if (players.length === 2) {
+                    document.getElementById('introScreen').classList.add('show');
+                } else {
+                    document.getElementById('introScreen').classList.remove('show');
+                }
+            });
         }
 
         async function loadPokemon() {
@@ -443,10 +816,13 @@
             }
         }
 
-        async function initGame() {
+        window.startGame = async function() {
             await loadPokemon();
             
-            const eventRef = ref(database, 'events/lenora');
+            document.getElementById('landingScreen').style.display = 'none';
+            document.getElementById('gameScreen').classList.add('show');
+            
+            const eventRef = ref(database, 'events/lenora/game');
             const snapshot = await get(eventRef);
             
             if (snapshot.exists()) {
@@ -476,7 +852,7 @@
                     updateUI();
                 }
             });
-        }
+        };
 
         function updateUI() {
             document.getElementById('player1Name').textContent = gameState.player1.name || 'Giocatore 1';
@@ -515,12 +891,11 @@
 
             const distance = Math.abs(guessedPokemon.bst - currentBST);
             
-            const eventRef = ref(database, 'events/lenora');
+            const eventRef = ref(database, 'events/lenora/game');
             const snapshot = await get(eventRef);
             const currentState = snapshot.val();
 
             const currentPlayer = getCurrentPlayer();
-            const isPlayer1 = currentPlayer === currentState.player1.name;
 
             if (!currentState.currentGuess) {
                 currentState.currentGuess = {
@@ -698,11 +1073,13 @@
             }
         });
 
+        window.toggleJoin = toggleJoin;
+
         if (!getCurrentPlayer()) {
             alert('Devi impostare il tuo nome dalla home page!');
             window.location.href = 'index.html';
         } else {
-            initGame();
+            renderLanding();
         }
     </script>
 </body>
