@@ -1,0 +1,766 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Black Market - Roulette Run Challenge</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #0a0a0a;
+            min-height: 100vh;
+            padding: 20px;
+            color: #e0e0e0;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            background: #1a1a1a;
+            border: 1px solid #2a2a2a;
+            border-radius: 8px;
+            color: #e0e0e0;
+            text-decoration: none;
+            font-size: 1em;
+            transition: all 0.3s ease;
+            margin-bottom: 30px;
+        }
+
+        .back-btn:hover {
+            background: #252525;
+            border-color: #3a3a3a;
+        }
+
+        header {
+            background: #1a1a1a;
+            border: 1px solid #2a2a2a;
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 2.5em;
+            color: #ffffff;
+            margin-bottom: 15px;
+        }
+
+        .player-coins {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            font-size: 1.5em;
+            color: #ffd700;
+            margin-bottom: 20px;
+        }
+
+        .coin-img {
+            width: 32px;
+            height: 32px;
+            image-rendering: pixelated;
+        }
+
+        .timer-section {
+            background: #2a2a2a;
+            padding: 15px 25px;
+            border-radius: 8px;
+            display: inline-block;
+        }
+
+        .timer-label {
+            color: #888;
+            font-size: 0.9em;
+            margin-bottom: 5px;
+        }
+
+        .timer-value {
+            font-size: 1.3em;
+            color: #fff;
+            font-weight: bold;
+        }
+
+        .section-title {
+            font-size: 2em;
+            color: #fff;
+            margin: 40px 0 20px;
+            text-align: center;
+        }
+
+        .spins-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+            max-width: 900px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .spin-card {
+            background: #1a1a1a;
+            border: 2px solid #2a2a2a;
+            border-radius: 12px;
+            padding: 30px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .spin-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .spin-card.s-tier {
+            border-color: #ff4444;
+            box-shadow: 0 0 20px rgba(255, 68, 68, 0.3);
+        }
+
+        .spin-card.a-tier {
+            border-color: #ff8844;
+            box-shadow: 0 0 20px rgba(255, 136, 68, 0.3);
+        }
+
+        .spin-card.b-tier {
+            border-color: #4488ff;
+            box-shadow: 0 0 20px rgba(68, 136, 255, 0.3);
+        }
+
+        .spin-badge {
+            display: inline-block;
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-size: 1.5em;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+
+        .spin-badge.s-tier {
+            background: #ff4444;
+            color: white;
+        }
+
+        .spin-badge.a-tier {
+            background: #ff8844;
+            color: white;
+        }
+
+        .spin-badge.b-tier {
+            background: #4488ff;
+            color: white;
+        }
+
+        .spin-price {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin: 20px 0;
+            font-size: 1.5em;
+            color: #ffd700;
+            font-weight: bold;
+        }
+
+        .buy-spin-btn {
+            width: 100%;
+            padding: 15px;
+            background: #2a7a2a;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.2em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .buy-spin-btn:hover:not(:disabled) {
+            background: #357a35;
+            transform: scale(1.02);
+        }
+
+        .buy-spin-btn:disabled {
+            background: #2a2a2a;
+            cursor: not-allowed;
+            opacity: 0.5;
+        }
+
+        .pokemon-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .pokemon-card {
+            background: #1a1a1a;
+            border: 2px solid #2a2a2a;
+            border-radius: 12px;
+            padding: 25px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .pokemon-card:hover {
+            border-color: #3a3a3a;
+            transform: translateY(-5px);
+        }
+
+        .pokemon-card.s-tier {
+            border-color: #ff4444;
+        }
+
+        .pokemon-card.a-tier {
+            border-color: #ff8844;
+        }
+
+        .pokemon-card.b-tier {
+            border-color: #4488ff;
+        }
+
+        .pokemon-card.legendary {
+            border-color: #d4af37;
+            box-shadow: 0 0 30px rgba(212, 175, 55, 0.4);
+        }
+
+        .tier-badge {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-size: 0.8em;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .tier-badge.s-tier {
+            background: #ff4444;
+            color: white;
+        }
+
+        .tier-badge.a-tier {
+            background: #ff8844;
+            color: white;
+        }
+
+        .tier-badge.b-tier {
+            background: #4488ff;
+            color: white;
+        }
+
+        .tier-badge.legendary {
+            background: #d4af37;
+            color: #000;
+        }
+
+        .pokemon-image {
+            width: 150px;
+            height: 150px;
+            margin: 0 auto 15px;
+            display: block;
+        }
+
+        .pokemon-name {
+            font-size: 1.5em;
+            color: #fff;
+            margin-bottom: 10px;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        .pokemon-stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+
+        .pokemon-stat {
+            background: #0a0a0a;
+            padding: 8px;
+            border-radius: 6px;
+            text-align: center;
+        }
+
+        .stat-label {
+            color: #888;
+            font-size: 0.85em;
+        }
+
+        .stat-value {
+            color: #fff;
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+
+        .pokemon-price {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+            color: #ffd700;
+            font-weight: bold;
+        }
+
+        .buy-pokemon-btn {
+            width: 100%;
+            padding: 12px;
+            background: #2a7a2a;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .buy-pokemon-btn:hover:not(:disabled) {
+            background: #357a35;
+            transform: scale(1.02);
+        }
+
+        .buy-pokemon-btn:disabled {
+            background: #2a2a2a;
+            cursor: not-allowed;
+            opacity: 0.5;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 60px 20px;
+            color: #888;
+            font-size: 1.2em;
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2em;
+            }
+
+            .pokemon-grid, .spins-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="index.html" class="back-btn">
+            <span>←</span>
+            <span>Torna alla Home</span>
+        </a>
+
+        <header>
+            <h1>🏴‍☠️ Black Market</h1>
+            <div class="player-coins">
+                <img src="https://raw.githubusercontent.com/lucaremix/roulette-run-challenge/main/pixel-art-red-chinese-gold-coin-png.png" 
+                     alt="Coins" 
+                     class="coin-img"
+                     onerror="this.style.display='none'">
+                <span id="playerCoins">0</span>
+                <span style="font-size: 0.8em; color: #888;">Coins</span>
+            </div>
+            <div class="timer-section">
+                <div class="timer-label">Prossimo aggiornamento in:</div>
+                <div class="timer-value" id="timerValue">--:--:--</div>
+            </div>
+        </header>
+
+        <h2 class="section-title">🎰 Acquista Spin</h2>
+        <div class="spins-grid">
+            <div class="spin-card s-tier">
+                <div class="spin-badge s-tier">S TIER</div>
+                <div class="spin-price">
+                    <img src="https://raw.githubusercontent.com/lucaremix/roulette-run-challenge/main/pixel-art-red-chinese-gold-coin-png.png" 
+                         alt="Coins" 
+                         class="coin-img"
+                         onerror="this.style.display='none'">
+                    <span>200</span>
+                </div>
+                <button class="buy-spin-btn" onclick="buySpin('s_tier', 200)">
+                    🎰 Acquista Spin S
+                </button>
+            </div>
+
+            <div class="spin-card a-tier">
+                <div class="spin-badge a-tier">A TIER</div>
+                <div class="spin-price">
+                    <img src="https://raw.githubusercontent.com/lucaremix/roulette-run-challenge/main/pixel-art-red-chinese-gold-coin-png.png" 
+                         alt="Coins" 
+                         class="coin-img"
+                         onerror="this.style.display='none'">
+                    <span>150</span>
+                </div>
+                <button class="buy-spin-btn" onclick="buySpin('a_tier', 150)">
+                    🎰 Acquista Spin A
+                </button>
+            </div>
+
+            <div class="spin-card b-tier">
+                <div class="spin-badge b-tier">B TIER</div>
+                <div class="spin-price">
+                    <img src="https://raw.githubusercontent.com/lucaremix/roulette-run-challenge/main/pixel-art-red-chinese-gold-coin-png.png" 
+                         alt="Coins" 
+                         class="coin-img"
+                         onerror="this.style.display='none'">
+                    <span>100</span>
+                </div>
+                <button class="buy-spin-btn" onclick="buySpin('b_tier', 100)">
+                    🎰 Acquista Spin B
+                </button>
+            </div>
+        </div>
+
+        <h2 class="section-title">👾 Pokémon in Vendita</h2>
+        <div class="loading" id="loading">Caricamento mercato...</div>
+        <div class="pokemon-grid" id="pokemonGrid" style="display: none;"></div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+        import { getDatabase, ref, set, get, remove, onValue } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js';
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDNuD9wViLLxteHMCEBlvfdONwcZbAjAvo",
+            authDomain: "roulette-run-challenge.firebaseapp.com",
+            databaseURL: "https://roulette-run-challenge-default-rtdb.europe-west1.firebasedatabase.app",
+            projectId: "roulette-run-challenge",
+            storageBucket: "roulette-run-challenge.firebasestorage.app",
+            messagingSenderId: "994019156093",
+            appId: "1:994019156093:web:9792bdce75c486f589d114"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app);
+
+        const PRICES = {
+            s_tier: 250,
+            a_tier: 150,
+            b_tier: 150,
+            legendary: 400
+        };
+
+        function getCurrentPlayer() {
+            return localStorage.getItem('playerName') || '';
+        }
+
+        function padNumber(num) {
+            return String(num).padStart(3, '0');
+        }
+
+        function getPokemonImageUrl(nationalNumber) {
+            return `https://www.pokemon.com/static-assets/content-assets/cms2/img/pokedex/full/${padNumber(nationalNumber)}.png`;
+        }
+
+        async function initializeMarket() {
+            const marketRef = ref(database, 'markets/black_market');
+            const snapshot = await get(marketRef);
+
+            if (!snapshot.exists()) {
+                await generateNewMarket();
+            }
+
+            loadMarket();
+            updateTimer();
+            setInterval(updateTimer, 1000);
+        }
+
+        async function generateNewMarket() {
+            const marketRef = ref(database, 'markets/black_market');
+
+            const sTierRef = ref(database, 'pools/s_tier');
+            const aTierRef = ref(database, 'pools/a_tier');
+            const bTierRef = ref(database, 'pools/b_tier');
+            const legendaryRef = ref(database, 'pools/legendary');
+
+            const [sTierSnap, aTierSnap, bTierSnap, legendarySnap] = await Promise.all([
+                get(sTierRef),
+                get(aTierRef),
+                get(bTierRef),
+                get(legendaryRef)
+            ]);
+
+            const sTierPokemon = [];
+            const aTierPokemon = [];
+            const bTierPokemon = [];
+            const legendaryPokemon = [];
+
+            sTierSnap.forEach(child => {
+                sTierPokemon.push({ key: child.key, ...child.val(), tier: 's_tier' });
+            });
+
+            aTierSnap.forEach(child => {
+                aTierPokemon.push({ key: child.key, ...child.val(), tier: 'a_tier' });
+            });
+
+            bTierSnap.forEach(child => {
+                bTierPokemon.push({ key: child.key, ...child.val(), tier: 'b_tier' });
+            });
+
+            legendarySnap.forEach(child => {
+                legendaryPokemon.push({ key: child.key, ...child.val(), tier: 'legendary' });
+            });
+
+            const selectedPokemon = [];
+
+            // 1 S Tier
+            if (sTierPokemon.length > 0) {
+                const randomIndex = Math.floor(Math.random() * sTierPokemon.length);
+                selectedPokemon.push(sTierPokemon[randomIndex]);
+            }
+
+            // 2 A Tier
+            for (let i = 0; i < 2; i++) {
+                if (aTierPokemon.length > 0) {
+                    const randomIndex = Math.floor(Math.random() * aTierPokemon.length);
+                    selectedPokemon.push(aTierPokemon.splice(randomIndex, 1)[0]);
+                }
+            }
+
+            // 2 B Tier
+            for (let i = 0; i < 2; i++) {
+                if (bTierPokemon.length > 0) {
+                    const randomIndex = Math.floor(Math.random() * bTierPokemon.length);
+                    selectedPokemon.push(bTierPokemon.splice(randomIndex, 1)[0]);
+                }
+            }
+
+            // 10% chance per Legendary
+            if (Math.random() < 0.1 && legendaryPokemon.length > 0) {
+                const randomIndex = Math.floor(Math.random() * legendaryPokemon.length);
+                selectedPokemon.push(legendaryPokemon[randomIndex]);
+            }
+
+            const marketData = {
+                pokemon: selectedPokemon,
+                nextRefresh: Date.now() + (24 * 60 * 60 * 1000)
+            };
+
+            await set(marketRef, marketData);
+        }
+
+        async function loadMarket() {
+            const marketRef = ref(database, 'markets/black_market');
+            
+            onValue(marketRef, async (snapshot) => {
+                const data = snapshot.val();
+                
+                if (!data || !data.nextRefresh) {
+                    await generateNewMarket();
+                    return;
+                }
+
+                if (Date.now() >= data.nextRefresh) {
+                    await generateNewMarket();
+                    return;
+                }
+
+                renderPokemon(data.pokemon || []);
+                updatePlayerCoins();
+            });
+        }
+
+        function renderPokemon(pokemon) {
+            const grid = document.getElementById('pokemonGrid');
+            const loading = document.getElementById('loading');
+
+            loading.style.display = 'none';
+            grid.style.display = 'grid';
+
+            if (pokemon.length === 0) {
+                grid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; color: #555; padding: 40px;">Nessun Pokémon disponibile</div>';
+                return;
+            }
+
+            grid.innerHTML = pokemon.map((p, index) => {
+                const types = [p.primary_type];
+                if (p.secondary_type) types.push(p.secondary_type);
+
+                return `
+                    <div class="pokemon-card ${p.tier}">
+                        <div class="tier-badge ${p.tier}">${p.tier.replace('_', ' ')}</div>
+                        <img src="${getPokemonImageUrl(p.national_number)}" 
+                             alt="${p.english_name}" 
+                             class="pokemon-image">
+                        <div class="pokemon-name">${p.english_name}</div>
+                        <div class="pokemon-stats">
+                            <div class="pokemon-stat">
+                                <div class="stat-label">Numero</div>
+                                <div class="stat-value">#${padNumber(p.national_number)}</div>
+                            </div>
+                            <div class="pokemon-stat">
+                                <div class="stat-label">BST</div>
+                                <div class="stat-value">${p.bst}</div>
+                            </div>
+                            <div class="pokemon-stat" style="grid-column: 1/-1;">
+                                <div class="stat-label">Tipo</div>
+                                <div class="stat-value">${types.join(' / ')}</div>
+                            </div>
+                        </div>
+                        <div class="pokemon-price">
+                            <img src="https://raw.githubusercontent.com/lucaremix/roulette-run-challenge/main/pixel-art-red-chinese-gold-coin-png.png" 
+                                 alt="Coins" 
+                                 class="coin-img"
+                                 onerror="this.style.display='none'">
+                            <span>${PRICES[p.tier]}</span>
+                        </div>
+                        <button class="buy-pokemon-btn" onclick="buyPokemon(${index})">
+                            💰 Acquista
+                        </button>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        async function updatePlayerCoins() {
+            const player = getCurrentPlayer();
+            if (!player) return;
+
+            const playerRef = ref(database, `players/${player}/coins`);
+            onValue(playerRef, (snapshot) => {
+                const coins = snapshot.val() || 0;
+                document.getElementById('playerCoins').textContent = coins;
+            });
+        }
+
+        window.buySpin = async function(tier, cost) {
+            const player = getCurrentPlayer();
+            if (!player) {
+                alert('Devi impostare il tuo nome dalla home page!');
+                window.location.href = 'index.html';
+                return;
+            }
+
+            const playerRef = ref(database, `players/${player}`);
+            const playerSnapshot = await get(playerRef);
+            const playerData = playerSnapshot.val() || { coins: 0 };
+
+            if ((playerData.coins || 0) < cost) {
+                alert('Non hai abbastanza Coins!');
+                return;
+            }
+
+            if (confirm(`Vuoi acquistare uno Spin ${tier.toUpperCase().replace('_', ' ')} per ${cost} Coins?`)) {
+                playerData.coins = (playerData.coins || 0) - cost;
+                await set(playerRef, playerData);
+
+                localStorage.setItem('purchasedSpinPool', tier);
+                window.location.href = 'pokemon-spin.html';
+            }
+        };
+
+        window.buyPokemon = async function(index) {
+            const player = getCurrentPlayer();
+            if (!player) {
+                alert('Devi impostare il tuo nome dalla home page!');
+                window.location.href = 'index.html';
+                return;
+            }
+
+            const marketRef = ref(database, 'markets/black_market');
+            const marketSnapshot = await get(marketRef);
+            const marketData = marketSnapshot.val();
+
+            if (!marketData || !marketData.pokemon || !marketData.pokemon[index]) {
+                alert('Pokémon non disponibile!');
+                return;
+            }
+
+            const pokemon = marketData.pokemon[index];
+            const price = PRICES[pokemon.tier];
+
+            const playerRef = ref(database, `players/${player}`);
+            const playerSnapshot = await get(playerRef);
+            const playerData = playerSnapshot.val() || { coins: 0, team: [] };
+
+            if ((playerData.coins || 0) < price) {
+                alert('Non hai abbastanza Coins!');
+                return;
+            }
+
+            if (confirm(`Vuoi acquistare ${pokemon.english_name} per ${price} Coins?`)) {
+                // Deduct coins
+                playerData.coins = (playerData.coins || 0) - price;
+
+                // Add to team
+                if (!playerData.team) playerData.team = [];
+                
+                const natures = ["Hardy", "Lonely", "Brave", "Adamant", "Naughty", "Bold", "Docile", "Relaxed", "Impish", "Lax", "Timid", "Hasty", "Serious", "Jolly", "Naive", "Modest", "Mild", "Quiet", "Bashful", "Rash", "Calm", "Gentle", "Sassy", "Careful", "Quirky"];
+                const randomNature = natures[Math.floor(Math.random() * natures.length)];
+                
+                const abilities = [pokemon.abilities_0, pokemon.abilities_1, pokemon.abilities_2].filter(a => a && a.trim() !== '');
+                const randomAbility = abilities.length > 0 ? abilities[Math.floor(Math.random() * abilities.length)] : 'Unknown';
+
+                playerData.team.push({
+                    ...pokemon,
+                    nature: randomNature,
+                    ability: randomAbility,
+                    won_from: 'black_market',
+                    won_at: Date.now()
+                });
+
+                await set(playerRef, playerData);
+
+                // Remove from pool
+                const poolRef = ref(database, `pools/${pokemon.tier}/${pokemon.key}`);
+                await remove(poolRef);
+
+                // Remove from market
+                marketData.pokemon.splice(index, 1);
+                await set(marketRef, marketData);
+
+                alert(`${pokemon.english_name} acquistato con successo!`);
+            }
+        };
+
+        function updateTimer() {
+            const marketRef = ref(database, 'markets/black_market');
+            
+            get(marketRef).then((snapshot) => {
+                const data = snapshot.val();
+                if (!data || !data.nextRefresh) return;
+
+                const timeLeft = data.nextRefresh - Date.now();
+                
+                if (timeLeft <= 0) {
+                    generateNewMarket();
+                    return;
+                }
+
+                const hours = Math.floor(timeLeft / (1000 * 60 * 60));
+                const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
+
+                document.getElementById('timerValue').textContent = 
+                    `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+            });
+        }
+
+        const playerName = getCurrentPlayer();
+        if (!playerName) {
+            alert('Devi impostare il tuo nome dalla home page!');
+            window.location.href = 'index.html';
+        } else {
+            initializeMarket();
+        }
+    </script>
+</body>
+</html>
