@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Skyla v6</title>
+    <title>Skyla v7</title>
     <style>
         * {
             margin: 0;
@@ -610,7 +610,7 @@
 
         <!-- Event Header -->
         <div class="event-header">
-            <img src="https://raw.githubusercontent.com/lucaremix/roulette-run-challenge/main/trainers/Skyla.png" 
+            <img src="https://img.nuzlocke.app/leaders/blwh-skyla.png" 
                  alt="Skyla" class="event-trainer-img">
             <div class="event-info">
                 <h1 class="event-title">Skyla - Stat Sorting Challenge</h1>
@@ -1076,14 +1076,35 @@
         async function calculateRoundScores(state) {
             const player1Order = state.submissions[state.player1.name];
             const player2Order = state.submissions[state.player2.name];
-            const correctNames = state.correctOrder.map(p => p.name);
-
+            
             let player1Correct = 0;
             let player2Correct = 0;
 
-            for (let i = 0; i < correctNames.length; i++) {
-                if (player1Order[i] === correctNames[i]) player1Correct++;
-                if (player2Order[i] === correctNames[i]) player2Correct++;
+            // For each position, check if the pokemon is correct
+            for (let i = 0; i < state.correctOrder.length; i++) {
+                const correctPokemon = state.correctOrder[i];
+                const correctStat = correctPokemon.stat;
+                
+                // Find all pokemon with the same stat value in the correct order
+                const sameStatIndices = [];
+                for (let j = 0; j < state.correctOrder.length; j++) {
+                    if (state.correctOrder[j].stat === correctStat) {
+                        sameStatIndices.push(j);
+                    }
+                }
+                
+                // Get the names of pokemon that should be in these positions
+                const validNames = sameStatIndices.map(idx => state.correctOrder[idx].name);
+                
+                // Check if player1's pokemon at this position is one of the valid ones
+                if (validNames.includes(player1Order[i])) {
+                    player1Correct++;
+                }
+                
+                // Check if player2's pokemon at this position is one of the valid ones
+                if (validNames.includes(player2Order[i])) {
+                    player2Correct++;
+                }
             }
 
             // Determine round winner
