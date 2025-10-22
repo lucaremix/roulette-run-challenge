@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Burgh v4</title>
+    <title>Burgh v5</title>
     <style>
         * {
             margin: 0;
@@ -723,7 +723,7 @@
         fetch('https://raw.githubusercontent.com/lucaremix/roulette-run-challenge/main/pokemon.json')
             .then(res => res.json())
             .then(data => {
-                allPokemon = data.filter(p => p.flavor_text && p.flavor_text.trim().length > 0);
+                allPokemon = data.filter(p => p.description && p.description.trim().length > 0);
                 console.log(`Caricati ${allPokemon.length} Pokémon con descrizioni`);
             })
             .catch(err => console.error('Errore nel caricamento dei Pokémon:', err));
@@ -871,10 +871,10 @@
             const randomPokemon = allPokemon[Math.floor(Math.random() * allPokemon.length)];
             
             state.currentPokemon = {
-                name: randomPokemon.name,
+                name: randomPokemon.english_name,
                 national_number: randomPokemon.national_number
             };
-            state.currentDescription = randomPokemon.flavor_text;
+            state.currentDescription = randomPokemon.description;
             state.firstPlayerGuessed = false;
             state.guesses = {};
 
@@ -932,7 +932,7 @@
             if (!input) return;
 
             const guessedPokemon = allPokemon.find(p => 
-                p.name.toLowerCase() === input.toLowerCase()
+                p.english_name.toLowerCase() === input.toLowerCase()
             );
 
             if (!guessedPokemon) {
@@ -948,10 +948,10 @@
                 state.guesses = {};
             }
 
-            const isCorrect = guessedPokemon.name.toLowerCase() === state.currentPokemon.name.toLowerCase();
+            const isCorrect = guessedPokemon.english_name.toLowerCase() === state.currentPokemon.name.toLowerCase();
             
             state.guesses[currentPlayer] = {
-                pokemon: guessedPokemon.name,
+                pokemon: guessedPokemon.english_name,
                 correct: isCorrect
             };
 
@@ -1109,12 +1109,12 @@
             }
 
             const matches = allPokemon
-                .filter(p => p.name.toLowerCase().startsWith(value))
+                .filter(p => p.english_name.toLowerCase().startsWith(value))
                 .slice(0, 8);
 
             if (matches.length > 0) {
                 suggestionsDiv.innerHTML = matches
-                    .map(p => `<div class="suggestion-item" onclick="selectPokemon('${p.name}')">${p.name}</div>`)
+                    .map(p => `<div class="suggestion-item" onclick="selectPokemon('${p.english_name}')">${p.english_name}</div>`)
                     .join('');
                 suggestionsDiv.classList.add('show');
             } else {
