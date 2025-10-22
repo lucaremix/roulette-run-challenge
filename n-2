@@ -1,0 +1,846 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>N - Split or Steal Challenge</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-image: url('https://raw.githubusercontent.com/lucaremix/roulette-run-challenge/main/background/Chargestone_cave_background.png');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            color: #e0e0e0;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            background: #1a1a1a;
+            border: 1px solid #2a2a2a;
+            border-radius: 8px;
+            color: #e0e0e0;
+            text-decoration: none;
+            font-size: 1em;
+            transition: all 0.3s ease;
+            margin-bottom: 30px;
+        }
+
+        .back-btn:hover {
+            background: #252525;
+        }
+
+        .event-header {
+            background: #1a1a1a;
+            border: 1px solid #2a2a2a;
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 30px;
+            display: flex;
+            align-items: center;
+            gap: 30px;
+        }
+
+        .event-trainer-img {
+            width: 160px;
+            height: 160px;
+            object-fit: contain;
+            border: none;
+            flex-shrink: 0;
+            image-rendering: pixelated;
+        }
+
+        .event-info {
+            flex: 1;
+        }
+
+        .event-title {
+            font-size: 2.5em;
+            color: #ffffff;
+            margin-bottom: 15px;
+        }
+
+        .event-status {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .status-badge {
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 1.1em;
+        }
+
+        .status-badge.joined {
+            background: #2d4a2d;
+            color: #7fff7f;
+        }
+
+        .status-badge.not-joined {
+            background: #2a2a2a;
+            color: #888;
+        }
+
+        .join-leave-btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+
+        .join-btn {
+            background: #2a7a2a;
+            color: white;
+        }
+
+        .join-btn:hover {
+            background: #357a35;
+        }
+
+        .leave-btn {
+            background: #7a2a2a;
+            color: white;
+        }
+
+        .leave-btn:hover {
+            background: #8a3535;
+        }
+
+        .players-section {
+            background: #1a1a1a;
+            border: 1px solid #2a2a2a;
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 30px;
+        }
+
+        .players-title {
+            font-size: 1.8em;
+            color: #ffffff;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .player-count-badge {
+            background: #2a2a2a;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.7em;
+            color: #888;
+        }
+
+        .players-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .player-card {
+            background: #0a0a0a;
+            border: 1px solid #2a2a2a;
+            border-radius: 8px;
+            padding: 15px 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .player-card.current-user {
+            border-color: #4a4a4a;
+            background: #1f1f1f;
+        }
+
+        .player-name {
+            font-size: 1.1em;
+            color: #e0e0e0;
+        }
+
+        .player-card.current-user .player-name {
+            color: #ffffff;
+            font-weight: 600;
+        }
+
+        .you-badge {
+            background: #2a7a2a;
+            color: white;
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 0.8em;
+            font-weight: 600;
+        }
+
+        .no-players {
+            text-align: center;
+            color: #555;
+            font-style: italic;
+            padding: 30px;
+        }
+
+        .intro-screen {
+            background: #1a1a1a;
+            border: 1px solid #2a2a2a;
+            border-radius: 12px;
+            padding: 40px;
+            display: none;
+        }
+
+        .intro-screen.show {
+            display: block;
+        }
+
+        .intro-content {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .intro-text h2 {
+            font-size: 2em;
+            color: #ffa500;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .intro-text p {
+            font-size: 1.2em;
+            line-height: 1.8;
+            color: #e0e0e0;
+            margin-bottom: 15px;
+        }
+
+        .intro-text .highlight {
+            color: #ffa500;
+            font-weight: bold;
+        }
+
+        .start-btn {
+            display: block;
+            margin: 30px auto 0;
+            padding: 20px 60px;
+            background: #ffa500;
+            color: #1a1a1a;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.3em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .start-btn:hover {
+            background: #ff9500;
+            transform: translateY(-2px);
+        }
+
+        .game-screen {
+            background: #1a1a1a;
+            border: 1px solid #2a2a2a;
+            border-radius: 12px;
+            padding: 40px;
+            display: none;
+        }
+
+        .game-screen.show {
+            display: block;
+        }
+
+        .game-title {
+            font-size: 2em;
+            color: #ffa500;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .pot-display {
+            text-align: center;
+            font-size: 3em;
+            color: #ffd700;
+            margin-bottom: 40px;
+            font-weight: bold;
+            text-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+        }
+
+        .choice-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .choice-btn {
+            padding: 30px 60px;
+            font-size: 1.5em;
+            font-weight: 600;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .choice-btn.split {
+            background: #2a7a2a;
+            color: white;
+        }
+
+        .choice-btn.split:hover {
+            background: #357a35;
+            transform: translateY(-3px);
+        }
+
+        .choice-btn.steal {
+            background: #7a2a2a;
+            color: white;
+        }
+
+        .choice-btn.steal:hover {
+            background: #8a3535;
+            transform: translateY(-3px);
+        }
+
+        .choice-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .waiting-message {
+            text-align: center;
+            font-size: 1.3em;
+            color: #ffa500;
+            margin-top: 20px;
+        }
+
+        .result-screen {
+            background: #1a1a1a;
+            border: 1px solid #2a2a2a;
+            border-radius: 12px;
+            padding: 40px;
+            display: none;
+        }
+
+        .result-screen.show {
+            display: block;
+        }
+
+        .result-title {
+            font-size: 2.5em;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .choices-display {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 40px;
+        }
+
+        .choice-card {
+            background: #0a0a0a;
+            border: 2px solid #2a2a2a;
+            border-radius: 12px;
+            padding: 30px;
+            text-align: center;
+            min-width: 250px;
+        }
+
+        .choice-card .player-name {
+            font-size: 1.5em;
+            margin-bottom: 20px;
+            color: #ffffff;
+        }
+
+        .choice-card .choice {
+            font-size: 2em;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .choice-card .choice.split {
+            color: #7fff7f;
+        }
+
+        .choice-card .choice.steal {
+            color: #ff6464;
+        }
+
+        .outcome-message {
+            font-size: 1.8em;
+            text-align: center;
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+
+        .rewards-display {
+            background: #0a0a0a;
+            border: 1px solid #2a2a2a;
+            border-radius: 8px;
+            padding: 30px;
+            margin-bottom: 30px;
+        }
+
+        .rewards-display h3 {
+            color: #ffa500;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+            text-align: center;
+        }
+
+        .reward-item {
+            font-size: 1.2em;
+            padding: 15px;
+            margin: 10px 0;
+            background: #1a1a1a;
+            border-radius: 8px;
+            border-left: 4px solid #ffa500;
+        }
+
+        .back-home-btn {
+            display: block;
+            margin: 0 auto;
+            padding: 15px 40px;
+            background: #2a7a2a;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.2em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .back-home-btn:hover {
+            background: #357a35;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="index.html" class="back-btn">← Torna alla Home</a>
+
+        <!-- Header -->
+        <div class="event-header">
+            <img src="https://raw.githubusercontent.com/lucaremix/roulette-run-challenge/main/blwh-n-2.webp" 
+                 alt="N" class="event-trainer-img">
+            <div class="event-info">
+                <div class="event-title">N - Split or Steal</div>
+                <p style="font-size: 1.1em; color: #b0b0b0;">
+                    Due giocatori, una scelta: dividere o rubare? 300 Coins in palio.
+                </p>
+                <div class="event-status" id="eventStatus">
+                    <span class="status-badge not-joined">Non partecipante</span>
+                    <button class="join-leave-btn join-btn" onclick="joinEvent()">Unisciti</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Players Section -->
+        <div class="players-section">
+            <div class="players-title">
+                Giocatori
+                <span class="player-count-badge" id="playerCount">0/2</span>
+            </div>
+            <div class="players-list" id="playersList">
+                <div class="no-players">In attesa di giocatori...</div>
+            </div>
+        </div>
+
+        <!-- Intro Screen -->
+        <div class="intro-screen" id="introScreen">
+            <div class="intro-content">
+                <div class="intro-text">
+                    <h2>🎲 Split or Steal Challenge</h2>
+                    <p>
+                        Un classico dilemma del prigioniero: 300 Coins sono sul tavolo, 
+                        ma solo la fiducia o l'astuzia determineranno chi li otterrà.
+                    </p>
+                    <p>
+                        Entrambi i giocatori scelgono <span class="highlight">Split</span> o 
+                        <span class="highlight">Steal</span> in segreto:
+                    </p>
+                    <p>
+                        • <span class="highlight">Split / Split</span> → Entrambi ricevono 150 Coins ciascuno<br>
+                        • <span class="highlight">Split / Steal</span> → Chi ha scelto Steal ottiene 300 Coins, l'altro 0<br>
+                        • <span class="highlight">Steal / Steal</span> → Nessuno ottiene nulla
+                    </p>
+                    <p>
+                        Scegli saggiamente. La fiducia può essere ricompensata... o tradita.
+                    </p>
+                </div>
+                <button class="start-btn" onclick="startGame()">Inizia la Sfida</button>
+            </div>
+        </div>
+
+        <!-- Game Screen -->
+        <div class="game-screen" id="gameScreen">
+            <h2 class="game-title">Fai la tua scelta</h2>
+            <div class="pot-display">💰 300 Coins</div>
+            <div class="choice-buttons">
+                <button class="choice-btn split" onclick="makeChoice('split')">
+                    🤝 SPLIT
+                </button>
+                <button class="choice-btn steal" onclick="makeChoice('steal')">
+                    💀 STEAL
+                </button>
+            </div>
+            <div class="waiting-message" id="waitingMessage" style="display: none;">
+                Aspettando l'altro giocatore...
+            </div>
+        </div>
+
+        <!-- Result Screen -->
+        <div class="result-screen" id="resultScreen">
+            <h2 class="result-title" id="resultTitle">Risultato</h2>
+            <div class="choices-display" id="choicesDisplay"></div>
+            <div class="outcome-message" id="outcomeMessage"></div>
+            <div class="rewards-display" id="rewardsDisplay"></div>
+            <button class="back-home-btn" onclick="window.location.href='index.html'">
+                Torna alla Home
+            </button>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+        import { getDatabase, ref, set, get, onValue, remove } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js';
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDaeBqueLC17NNId1S4ao3i21W-5WZVang",
+            authDomain: "pokemon-roulette-run-challenge.firebaseapp.com",
+            databaseURL: "https://pokemon-roulette-run-challenge-default-rtdb.europe-west1.firebasedatabase.app",
+            projectId: "pokemon-roulette-run-challenge",
+            storageBucket: "pokemon-roulette-run-challenge.firebasestorage.app",
+            messagingSenderId: "1016688777100",
+            appId: "1:1016688777100:web:e447865e34c08c1b2eeab0"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app);
+        const eventRef = ref(database, 'events/n');
+
+        function getCurrentPlayer() {
+            return localStorage.getItem('playerName');
+        }
+
+        async function renderLanding() {
+            const snapshot = await get(eventRef);
+            const state = snapshot.val();
+            
+            onValue(eventRef, (snapshot) => {
+                const state = snapshot.val();
+                if (!state) {
+                    updateLandingView(null);
+                    return;
+                }
+                
+                updateLandingView(state);
+                
+                if (state.gameStarted && !state.gameFinished) {
+                    document.getElementById('introScreen').classList.remove('show');
+                    document.getElementById('gameScreen').classList.add('show');
+                    updateGameScreen(state);
+                } else if (state.gameFinished) {
+                    document.getElementById('introScreen').classList.remove('show');
+                    document.getElementById('gameScreen').classList.remove('show');
+                    document.getElementById('resultScreen').classList.add('show');
+                    showResults(state);
+                } else if (state.showIntro) {
+                    document.getElementById('introScreen').classList.add('show');
+                }
+            });
+        }
+
+        function updateLandingView(state) {
+            const currentPlayer = getCurrentPlayer();
+            const isJoined = state && (state.player1?.name === currentPlayer || state.player2?.name === currentPlayer);
+            
+            const statusDiv = document.getElementById('eventStatus');
+            if (isJoined) {
+                statusDiv.innerHTML = `
+                    <span class="status-badge joined">Partecipante</span>
+                    <button class="join-leave-btn leave-btn" onclick="leaveEvent()">Abbandona</button>
+                `;
+            } else {
+                statusDiv.innerHTML = `
+                    <span class="status-badge not-joined">Non partecipante</span>
+                    <button class="join-leave-btn join-btn" onclick="joinEvent()">Unisciti</button>
+                `;
+            }
+            
+            const playersList = document.getElementById('playersList');
+            const playerCount = document.getElementById('playerCount');
+            
+            if (!state || (!state.player1 && !state.player2)) {
+                playersList.innerHTML = '<div class="no-players">In attesa di giocatori...</div>';
+                playerCount.textContent = '0/2';
+                return;
+            }
+            
+            let count = 0;
+            let html = '';
+            
+            if (state.player1) {
+                count++;
+                const isCurrentUser = state.player1.name === currentPlayer;
+                html += `
+                    <div class="player-card ${isCurrentUser ? 'current-user' : ''}">
+                        <span class="player-name">${state.player1.name}</span>
+                        ${isCurrentUser ? '<span class="you-badge">TU</span>' : ''}
+                    </div>
+                `;
+            }
+            
+            if (state.player2) {
+                count++;
+                const isCurrentUser = state.player2.name === currentPlayer;
+                html += `
+                    <div class="player-card ${isCurrentUser ? 'current-user' : ''}">
+                        <span class="player-name">${state.player2.name}</span>
+                        ${isCurrentUser ? '<span class="you-badge">TU</span>' : ''}
+                    </div>
+                `;
+            }
+            
+            playersList.innerHTML = html;
+            playerCount.textContent = `${count}/2`;
+        }
+
+        window.joinEvent = async function() {
+            const currentPlayer = getCurrentPlayer();
+            if (!currentPlayer) {
+                alert('Devi impostare il tuo nome dalla home page!');
+                return;
+            }
+            
+            const snapshot = await get(eventRef);
+            const state = snapshot.val() || {};
+            
+            if (state.player1?.name === currentPlayer || state.player2?.name === currentPlayer) {
+                return;
+            }
+            
+            if (state.player1 && state.player2) {
+                alert('L\'evento è pieno!');
+                return;
+            }
+            
+            if (!state.player1) {
+                state.player1 = { name: currentPlayer };
+            } else if (!state.player2) {
+                state.player2 = { name: currentPlayer };
+                state.showIntro = true;
+            }
+            
+            await set(eventRef, state);
+        };
+
+        window.leaveEvent = async function() {
+            const currentPlayer = getCurrentPlayer();
+            const snapshot = await get(eventRef);
+            const state = snapshot.val();
+            
+            if (!state) return;
+            
+            if (state.gameStarted && !state.gameFinished) {
+                alert('Non puoi abbandonare durante il gioco!');
+                return;
+            }
+            
+            if (state.player1?.name === currentPlayer) {
+                if (state.player2) {
+                    state.player1 = state.player2;
+                    delete state.player2;
+                } else {
+                    await remove(eventRef);
+                    return;
+                }
+            } else if (state.player2?.name === currentPlayer) {
+                delete state.player2;
+            }
+            
+            delete state.showIntro;
+            await set(eventRef, state);
+        };
+
+        window.startGame = async function() {
+            const snapshot = await get(eventRef);
+            const state = snapshot.val();
+            
+            if (!state || !state.player1 || !state.player2) {
+                alert('Servono 2 giocatori per iniziare!');
+                return;
+            }
+            
+            state.gameStarted = true;
+            delete state.showIntro;
+            state.choices = {};
+            
+            await set(eventRef, state);
+        };
+
+        function updateGameScreen(state) {
+            const currentPlayer = getCurrentPlayer();
+            const hasChosen = state.choices && state.choices[currentPlayer];
+            
+            const buttons = document.querySelectorAll('.choice-btn');
+            buttons.forEach(btn => btn.disabled = hasChosen);
+            
+            const waitingMsg = document.getElementById('waitingMessage');
+            if (hasChosen) {
+                waitingMsg.style.display = 'block';
+            } else {
+                waitingMsg.style.display = 'none';
+            }
+        }
+
+        window.makeChoice = async function(choice) {
+            const currentPlayer = getCurrentPlayer();
+            const snapshot = await get(eventRef);
+            const state = snapshot.val();
+            
+            if (!state.choices) {
+                state.choices = {};
+            }
+            
+            state.choices[currentPlayer] = choice;
+            
+            await set(eventRef, state);
+            
+            // Check if both players have chosen
+            const player1Name = state.player1.name;
+            const player2Name = state.player2.name;
+            
+            if (state.choices[player1Name] && state.choices[player2Name]) {
+                // Calculate results
+                const p1Choice = state.choices[player1Name];
+                const p2Choice = state.choices[player2Name];
+                
+                let p1Coins = 0;
+                let p2Coins = 0;
+                
+                if (p1Choice === 'split' && p2Choice === 'split') {
+                    p1Coins = 150;
+                    p2Coins = 150;
+                } else if (p1Choice === 'split' && p2Choice === 'steal') {
+                    p1Coins = 0;
+                    p2Coins = 300;
+                } else if (p1Choice === 'steal' && p2Choice === 'split') {
+                    p1Coins = 300;
+                    p2Coins = 0;
+                } else {
+                    // both steal
+                    p1Coins = 0;
+                    p2Coins = 0;
+                }
+                
+                state.gameFinished = true;
+                state.results = {
+                    [player1Name]: p1Coins,
+                    [player2Name]: p2Coins
+                };
+                
+                await set(eventRef, state);
+                await giveRewards(player1Name, player2Name, p1Coins, p2Coins);
+            }
+        };
+
+        async function giveRewards(player1Name, player2Name, p1Coins, p2Coins) {
+            const player1Ref = ref(database, `players/${player1Name}`);
+            const player2Ref = ref(database, `players/${player2Name}`);
+            
+            const p1Snap = await get(player1Ref);
+            const p2Snap = await get(player2Ref);
+            
+            let p1Data = p1Snap.val() || { coins: 0, team: [] };
+            let p2Data = p2Snap.val() || { coins: 0, team: [] };
+            
+            p1Data.coins = (p1Data.coins || 0) + p1Coins;
+            p2Data.coins = (p2Data.coins || 0) + p2Coins;
+            
+            await set(player1Ref, p1Data);
+            await set(player2Ref, p2Data);
+        }
+
+        function showResults(state) {
+            const player1Name = state.player1.name;
+            const player2Name = state.player2.name;
+            const p1Choice = state.choices[player1Name];
+            const p2Choice = state.choices[player2Name];
+            const p1Coins = state.results[player1Name];
+            const p2Coins = state.results[player2Name];
+            
+            // Show choices
+            const choicesDisplay = document.getElementById('choicesDisplay');
+            choicesDisplay.innerHTML = `
+                <div class="choice-card">
+                    <div class="player-name">${player1Name}</div>
+                    <div class="choice ${p1Choice}">${p1Choice === 'split' ? '🤝 SPLIT' : '💀 STEAL'}</div>
+                </div>
+                <div class="choice-card">
+                    <div class="player-name">${player2Name}</div>
+                    <div class="choice ${p2Choice}">${p2Choice === 'split' ? '🤝 SPLIT' : '💀 STEAL'}</div>
+                </div>
+            `;
+            
+            // Outcome message
+            let outcomeMsg = '';
+            let resultTitleColor = '';
+            
+            if (p1Choice === 'split' && p2Choice === 'split') {
+                outcomeMsg = '🤝 Entrambi hanno scelto di condividere!<br>La cooperazione è stata ricompensata.';
+                resultTitleColor = '#7fff7f';
+            } else if (p1Choice === 'steal' && p2Choice === 'steal') {
+                outcomeMsg = '💀 Entrambi hanno tentato di rubare!<br>L\'avidità non paga.';
+                resultTitleColor = '#ff6464';
+            } else {
+                const stealer = p1Choice === 'steal' ? player1Name : player2Name;
+                outcomeMsg = `💀 ${stealer} ha tradito la fiducia dell'altro!`;
+                resultTitleColor = '#ffa500';
+            }
+            
+            document.getElementById('resultTitle').style.color = resultTitleColor;
+            document.getElementById('outcomeMessage').innerHTML = outcomeMsg;
+            
+            // Rewards
+            const rewardsDisplay = document.getElementById('rewardsDisplay');
+            rewardsDisplay.innerHTML = `
+                <h3>💰 Ricompense</h3>
+                <div class="reward-item">
+                    ${player1Name}: ${p1Coins} Coins
+                </div>
+                <div class="reward-item">
+                    ${player2Name}: ${p2Coins} Coins
+                </div>
+            `;
+        }
+
+        if (!getCurrentPlayer()) {
+            alert('Devi impostare il tuo nome dalla home page!');
+            window.location.href = 'index.html';
+        } else {
+            renderLanding();
+        }
+    </script>
+</body>
+</html>
