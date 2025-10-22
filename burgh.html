@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Burgh v5</title>
+    <title>Burgh v6</title>
     <style>
         * {
             margin: 0;
@@ -797,6 +797,30 @@
                     document.getElementById('introScreen').classList.remove('show');
                 }
             });
+
+            // Listener per lo stato del gioco
+            onValue(eventRef, (snapshot) => {
+                const data = snapshot.val();
+                if (!data) return;
+
+                // Se il gioco è iniziato, mostra game screen
+                if (data.gameStarted && !data.isGameOver) {
+                    document.getElementById('landingSection').style.display = 'none';
+                    document.getElementById('introScreen').classList.remove('show');
+                    document.getElementById('gameScreen').classList.add('show');
+                    gameState = data;
+                    renderGame();
+                }
+
+                // Se il gioco è finito, mostra risultato finale
+                if (data.isGameOver) {
+                    document.getElementById('landingSection').style.display = 'none';
+                    document.getElementById('introScreen').classList.remove('show');
+                    document.getElementById('gameScreen').style.display = 'none';
+                    document.getElementById('finalResult').classList.add('show');
+                    showFinalResult(data);
+                }
+            });
         }
 
         async function toggleJoin() {
@@ -834,9 +858,13 @@
         window.toggleJoin = toggleJoin;
 
         window.startGame = async function() {
-            const snapshot = await get(eventRef);
-            const data = snapshot.val();
-            const players = Object.keys(data.players);
+            const playersRef = ref(database, `events/burgh/players`);
+            const snapshot = await get(playersRef);
+            
+            const players = [];
+            snapshot.forEach((childSnapshot) => {
+                players.push(childSnapshot.val());
+            });
 
             if (players.length !== 2) {
                 alert('Servono esattamente 2 giocatori per iniziare!');
@@ -845,7 +873,6 @@
 
             // Inizializza il gioco
             const newGame = {
-                players: data.players,
                 gameStarted: true,
                 player1: { name: players[0], score: 0 },
                 player2: { name: players[1], score: 0 },
@@ -859,7 +886,7 @@
             };
 
             await set(eventRef, newGame);
-            generateNewDescription(newGame);
+            await generateNewDescription(newGame);
         };
 
         async function generateNewDescription(state) {
