@@ -20,7 +20,7 @@
         }
 
         body.intro-mode {
-            background-image: url('https://raw.githubusercontent.com/lucaremix/roulette-run-challenge/main/silver_background.png');
+            background-image: url('https://raw.githubusercontent.com/lucaremix/roulette-run-challenge/main/n-1_background.png');
             background-size: cover;
             background-position: center;
             background-attachment: fixed;
@@ -365,11 +365,11 @@
 
         <div id="normalScreen">
             <div class="event-header">
-                <img src="https://img.nuzlocke.app/leaders/gs-silver.png" 
+                <img src="https://raw.githubusercontent.com/lucaremix/roulette-run-challenge/main/blwh-n-2.webp" 
                      alt="Silver" 
                      class="event-trainer-img">
                 <div class="event-info">
-                    <h1 class="event-title">Silver - Indovina il Pokémon</h1>
+                    <h1 class="event-title">N - Indovina il Pokémon</h1>
                     <div class="event-status">
                         <div class="status-badge" id="statusBadge">Non sei nell'evento</div>
                         <button class="join-leave-btn join-btn" id="joinLeaveBtn" onclick="toggleJoin()">
@@ -392,13 +392,13 @@
 
         <div class="intro-screen" id="introScreen" style="display: none;">
             <div class="intro-content">
-                <img src="https://img.nuzlocke.app/leaders/gs-silver.png" 
+                <img src="https://raw.githubusercontent.com/lucaremix/roulette-run-challenge/main/blwh-n-2.webp" 
                      alt="Silver" 
                      class="silver-image">
                 <div class="intro-text">
-                    <h2>Sfida Silver: Indovina il Pokémon!</h2>
+                    <h2>Sfida N: Indovina il Pokémon!</h2>
                     <p>
-                        Silver vi sfida a un gioco di deduzione! Ad ogni giocatore verrà assegnato 
+                        N vi sfida a un gioco di deduzione! Ad ogni giocatore verrà assegnato 
                         un Pokémon misterioso dal pool B-Tier.
                     </p>
                     <p>
@@ -561,7 +561,7 @@
         window.toggleJoin = toggleJoin;
 
         window.startGame = function() {
-            window.location.href = 'pokemon-guess-silver.html';
+            window.location.href = 'pokemon-guess-n.html';
         };
 
         if (!getCurrentPlayer()) {
