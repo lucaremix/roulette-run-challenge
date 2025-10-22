@@ -723,7 +723,7 @@
             teamGrid.innerHTML = playerTeam.map(pokemon => {
                 const imgUrl = `https://www.pokemon.com/static-assets/content-assets/cms2/img/pokedex/full/${padNumber(pokemon.national_number)}.png`;
                 return `
-                    <div class="team-pokemon" onclick="selectPokemon('${pokemon.key}')">
+                    <div class="team-pokemon" data-key="${pokemon.key}" onclick="selectPokemon('${pokemon.key}', event)">
                         <img src="${imgUrl}" alt="${pokemon.name}" class="team-pokemon-img">
                         <div class="team-pokemon-name">${pokemon.name}</div>
                     </div>
@@ -731,7 +731,7 @@
             }).join('');
         }
 
-        window.selectPokemon = function(key) {
+        window.selectPokemon = function(key, event) {
             selectedPokemon = playerTeam.find(p => p.key === key);
             
             document.querySelectorAll('.team-pokemon').forEach(el => {
