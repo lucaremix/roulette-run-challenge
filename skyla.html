@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Skyla v5</title>
+    <title>Skyla v6</title>
     <style>
         * {
             margin: 0;
@@ -895,7 +895,17 @@
         };
 
         async function generateNewRound(state) {
-            // Always generate new pokemon and stat
+            // Check if round data already exists (second player arriving)
+            if (state.currentPokemon && state.correctOrder && state.selectedStat) {
+                // Round already generated, just render it
+                document.getElementById('introScreen').classList.remove('show');
+                document.getElementById('resultOverlay').classList.remove('show');
+                document.getElementById('waitingScreen').classList.remove('show');
+                renderGameArea(state);
+                return;
+            }
+
+            // Generate new round (first player to arrive here)
             // Select 5 random pokemon
             const shuffled = [...allPokemon].sort(() => Math.random() - 0.5);
             const selectedPokemon = shuffled.slice(0, 5);
@@ -930,6 +940,7 @@
             state.submissions = {};
             delete state.showRoundResult;
             delete state.roundResults;
+            delete state.roundCleared;
 
             await set(eventRef, state);
             
@@ -1139,7 +1150,7 @@
                 </div>
             `;
 
-            // Auto-hide after 5 seconds
+            // Auto-hide after 5 seconds and prepare next round
             setTimeout(async () => {
                 document.getElementById('resultOverlay').classList.remove('show');
                 
@@ -1150,17 +1161,27 @@
                 if (freshState.isGameOver) {
                     showFinalResult(freshState);
                 } else {
-                    // Clear the round result flags and generate new round
-                    delete freshState.showRoundResult;
-                    delete freshState.roundResults;
-                    delete freshState.currentPokemon;
-                    delete freshState.correctOrder;
-                    delete freshState.selectedStat;
-                    delete freshState.selectedStatName;
-                    delete freshState.submissions;
+                    // Clear only the flags, keep currentPokemon so we know a round is in progress
+                    const currentPlayer = getCurrentPlayer();
+                    const isFirstToAct = !freshState.roundCleared;
                     
-                    // Generate new round with fresh pokemon
-                    await generateNewRound(freshState);
+                    if (isFirstToAct) {
+                        // First player clears and generates
+                        freshState.roundCleared = true;
+                        delete freshState.showRoundResult;
+                        delete freshState.roundResults;
+                        delete freshState.currentPokemon;
+                        delete freshState.correctOrder;
+                        delete freshState.selectedStat;
+                        delete freshState.selectedStatName;
+                        delete freshState.submissions;
+                        
+                        await set(eventRef, freshState);
+                        await generateNewRound(freshState);
+                    } else {
+                        // Second player just waits for the new round data
+                        // The onValue listener will pick it up
+                    }
                 }
             }, 5000);
         }
@@ -1249,7 +1270,7 @@
                         showRoundResult(state);
                     }
                 } else if (state.isActive && state.currentPokemon) {
-                    // Game attivo - controlla se abbiamo già inviato
+                    // Game attivo con pokemon - controlla se abbiamo già inviato
                     const hasSubmitted = state.submissions && state.submissions[currentPlayer];
                     if (hasSubmitted) {
                         // Mostra waiting screen
@@ -1261,10 +1282,20 @@
                         document.getElementById('introScreen').classList.remove('show');
                         document.getElementById('waitingScreen').classList.remove('show');
                         document.getElementById('resultOverlay').classList.remove('show');
-                        if (!document.getElementById('gameArea').classList.contains('show')) {
+                        // Solo renderizza se non è già visibile o se i pokemon sono cambiati
+                        const gameArea = document.getElementById('gameArea');
+                        if (!gameArea.classList.contains('show') || 
+                            !currentOrder || 
+                            currentOrder.length === 0 ||
+                            currentOrder[0].name !== state.currentPokemon[0].name) {
                             renderGameArea(state);
                         }
                     }
+                } else if (state.isActive && !state.currentPokemon && state.roundCleared) {
+                    // Round appena pulito, attendi che vengano generati i pokemon
+                    document.getElementById('gameArea').classList.remove('show');
+                    document.getElementById('waitingScreen').classList.add('show');
+                    document.getElementById('waitingText').textContent = 'Preparazione nuovo round...';
                 } else if (!state.isActive) {
                     // Gioco non ancora iniziato - mostra intro
                     document.getElementById('playersSection').style.display = 'none';
