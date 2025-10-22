@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Drayden - Ball Choice Challenge</title>
+    <title>Drayden v2</title>
     <style>
         * {
             margin: 0;
@@ -585,6 +585,10 @@
                         • L'altro giocatore deve <span class="highlight">scegliere una ball alla cieca</span><br>
                         • Ogni giocatore riceve il Pokémon nella ball che gli spetta
                     </p>
+                    <p>
+                        <span class="highlight">Ricompense:</span><br>
+                        💰 Entrambi i giocatori: 150 Coins
+                    </p>
                     <p style="color: #888; font-size: 1em; margin-top: 20px;">
                         Nota: I Pokémon verranno rimossi dai rispettivi pool
                     </p>
@@ -681,6 +685,14 @@
         let gameState = null;
         let selectedBall = null;
         const MAX_PLAYERS = 2;
+
+        const natures = [
+            "Hardy", "Lonely", "Brave", "Adamant", "Naughty",
+            "Bold", "Docile", "Relaxed", "Impish", "Lax",
+            "Timid", "Hasty", "Serious", "Jolly", "Naive",
+            "Modest", "Mild", "Quiet", "Bashful", "Rash",
+            "Calm", "Gentle", "Sassy", "Careful", "Quirky"
+        ];
 
         function getCurrentPlayer() {
             return localStorage.getItem('playerName') || '';
@@ -849,16 +861,48 @@
             const randomATier = aTierPokemon[Math.floor(Math.random() * aTierPokemon.length)];
             const randomLegendary = legendaryPokemon[Math.floor(Math.random() * legendaryPokemon.length)];
 
+            // Genera natura casuale per entrambi i Pokémon
+            const aTierNature = natures[Math.floor(Math.random() * natures.length)];
+            const legendaryNature = natures[Math.floor(Math.random() * natures.length)];
+
+            // Scegli abilità casuale per A Tier (non hidden)
+            const aTierAbilities = [
+                randomATier.abilities_0,
+                randomATier.abilities_1,
+                randomATier.abilities_2
+            ].filter(a => a && a.trim() !== '');
+            const aTierAbility = aTierAbilities.length > 0 
+                ? aTierAbilities[Math.floor(Math.random() * aTierAbilities.length)]
+                : 'Unknown';
+
+            // Scegli abilità casuale per Legendary (non hidden)
+            const legendaryAbilities = [
+                randomLegendary.abilities_0,
+                randomLegendary.abilities_1,
+                randomLegendary.abilities_2
+            ].filter(a => a && a.trim() !== '');
+            const legendaryAbility = legendaryAbilities.length > 0 
+                ? legendaryAbilities[Math.floor(Math.random() * legendaryAbilities.length)]
+                : 'Unknown';
+
             const gameData = {
                 gameStarted: true,
                 observer: observer,
                 chooser: chooser,
                 pokeball: {
-                    pokemon: randomATier,
+                    pokemon: {
+                        ...randomATier,
+                        rolled_nature: aTierNature,
+                        rolled_ability: aTierAbility
+                    },
                     tier: 'Pool A'
                 },
                 premierball: {
-                    pokemon: randomLegendary,
+                    pokemon: {
+                        ...randomLegendary,
+                        rolled_nature: legendaryNature,
+                        rolled_ability: legendaryAbility
+                    },
                     tier: 'Pool Legendary'
                 },
                 choice: null,
@@ -911,18 +955,25 @@
             const pokeballPokemon = gameState.pokeball.pokemon;
             const premierballPokemon = gameState.premierball.pokemon;
 
+            const pokeballName = pokeballPokemon.name || pokeballPokemon.english_name || 'Unknown';
+            const premierballName = premierballPokemon.name || premierballPokemon.english_name || 'Unknown';
+
             document.getElementById('pokeballContent').innerHTML = `
                 <img src="https://www.pokemon.com/static-assets/content-assets/cms2/img/pokedex/full/${padNumber(pokeballPokemon.national_number)}.png" 
-                     alt="${pokeballPokemon.name}">
-                <div class="pokemon-name">${pokeballPokemon.name}</div>
+                     alt="${pokeballName}">
+                <div class="pokemon-name">${pokeballName}</div>
                 <div class="pokemon-tier">Pool A</div>
+                <div class="pokemon-tier" style="font-size: 0.9em; margin-top: 5px;">Natura: ${pokeballPokemon.rolled_nature}</div>
+                <div class="pokemon-tier" style="font-size: 0.9em;">Abilità: ${pokeballPokemon.rolled_ability}</div>
             `;
 
             document.getElementById('premierballContent').innerHTML = `
                 <img src="https://www.pokemon.com/static-assets/content-assets/cms2/img/pokedex/full/${padNumber(premierballPokemon.national_number)}.png" 
-                     alt="${premierballPokemon.name}">
-                <div class="pokemon-name">${premierballPokemon.name}</div>
+                     alt="${premierballName}">
+                <div class="pokemon-name">${premierballName}</div>
                 <div class="pokemon-tier">Pool Legendary</div>
+                <div class="pokemon-tier" style="font-size: 0.9em; margin-top: 5px;">Natura: ${premierballPokemon.rolled_nature}</div>
+                <div class="pokemon-tier" style="font-size: 0.9em;">Abilità: ${premierballPokemon.rolled_ability}</div>
             `;
         }
 
@@ -960,12 +1011,55 @@
             const chooserPokemon = data[chooserBall].pokemon;
             const observerPokemon = data[observerBall].pokemon;
 
-            // Add pokemon to teams
-            const chooserTeamRef = ref(database, `players/${data.chooser}/team`);
-            const observerTeamRef = ref(database, `players/${data.observer}/team`);
+            console.log('Chooser Pokemon:', chooserPokemon);
+            console.log('Observer Pokemon:', observerPokemon);
 
-            await push(chooserTeamRef, chooserPokemon);
-            await push(observerTeamRef, observerPokemon);
+            // Prepare pokemon data (remove key field and add won_from/won_at)
+            const chooserPokemonData = {
+                ...chooserPokemon,
+                nature: chooserPokemon.rolled_nature,
+                ability: chooserPokemon.rolled_ability,
+                won_from: data[chooserBall].tier === 'Pool A' ? 'a_tier' : 'legendary',
+                won_at: Date.now()
+            };
+            delete chooserPokemonData.key;
+            delete chooserPokemonData.rolled_nature;
+            delete chooserPokemonData.rolled_ability;
+            
+            const observerPokemonData = {
+                ...observerPokemon,
+                nature: observerPokemon.rolled_nature,
+                ability: observerPokemon.rolled_ability,
+                won_from: data[observerBall].tier === 'Pool A' ? 'a_tier' : 'legendary',
+                won_at: Date.now()
+            };
+            delete observerPokemonData.key;
+            delete observerPokemonData.rolled_nature;
+            delete observerPokemonData.rolled_ability;
+
+            // Add pokemon to teams
+            const chooserTeamRef = push(ref(database, `players/${data.chooser}/team`));
+            const observerTeamRef = push(ref(database, `players/${data.observer}/team`));
+
+            await set(chooserTeamRef, chooserPokemonData);
+            await set(observerTeamRef, observerPokemonData);
+
+            console.log('Pokemon added to teams');
+
+            // Add coins to both players
+            const chooserRef = ref(database, `players/${data.chooser}/coins`);
+            const observerRef = ref(database, `players/${data.observer}/coins`);
+
+            const chooserCoinsSnap = await get(chooserRef);
+            const observerCoinsSnap = await get(observerRef);
+
+            const chooserCoins = (chooserCoinsSnap.val() || 0) + 150;
+            const observerCoins = (observerCoinsSnap.val() || 0) + 150;
+
+            await set(chooserRef, chooserCoins);
+            await set(observerRef, observerCoins);
+
+            console.log('Coins added to players');
 
             // Remove pokemon from pools
             const chooserTier = data[chooserBall].tier === 'Pool A' ? 'a_tier' : 'legendary';
@@ -973,6 +1067,8 @@
 
             await remove(ref(database, `pools/${chooserTier}/${chooserPokemon.key}`));
             await remove(ref(database, `pools/${observerTier}/${observerPokemon.key}`));
+
+            console.log('Pokemon removed from pools');
 
             data.gameCompleted = true;
             data.results = {
@@ -1003,6 +1099,9 @@
             const chooserResult = data.results.chooser;
             const observerResult = data.results.observer;
 
+            const chooserName = chooserResult.pokemon.name || chooserResult.pokemon.english_name || 'Unknown';
+            const observerName = observerResult.pokemon.name || observerResult.pokemon.english_name || 'Unknown';
+
             resultsGrid.innerHTML = `
                 <div class="player-result ${chooserResult.player === currentPlayer ? 'current' : ''}">
                     <div class="result-player-name">${chooserResult.player}</div>
@@ -1012,10 +1111,13 @@
                     </div>
                     <div class="result-pokemon-img">
                         <img src="https://www.pokemon.com/static-assets/content-assets/cms2/img/pokedex/full/${padNumber(chooserResult.pokemon.national_number)}.png" 
-                             alt="${chooserResult.pokemon.name}" style="width: 100%; height: 100%;">
+                             alt="${chooserName}" style="width: 100%; height: 100%;">
                     </div>
-                    <div class="result-pokemon-name">${chooserResult.pokemon.name}</div>
+                    <div class="result-pokemon-name">${chooserName}</div>
                     <div class="result-tier">${chooserResult.tier}</div>
+                    <div class="result-tier" style="font-size: 0.9em; margin-top: 5px;">Natura: ${chooserResult.pokemon.rolled_nature}</div>
+                    <div class="result-tier" style="font-size: 0.9em;">Abilità: ${chooserResult.pokemon.rolled_ability}</div>
+                    <div class="result-tier" style="margin-top: 10px;">+150 Coins</div>
                 </div>
                 <div class="player-result ${observerResult.player === currentPlayer ? 'current' : ''}">
                     <div class="result-player-name">${observerResult.player}</div>
@@ -1025,10 +1127,13 @@
                     </div>
                     <div class="result-pokemon-img">
                         <img src="https://www.pokemon.com/static-assets/content-assets/cms2/img/pokedex/full/${padNumber(observerResult.pokemon.national_number)}.png" 
-                             alt="${observerResult.pokemon.name}" style="width: 100%; height: 100%;">
+                             alt="${observerName}" style="width: 100%; height: 100%;">
                     </div>
-                    <div class="result-pokemon-name">${observerResult.pokemon.name}</div>
+                    <div class="result-pokemon-name">${observerName}</div>
                     <div class="result-tier">${observerResult.tier}</div>
+                    <div class="result-tier" style="font-size: 0.9em; margin-top: 5px;">Natura: ${observerResult.pokemon.rolled_nature}</div>
+                    <div class="result-tier" style="font-size: 0.9em;">Abilità: ${observerResult.pokemon.rolled_ability}</div>
+                    <div class="result-tier" style="margin-top: 10px;">+150 Coins</div>
                 </div>
             `;
         }
