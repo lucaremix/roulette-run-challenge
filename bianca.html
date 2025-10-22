@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bianca v2</title>
+    <title>Bianca v3</title>
     <style>
         * {
             margin: 0;
@@ -702,13 +702,17 @@
             
             if (snapshot.exists()) {
                 snapshot.forEach((childSnapshot) => {
+                    const data = childSnapshot.val();
                     playerTeam.push({
                         key: childSnapshot.key,
-                        ...childSnapshot.val()
+                        name: data.name || data.english_name || 'Unknown',
+                        national_number: data.national_number || 0,
+                        ...data
                     });
                 });
             }
 
+            console.log('Player team loaded:', playerTeam);
             renderTeam();
         }
 
@@ -720,28 +724,34 @@
                 return;
             }
 
-            teamGrid.innerHTML = playerTeam.map(pokemon => {
+            teamGrid.innerHTML = playerTeam.map((pokemon, index) => {
                 const imgUrl = `https://www.pokemon.com/static-assets/content-assets/cms2/img/pokedex/full/${padNumber(pokemon.national_number)}.png`;
                 return `
-                    <div class="team-pokemon" data-key="${pokemon.key}" onclick="selectPokemon('${pokemon.key}', event)">
+                    <div class="team-pokemon" data-index="${index}">
                         <img src="${imgUrl}" alt="${pokemon.name}" class="team-pokemon-img">
                         <div class="team-pokemon-name">${pokemon.name}</div>
                     </div>
                 `;
             }).join('');
+
+            // Add click listeners after rendering
+            document.querySelectorAll('.team-pokemon').forEach((el, index) => {
+                el.addEventListener('click', () => selectPokemon(index));
+            });
         }
 
-        window.selectPokemon = function(key, event) {
-            selectedPokemon = playerTeam.find(p => p.key === key);
+        function selectPokemon(index) {
+            selectedPokemon = playerTeam[index];
+            console.log('Selected pokemon:', selectedPokemon);
             
             document.querySelectorAll('.team-pokemon').forEach(el => {
                 el.classList.remove('selected');
             });
             
-            event.target.closest('.team-pokemon').classList.add('selected');
+            document.querySelectorAll('.team-pokemon')[index].classList.add('selected');
             
             document.getElementById('acceptBtn').disabled = false;
-        };
+        }
 
         window.acceptTrade = async function() {
             if (!selectedPokemon) {
