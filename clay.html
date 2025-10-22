@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Clay v6</title>
+    <title>Clay - Pokémon Battleship Challenge</title>
     <style>
         * {
             margin: 0;
@@ -1486,6 +1486,9 @@
 
                 // Update my board state
                 myBoard = boardData;
+                
+                // Check game over when my board changes
+                setTimeout(() => checkGameOver(), 500);
             });
 
             // Listen to opponent board
@@ -1510,6 +1513,9 @@
                         markShipAsSunk(ship, shipData);
                     }
                 });
+                
+                // Check game over when opponent board changes
+                setTimeout(() => checkGameOver(), 500);
             });
         }
 
@@ -1518,25 +1524,58 @@
             const snapshot = await get(eventRef);
             const gameData = snapshot.val();
 
-            if (!gameData || !gameData.boards || !gameData.boards.p1 || !gameData.boards.p2) return;
+            if (!gameData || !gameData.boards || !gameData.boards.p1 || !gameData.boards.p2) {
+                console.log('GameOver check: missing data');
+                return;
+            }
 
             const p1Board = gameData.boards.p1;
             const p2Board = gameData.boards.p2;
 
+            console.log('Checking game over...');
+            console.log('P1 Board:', p1Board);
+            console.log('P2 Board:', p2Board);
+
             const isP1Defeated = ['S', 'A', 'B'].every(ship => {
                 const shipData = p1Board[ship];
-                if (!shipData || !shipData.hits) return false;
-                return shipData.hits.length >= shipData.w * shipData.h;
+                if (!shipData) {
+                    console.log(`P1 ${ship}: missing`);
+                    return false;
+                }
+                const hits = shipData.hits || [];
+                const maxHits = shipData.w * shipData.h;
+                const defeated = hits.length >= maxHits;
+                console.log(`P1 ${ship}: ${hits.length}/${maxHits} - defeated: ${defeated}`);
+                return defeated;
             });
 
             const isP2Defeated = ['S', 'A', 'B'].every(ship => {
                 const shipData = p2Board[ship];
-                if (!shipData || !shipData.hits) return false;
-                return shipData.hits.length >= shipData.w * shipData.h;
+                if (!shipData) {
+                    console.log(`P2 ${ship}: missing`);
+                    return false;
+                }
+                const hits = shipData.hits || [];
+                const maxHits = shipData.w * shipData.h;
+                const defeated = hits.length >= maxHits;
+                console.log(`P2 ${ship}: ${hits.length}/${maxHits} - defeated: ${defeated}`);
+                return defeated;
             });
 
+            console.log('P1 Defeated:', isP1Defeated);
+            console.log('P2 Defeated:', isP2Defeated);
+
             if (isP1Defeated || isP2Defeated) {
+                console.log('GAME OVER!');
                 const winner = isP1Defeated ? 'p2' : 'p1';
+                
+                // Prevent multiple calls
+                if (gameData.isGameOver) {
+                    console.log('Game already over, showing screen');
+                    showGameOver(gameData);
+                    return;
+                }
+                
                 await finalizeRewards(winner, gameData);
             }
         }
