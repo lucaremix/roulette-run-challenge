@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lenora - BST Challenge</title>
+    <title>Lenora - BST Challenge v6</title>
     <style>
         * {
             margin: 0;
@@ -889,11 +889,24 @@
                     console.log('Game state updated from Firebase:', gameState);
                     updateUI();
                     
-                    // Se c'è un nuovo BST, aggiorna la UI
-                    if (gameState.currentBST && currentBST !== gameState.currentBST) {
+                    // Se c'è un BST (nuovo o esistente), aggiorna sempre la UI
+                    if (gameState.currentBST) {
                         currentBST = gameState.currentBST;
-                        document.getElementById('bstValue').textContent = currentBST;
                         correctPokemon = allPokemon.filter(p => p.bst === currentBST);
+                        
+                        const bstElement = document.getElementById('bstValue');
+                        if (bstElement) {
+                            bstElement.textContent = currentBST;
+                            console.log('Updated BST display to:', currentBST);
+                        }
+                        
+                        // Riabilita gli input se necessario
+                        const submitBtn = document.getElementById('submitBtn');
+                        const pokemonInput = document.getElementById('pokemonInput');
+                        if (submitBtn && pokemonInput && !gameState.currentGuess) {
+                            submitBtn.disabled = false;
+                            pokemonInput.disabled = false;
+                        }
                     }
                 }
             });
@@ -1019,6 +1032,88 @@
                 
                 document.getElementById('submitBtn').disabled = true;
                 document.getElementById('pokemonInput').disabled = true;
+                
+                // Salva il round corrente per il confronto
+                const myRound = currentState.currentRound;
+                
+                // Aggiungi listener per attendere la risposta dell'altro giocatore
+                const unsubscribe = onValue(eventRef, async (updatedSnapshot) => {
+                    const updatedState = updatedSnapshot.val();
+                    
+                    // Verifica se siamo ancora nello stesso round ma currentGuess è stato cancellato
+                    // Questo significa che il secondo giocatore ha completato il round
+                    if (updatedState.currentRound > myRound || (updatedState.currentRound === myRound && !updatedState.currentGuess)) {
+                        console.log('Round completed by second player, updating display');
+                        unsubscribe();
+                        
+                        // Aggiorna lo stato del gioco locale
+                        gameState = updatedState;
+                        updateUI();
+                        
+                        // Mostra i risultati del round se disponibili
+                        if (updatedState.lastRoundResult) {
+                            const result = updatedState.lastRoundResult;
+                            let resultHTML = `<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin: 20px 0;">`;
+                            
+                            // Guess del primo giocatore (me stesso in questo caso)
+                            resultHTML += `
+                                <div style="background: #0a0a0a; padding: 20px; border-radius: 8px; border: 2px solid ${result.player1Distance < result.player2Distance ? '#4a7a4a' : '#2a2a2a'}">
+                                    <div style="font-size: 1.2em; font-weight: bold; color: #fff; margin-bottom: 10px;">${result.player1}</div>
+                                    <img src="${getPokemonImageUrl(result.player1Pokemon.national_number)}" style="width: 120px; height: 120px; margin: 10px auto; display: block;">
+                                    <div style="color: #d4af37; font-size: 1.3em; font-weight: bold;">${result.player1Pokemon.name}</div>
+                                    <div style="color: #888; margin-top: 5px;">BST: ${result.player1Pokemon.bst}</div>
+                                    <div style="color: ${result.player1Distance === 0 ? '#7fff7f' : '#ff7f7f'}; font-weight: bold; margin-top: 10px;">
+                                        Distanza: ${result.player1Distance}
+                                    </div>
+                                </div>
+                            `;
+                            
+                            // Guess del secondo giocatore
+                            resultHTML += `
+                                <div style="background: #0a0a0a; padding: 20px; border-radius: 8px; border: 2px solid ${result.player2Distance < result.player1Distance ? '#4a7a4a' : '#2a2a2a'}">
+                                    <div style="font-size: 1.2em; font-weight: bold; color: #fff; margin-bottom: 10px;">${result.player2}</div>
+                                    <img src="${getPokemonImageUrl(result.player2Pokemon.national_number)}" style="width: 120px; height: 120px; margin: 10px auto; display: block;">
+                                    <div style="color: #d4af37; font-size: 1.3em; font-weight: bold;">${result.player2Pokemon.name}</div>
+                                    <div style="color: #888; margin-top: 5px;">BST: ${result.player2Pokemon.bst}</div>
+                                    <div style="color: ${result.player2Distance === 0 ? '#7fff7f' : '#ff7f7f'}; font-weight: bold; margin-top: 10px;">
+                                        Distanza: ${result.player2Distance}
+                                    </div>
+                                </div>
+                            `;
+                            
+                            resultHTML += `</div>`;
+                            
+                            // Mostra il vincitore
+                            if (!result.winner) {
+                                resultHTML += `<div style="text-align: center; font-size: 1.3em; color: #d4af37; font-weight: bold; margin-top: 20px;">
+                                    🤝 Pareggio!
+                                </div>`;
+                            } else {
+                                resultHTML += `<div style="text-align: center; font-size: 1.3em; color: #7fff7f; font-weight: bold; margin-top: 20px;">
+                                    ✓ ${result.winner} vince il round!
+                                </div>`;
+                            }
+                            
+                            // Mostra i Pokémon corretti
+                            const correctNames = result.correctPokemonNames.join(', ');
+                            resultHTML += `<div style="text-align: center; color: #888; margin-top: 20px;">
+                                Pokémon con BST ${result.bst}: ${correctNames}${result.totalCorrectPokemon > 5 ? ` (+${result.totalCorrectPokemon - 5} altri)` : ''}
+                            </div>`;
+                            
+                            showResult(resultHTML, result.winner !== null);
+                        }
+                        
+                        // Se il gioco è finito, mostra il risultato finale
+                        if (updatedState.isGameOver) {
+                            showFinalResult();
+                        } else {
+                            // Altrimenti, attendi un momento e poi genera il prossimo round
+                            setTimeout(() => {
+                                generateSharedRound();
+                            }, 5000);
+                        }
+                    }
+                });
             } else {
                 console.log('Second player answering, comparing results');
                 // Secondo giocatore - confronta le risposte
@@ -1110,6 +1205,24 @@
                 }
 
                 currentState.currentRound++;
+                
+                // Salva i risultati del round per il primo giocatore
+                currentState.lastRoundResult = {
+                    player1: otherPlayer,
+                    player1Pokemon: otherPokemon,
+                    player1Distance: otherGuess.distance,
+                    player2: currentPlayer,
+                    player2Pokemon: {
+                        name: guessedPokemon.name,
+                        national_number: parseInt(guessedPokemon.national_number) || 0,
+                        bst: guessedPokemon.bst
+                    },
+                    player2Distance: distance,
+                    winner: winner,
+                    bst: currentBST,
+                    correctPokemonNames: correctPokemon.map(p => p.name).slice(0, 5),
+                    totalCorrectPokemon: correctPokemon.length
+                };
                 
                 if (currentState.player1.score >= currentState.roundsToWin || 
                     currentState.player2.score >= currentState.roundsToWin) {
