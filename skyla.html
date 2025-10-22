@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Skyla v3</title>
+    <title>Skyla v4</title>
     <style>
         * {
             margin: 0;
@@ -315,6 +315,13 @@
             margin-bottom: 30px;
         }
 
+        .pokemon-slot {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+
         .pokemon-card {
             background: #0a0a0a;
             border: 2px solid #2a2a2a;
@@ -323,6 +330,7 @@
             text-align: center;
             transition: all 0.3s ease;
             cursor: grab;
+            width: 100%;
         }
 
         .pokemon-card:active {
@@ -962,9 +970,11 @@
             grid.innerHTML = currentOrder.map((pokemon, index) => {
                 const imgUrl = `https://www.pokemon.com/static-assets/content-assets/cms2/img/pokedex/full/${padNumber(pokemon.national_number)}.png`;
                 return `
-                    <div class="pokemon-card" draggable="true" data-index="${index}">
-                        <img src="${imgUrl}" alt="${pokemon.name}" class="pokemon-img">
-                        <div class="pokemon-name">${pokemon.name}</div>
+                    <div class="pokemon-slot">
+                        <div class="pokemon-card" draggable="true" data-index="${index}">
+                            <img src="${imgUrl}" alt="${pokemon.name}" class="pokemon-img">
+                            <div class="pokemon-name">${pokemon.name}</div>
+                        </div>
                         <div class="position-label">#${index + 1}</div>
                     </div>
                 `;
@@ -1153,15 +1163,22 @@
                 </div>
             `;
 
+            // Auto-hide after 5 seconds
             setTimeout(async () => {
                 document.getElementById('resultOverlay').classList.remove('show');
                 
-                if (state.isGameOver) {
-                    showFinalResult(state);
+                // Fetch fresh state from Firebase
+                const snapshot = await get(eventRef);
+                const freshState = snapshot.val();
+                
+                if (freshState.isGameOver) {
+                    showFinalResult(freshState);
                 } else {
-                    // Start new round
-                    state.currentRound++;
-                    await generateNewRound(state);
+                    // Clear the round result flag and start new round
+                    freshState.currentRound++;
+                    delete freshState.showRoundResult;
+                    delete freshState.roundResults;
+                    await generateNewRound(freshState);
                 }
             }, 5000);
         }
@@ -1232,6 +1249,7 @@
                 document.getElementById('gameArea').classList.remove('show');
                 document.getElementById('waitingScreen').classList.remove('show');
                 document.getElementById('finalResult').classList.remove('show');
+                document.getElementById('resultOverlay').classList.remove('show');
                 renderLanding();
                 return;
             }
@@ -1244,7 +1262,7 @@
                         showFinalResult(state);
                     }
                 } else if (state.showRoundResult) {
-                    // Mostra risultato round
+                    // Mostra risultato round (solo se non è già mostrato)
                     if (!document.getElementById('resultOverlay').classList.contains('show')) {
                         showRoundResult(state);
                     }
@@ -1255,10 +1273,12 @@
                         // Mostra waiting screen
                         document.getElementById('gameArea').classList.remove('show');
                         document.getElementById('waitingScreen').classList.add('show');
+                        document.getElementById('resultOverlay').classList.remove('show');
                     } else {
                         // Mostra game area
                         document.getElementById('introScreen').classList.remove('show');
                         document.getElementById('waitingScreen').classList.remove('show');
+                        document.getElementById('resultOverlay').classList.remove('show');
                         if (!document.getElementById('gameArea').classList.contains('show')) {
                             renderGameArea(state);
                         }
@@ -1269,6 +1289,7 @@
                     document.getElementById('introScreen').classList.add('show');
                     document.getElementById('gameArea').classList.remove('show');
                     document.getElementById('waitingScreen').classList.remove('show');
+                    document.getElementById('resultOverlay').classList.remove('show');
                 }
             } else {
                 // Meno di 2 giocatori - mostra landing
