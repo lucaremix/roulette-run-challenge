@@ -1,0 +1,879 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bianca - Wonder Trade Challenge</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-image: url('https://raw.githubusercontent.com/lucaremix/roulette-run-challenge/main/background/Bianca_background.png');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            color: #e0e0e0;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            background: #1a1a1a;
+            border: 1px solid #2a2a2a;
+            border-radius: 8px;
+            color: #e0e0e0;
+            text-decoration: none;
+            font-size: 1em;
+            transition: all 0.3s ease;
+            margin-bottom: 30px;
+        }
+
+        .back-btn:hover {
+            background: #252525;
+        }
+
+        .event-header {
+            background: #1a1a1a;
+            border: 1px solid #2a2a2a;
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 30px;
+            display: flex;
+            align-items: center;
+            gap: 30px;
+        }
+
+        .event-trainer-img {
+            width: 160px;
+            height: 160px;
+            object-fit: contain;
+            border: none;
+            flex-shrink: 0;
+            image-rendering: pixelated;
+        }
+
+        .event-info {
+            flex: 1;
+        }
+
+        .event-title {
+            font-size: 2.5em;
+            color: #ffffff;
+            margin-bottom: 15px;
+        }
+
+        .event-status {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .status-badge {
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 1.1em;
+        }
+
+        .status-badge.joined {
+            background: #2d4a2d;
+            color: #7fff7f;
+        }
+
+        .status-badge.not-joined {
+            background: #2a2a2a;
+            color: #888;
+        }
+
+        .join-leave-btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+
+        .join-btn {
+            background: #2a7a2a;
+            color: white;
+        }
+
+        .join-btn:hover {
+            background: #357a35;
+        }
+
+        .leave-btn {
+            background: #7a2a2a;
+            color: white;
+        }
+
+        .leave-btn:hover {
+            background: #8a3535;
+        }
+
+        .players-section {
+            background: #1a1a1a;
+            border: 1px solid #2a2a2a;
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 30px;
+        }
+
+        .players-title {
+            font-size: 1.8em;
+            color: #ffffff;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .player-count-badge {
+            background: #2a2a2a;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.7em;
+            color: #888;
+        }
+
+        .players-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .player-card {
+            background: #0a0a0a;
+            border: 1px solid #2a2a2a;
+            border-radius: 8px;
+            padding: 15px 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .player-card.current-user {
+            border-color: #4a4a4a;
+            background: #1f1f1f;
+        }
+
+        .player-name {
+            font-size: 1.1em;
+            color: #e0e0e0;
+        }
+
+        .player-card.current-user .player-name {
+            color: #ffffff;
+            font-weight: 600;
+        }
+
+        .you-badge {
+            background: #2a7a2a;
+            color: white;
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 0.8em;
+            font-weight: 600;
+        }
+
+        .no-players {
+            text-align: center;
+            color: #555;
+            font-style: italic;
+            padding: 30px;
+        }
+
+        .intro-screen {
+            background: #1a1a1a;
+            border: 1px solid #2a2a2a;
+            border-radius: 12px;
+            padding: 40px;
+            display: none;
+        }
+
+        .intro-screen.show {
+            display: block;
+        }
+
+        .intro-content {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .intro-text h2 {
+            font-size: 2em;
+            color: #ff69b4;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .intro-text p {
+            font-size: 1.2em;
+            line-height: 1.8;
+            color: #e0e0e0;
+            margin-bottom: 15px;
+        }
+
+        .intro-text .highlight {
+            color: #ff69b4;
+            font-weight: bold;
+        }
+
+        .start-btn {
+            display: block;
+            margin: 30px auto 0;
+            padding: 20px 60px;
+            background: #ff69b4;
+            color: #1a1a1a;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.3em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .start-btn:hover {
+            background: #ff85c1;
+            transform: translateY(-2px);
+        }
+
+        .game-screen {
+            display: none;
+        }
+
+        .game-screen.show {
+            display: block;
+        }
+
+        .trade-section {
+            background: #1a1a1a;
+            border: 1px solid #2a2a2a;
+            border-radius: 12px;
+            padding: 40px;
+            margin-bottom: 30px;
+        }
+
+        .trade-title {
+            font-size: 2em;
+            color: #ff69b4;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .team-selection {
+            margin-bottom: 30px;
+        }
+
+        .team-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .team-pokemon {
+            background: #0a0a0a;
+            border: 2px solid #2a2a2a;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .team-pokemon:hover {
+            border-color: #ff69b4;
+            transform: translateY(-5px);
+        }
+
+        .team-pokemon.selected {
+            border-color: #ff69b4;
+            background: rgba(255, 105, 180, 0.1);
+        }
+
+        .team-pokemon-img {
+            width: 120px;
+            height: 120px;
+            object-fit: contain;
+            margin-bottom: 10px;
+        }
+
+        .team-pokemon-name {
+            font-size: 1.2em;
+            color: #ffffff;
+            font-weight: 600;
+        }
+
+        .no-team {
+            text-align: center;
+            color: #888;
+            font-size: 1.2em;
+            padding: 40px;
+            font-style: italic;
+        }
+
+        .trade-buttons {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            margin-top: 30px;
+        }
+
+        .trade-btn {
+            padding: 15px 40px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.2em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+
+        .accept-btn {
+            background: #2a7a2a;
+            color: white;
+        }
+
+        .accept-btn:hover:not(:disabled) {
+            background: #357a35;
+        }
+
+        .refuse-btn {
+            background: #7a2a2a;
+            color: white;
+        }
+
+        .refuse-btn:hover {
+            background: #8a3535;
+        }
+
+        .trade-btn:disabled {
+            background: #2a2a2a;
+            color: #555;
+            cursor: not-allowed;
+        }
+
+        .waiting-message {
+            text-align: center;
+            color: #888;
+            font-size: 1.3em;
+            padding: 40px;
+        }
+
+        .result-message {
+            background: #1a1a1a;
+            border: 1px solid #2a2a2a;
+            border-radius: 12px;
+            padding: 40px;
+            text-align: center;
+            margin-top: 30px;
+        }
+
+        .result-message h3 {
+            font-size: 2em;
+            color: #ff69b4;
+            margin-bottom: 20px;
+        }
+
+        .result-message p {
+            font-size: 1.2em;
+            color: #e0e0e0;
+            margin-bottom: 15px;
+        }
+
+        .spin-redirect-btn {
+            margin-top: 30px;
+            padding: 15px 50px;
+            background: #ff69b4;
+            color: #1a1a1a;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.2em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+
+        .spin-redirect-btn:hover {
+            background: #ff85c1;
+            transform: scale(1.05);
+        }
+
+        @media (max-width: 768px) {
+            .event-header {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .team-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .trade-buttons {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="index.html" class="back-btn">← Torna alla Home</a>
+
+        <!-- Landing / Join Section -->
+        <div id="landingSection">
+            <div class="event-header">
+                <img src="https://img.nuzlocke.app/leaders/blwh-bianca.png" 
+                     alt="Bianca" class="event-trainer-img">
+                <div class="event-info">
+                    <h1 class="event-title">Bianca - Wonder Trade Challenge</h1>
+                    <p style="font-size: 1.1em; color: #ccc;">
+                        Offri un tuo Pokémon per ottenere uno Spin dal Pool S! 
+                        Oppure rifiuta lo scambio e mantieni il tuo Pokémon.
+                    </p>
+                    <div class="event-status">
+                        <span class="status-badge not-joined" id="joinStatus">Non partecipante</span>
+                        <button class="join-leave-btn join-btn" id="joinBtn" onclick="toggleJoin()">
+                            Unisciti all'evento
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="players-section">
+                <div class="players-title">
+                    Giocatori
+                    <span class="player-count-badge" id="playerCount">0/2</span>
+                </div>
+                <div class="players-list" id="playersList">
+                    <div class="no-players">Nessun giocatore nell'evento</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Intro Screen -->
+        <div class="intro-screen" id="introScreen">
+            <div class="intro-content">
+                <div class="intro-text">
+                    <h2>🎁 Wonder Trade Challenge 🎁</h2>
+                    <p>Benvenuti alla Wonder Trade di Bianca!</p>
+                    <p>
+                        <span class="highlight">Come funziona:</span><br>
+                        • Ogni giocatore può scegliere un Pokémon dal proprio team<br>
+                        • Puoi <span class="highlight">accettare lo scambio</span> per ricevere 1 Spin Pool S<br>
+                        • Oppure <span class="highlight">rifiutare</span> e mantenere il tuo Pokémon<br>
+                        • Se accetti, il Pokémon verrà rimosso dal tuo team
+                    </p>
+                    <p>
+                        <span class="highlight">Ricompense:</span><br>
+                        🌟 Accetti lo scambio: 1 Spin Pool S<br>
+                        🛡️ Rifiuti lo scambio: Mantieni il tuo Pokémon
+                    </p>
+                </div>
+                <button class="start-btn" onclick="startTrade()">Inizia il Wonder Trade</button>
+            </div>
+        </div>
+
+        <!-- Game Screen -->
+        <div class="game-screen" id="gameScreen">
+            <div class="trade-section">
+                <h2 class="trade-title">🎁 Scegli un Pokémon da scambiare 🎁</h2>
+                
+                <div class="team-selection">
+                    <div class="team-grid" id="teamGrid">
+                        <div class="no-team">Caricamento team...</div>
+                    </div>
+                </div>
+
+                <div class="trade-buttons">
+                    <button class="trade-btn accept-btn" id="acceptBtn" onclick="acceptTrade()" disabled>
+                        ✓ Accetta Scambio (1 Spin Pool S)
+                    </button>
+                    <button class="trade-btn refuse-btn" onclick="refuseTrade()">
+                        ✗ Rifiuta Scambio
+                    </button>
+                </div>
+
+                <div id="waitingMessage" class="waiting-message" style="display: none;">
+                    In attesa della decisione...
+                </div>
+
+                <div id="resultMessage" class="result-message" style="display: none;">
+                    <!-- Result will be shown here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+        import { getDatabase, ref, onValue, set, get, remove, push } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js';
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDNuD9wViLLxteHMCEBlvfdONwcZbAjAvo",
+            authDomain: "roulette-run-challenge.firebaseapp.com",
+            databaseURL: "https://roulette-run-challenge-default-rtdb.europe-west1.firebasedatabase.app",
+            projectId: "roulette-run-challenge",
+            storageBucket: "roulette-run-challenge.firebasestorage.app",
+            messagingSenderId: "994019156093",
+            appId: "1:994019156093:web:9792bdce75c486f589d114"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app);
+        const eventRef = ref(database, 'events/bianca');
+
+        let playerTeam = [];
+        let selectedPokemon = null;
+        const MAX_PLAYERS = 2;
+
+        function getCurrentPlayer() {
+            return localStorage.getItem('playerName') || '';
+        }
+
+        function padNumber(num) {
+            return String(num).padStart(3, '0');
+        }
+
+        function renderLanding() {
+            const currentPlayer = getCurrentPlayer();
+            const playersRef = ref(database, `events/bianca/players`);
+
+            onValue(playersRef, (snapshot) => {
+                const players = [];
+                snapshot.forEach((childSnapshot) => {
+                    players.push(childSnapshot.val());
+                });
+
+                const isJoined = players.includes(currentPlayer);
+
+                const statusBadge = document.getElementById('joinStatus');
+                const joinLeaveBtn = document.getElementById('joinBtn');
+
+                if (statusBadge && joinLeaveBtn) {
+                    if (isJoined) {
+                        statusBadge.textContent = 'Partecipante';
+                        statusBadge.className = 'status-badge joined';
+                        joinLeaveBtn.textContent = 'Abbandona evento';
+                        joinLeaveBtn.className = 'join-leave-btn leave-btn';
+                    } else {
+                        statusBadge.textContent = 'Non partecipante';
+                        statusBadge.className = 'status-badge not-joined';
+                        joinLeaveBtn.textContent = 'Unisciti all\'evento';
+                        joinLeaveBtn.className = 'join-leave-btn join-btn';
+                    }
+                }
+
+                const countBadge = document.getElementById('playerCount');
+                if (countBadge) {
+                    countBadge.textContent = `${players.length}/2`;
+                }
+
+                const playersList = document.getElementById('playersList');
+                
+                if (playersList) {
+                    if (players.length === 0) {
+                        playersList.innerHTML = '<div class="no-players">Nessun giocatore nell\'evento</div>';
+                    } else {
+                        playersList.innerHTML = players.map(player => {
+                            const isCurrentUser = player === currentPlayer;
+                            return `
+                                <div class="player-card ${isCurrentUser ? 'current-user' : ''}">
+                                    <span class="player-name">${player}</span>
+                                    ${isCurrentUser ? '<span class="you-badge">Tu</span>' : ''}
+                                </div>
+                            `;
+                        }).join('');
+                    }
+                }
+
+                if (players.length === 2 && players.includes(currentPlayer)) {
+                    document.getElementById('landingSection').style.display = 'none';
+                    document.getElementById('introScreen').classList.add('show');
+                } else {
+                    document.getElementById('landingSection').style.display = 'block';
+                    document.getElementById('introScreen').classList.remove('show');
+                }
+            });
+
+            onValue(eventRef, (snapshot) => {
+                const data = snapshot.val();
+                if (!data) return;
+
+                if (data.tradeStarted && !data.tradeCompleted) {
+                    document.getElementById('landingSection').style.display = 'none';
+                    document.getElementById('introScreen').classList.remove('show');
+                    document.getElementById('gameScreen').classList.add('show');
+                    loadPlayerTeam();
+                }
+
+                if (data.tradeCompleted) {
+                    showResult(data);
+                }
+            });
+        }
+
+        async function toggleJoin() {
+            const playerName = getCurrentPlayer();
+            if (!playerName) {
+                alert('Devi impostare il tuo nome dalla home page!');
+                window.location.href = 'index.html';
+                return;
+            }
+
+            const playersRef = ref(database, `events/bianca/players`);
+            
+            const snapshot = await new Promise((resolve) => {
+                onValue(playersRef, (snap) => resolve(snap), { onlyOnce: true });
+            });
+
+            let isInEvent = false;
+            let playerNodeKey = null;
+
+            snapshot.forEach((childSnapshot) => {
+                if (childSnapshot.val() === playerName) {
+                    isInEvent = true;
+                    playerNodeKey = childSnapshot.key;
+                }
+            });
+
+            if (isInEvent && playerNodeKey) {
+                await remove(ref(database, `events/bianca/players/${playerNodeKey}`));
+            } else {
+                const newPlayerRef = push(ref(database, `events/bianca/players`));
+                await set(newPlayerRef, playerName);
+            }
+        }
+
+        window.toggleJoin = toggleJoin;
+
+        window.startTrade = async function() {
+            const playersRef = ref(database, `events/bianca/players`);
+            const snapshot = await get(playersRef);
+            
+            const players = [];
+            snapshot.forEach((childSnapshot) => {
+                players.push(childSnapshot.val());
+            });
+
+            if (players.length !== 2) {
+                alert('Servono esattamente 2 giocatori per iniziare!');
+                return;
+            }
+
+            const tradeData = {
+                tradeStarted: true,
+                player1: players[0],
+                player2: players[1],
+                decisions: {},
+                tradeCompleted: false
+            };
+
+            await set(eventRef, tradeData);
+            
+            document.getElementById('introScreen').classList.remove('show');
+            document.getElementById('gameScreen').classList.add('show');
+            
+            await loadPlayerTeam();
+        };
+
+        async function loadPlayerTeam() {
+            const currentPlayer = getCurrentPlayer();
+            const teamRef = ref(database, `players/${currentPlayer}/team`);
+            
+            const snapshot = await get(teamRef);
+            playerTeam = [];
+            
+            if (snapshot.exists()) {
+                snapshot.forEach((childSnapshot) => {
+                    playerTeam.push({
+                        key: childSnapshot.key,
+                        ...childSnapshot.val()
+                    });
+                });
+            }
+
+            renderTeam();
+        }
+
+        function renderTeam() {
+            const teamGrid = document.getElementById('teamGrid');
+            
+            if (playerTeam.length === 0) {
+                teamGrid.innerHTML = '<div class="no-team">Non hai Pokémon nel tuo team!</div>';
+                return;
+            }
+
+            teamGrid.innerHTML = playerTeam.map(pokemon => {
+                const imgUrl = `https://www.pokemon.com/static-assets/content-assets/cms2/img/pokedex/full/${padNumber(pokemon.national_number)}.png`;
+                return `
+                    <div class="team-pokemon" onclick="selectPokemon('${pokemon.key}')">
+                        <img src="${imgUrl}" alt="${pokemon.name}" class="team-pokemon-img">
+                        <div class="team-pokemon-name">${pokemon.name}</div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        window.selectPokemon = function(key) {
+            selectedPokemon = playerTeam.find(p => p.key === key);
+            
+            document.querySelectorAll('.team-pokemon').forEach(el => {
+                el.classList.remove('selected');
+            });
+            
+            event.target.closest('.team-pokemon').classList.add('selected');
+            
+            document.getElementById('acceptBtn').disabled = false;
+        };
+
+        window.acceptTrade = async function() {
+            if (!selectedPokemon) {
+                alert('Seleziona un Pokémon da scambiare!');
+                return;
+            }
+
+            const currentPlayer = getCurrentPlayer();
+            
+            const snapshot = await get(eventRef);
+            const tradeData = snapshot.val();
+
+            if (!tradeData.decisions) {
+                tradeData.decisions = {};
+            }
+
+            tradeData.decisions[currentPlayer] = {
+                accepted: true,
+                pokemon: selectedPokemon
+            };
+
+            await set(eventRef, tradeData);
+
+            document.getElementById('waitingMessage').style.display = 'block';
+            document.querySelector('.team-selection').style.display = 'none';
+            document.querySelector('.trade-buttons').style.display = 'none';
+
+            checkIfBothDecided(tradeData);
+        };
+
+        window.refuseTrade = async function() {
+            const currentPlayer = getCurrentPlayer();
+            
+            const snapshot = await get(eventRef);
+            const tradeData = snapshot.val();
+
+            if (!tradeData.decisions) {
+                tradeData.decisions = {};
+            }
+
+            tradeData.decisions[currentPlayer] = {
+                accepted: false
+            };
+
+            await set(eventRef, tradeData);
+
+            document.getElementById('waitingMessage').style.display = 'block';
+            document.querySelector('.team-selection').style.display = 'none';
+            document.querySelector('.trade-buttons').style.display = 'none';
+
+            checkIfBothDecided(tradeData);
+        };
+
+        async function checkIfBothDecided(tradeData) {
+            const player1 = tradeData.player1;
+            const player2 = tradeData.player2;
+
+            if (tradeData.decisions[player1] && tradeData.decisions[player2]) {
+                await processTradeResults(tradeData);
+            }
+        }
+
+        async function processTradeResults(tradeData) {
+            const player1 = tradeData.player1;
+            const player2 = tradeData.player2;
+            const dec1 = tradeData.decisions[player1];
+            const dec2 = tradeData.decisions[player2];
+
+            if (dec1.accepted) {
+                const teamRef = ref(database, `players/${player1}/team/${dec1.pokemon.key}`);
+                await remove(teamRef);
+
+                const playerRef = ref(database, `players/${player1}`);
+                const playerSnap = await get(playerRef);
+                let playerData = playerSnap.val() || { coins: 0 };
+                playerData.pendingSpin = { pool: 's-tier', from: 'bianca' };
+                await set(playerRef, playerData);
+            }
+
+            if (dec2.accepted) {
+                const teamRef = ref(database, `players/${player2}/team/${dec2.pokemon.key}`);
+                await remove(teamRef);
+
+                const playerRef = ref(database, `players/${player2}`);
+                const playerSnap = await get(playerRef);
+                let playerData = playerSnap.val() || { coins: 0 };
+                playerData.pendingSpin = { pool: 's-tier', from: 'bianca' };
+                await set(playerRef, playerData);
+            }
+
+            tradeData.tradeCompleted = true;
+            await set(eventRef, tradeData);
+        }
+
+        function showResult(data) {
+            document.getElementById('waitingMessage').style.display = 'none';
+            const resultDiv = document.getElementById('resultMessage');
+            resultDiv.style.display = 'block';
+
+            const currentPlayer = getCurrentPlayer();
+            const myDecision = data.decisions[currentPlayer];
+
+            if (myDecision.accepted) {
+                resultDiv.innerHTML = `
+                    <h3>✓ Scambio Accettato!</h3>
+                    <p>Hai scambiato <strong>${myDecision.pokemon.name}</strong></p>
+                    <p>Hai ricevuto <strong>1 Spin Pool S</strong>!</p>
+                    <button class="spin-redirect-btn" onclick="goToSpin()">Vai allo Spin! 🎰</button>
+                `;
+            } else {
+                resultDiv.innerHTML = `
+                    <h3>✗ Scambio Rifiutato</h3>
+                    <p>Hai mantenuto il tuo Pokémon</p>
+                    <button class="spin-redirect-btn" onclick="goHome()">Torna alla Home</button>
+                `;
+            }
+        }
+
+        window.goToSpin = function() {
+            window.location.href = 'pokemon-spin.html';
+        };
+
+        window.goHome = function() {
+            window.location.href = 'index.html';
+        };
+
+        if (!getCurrentPlayer()) {
+            alert('Devi impostare il tuo nome dalla home page!');
+            window.location.href = 'index.html';
+        } else {
+            renderLanding();
+        }
+    </script>
+</body>
+</html>
