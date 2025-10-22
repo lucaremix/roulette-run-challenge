@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lenora - BST Challenge v6</title>
+    <title>Lenora - BST Challenge v7</title>
     <style>
         * {
             margin: 0;
@@ -784,45 +784,42 @@
 
         async function loadPokemon() {
             try {
-                // Usa fetch per caricare il CSV da GitHub Pages
-                const response = await fetch('pokemon.csv');
-                const csvContent = await response.text();
-                const cleanContent = csvContent.replace(/\0/g, '');
+                // Carica il JSON dal database Firebase
+                const poolRef = ref(database, 'allPokemon');
+                const snapshot = await get(poolRef);
                 
-                const parsed = Papa.parse(cleanContent, {
-                    header: true,
-                    dynamicTyping: true,
-                    skipEmptyLines: true,
-                    delimitersToGuess: ['\t', ',', '|', ';']
-                });
-
-                allPokemon = parsed.data.map(p => {
-                    const name = (p.english_name || '').trim();
-                    // Pulisci il national_number da caratteri strani
-                    let nationalNum = p.national_number;
-                    if (typeof nationalNum === 'string') {
-                        nationalNum = nationalNum.replace(/[^\d]/g, '');
-                        nationalNum = parseInt(nationalNum) || 0;
-                    }
+                if (snapshot.exists()) {
+                    const pokemonData = snapshot.val();
+                    allPokemon = Object.values(pokemonData).map(p => {
+                        const name = (p.english_name || '').trim();
+                        let nationalNum = p.national_number;
+                        if (typeof nationalNum === 'string') {
+                            nationalNum = nationalNum.replace(/[^\d]/g, '');
+                            nationalNum = parseInt(nationalNum) || 0;
+                        }
+                        
+                        const bst = (p.hp || 0) + (p.attack || 0) + (p.defense || 0) + (p.sp_attack || 0) + (p.sp_defense || 0) + (p.speed || 0);
+                        return {
+                            name,
+                            national_number: nationalNum,
+                            bst,
+                            hp: p.hp || 0,
+                            attack: p.attack || 0,
+                            defense: p.defense || 0,
+                            sp_attack: p.sp_attack || 0,
+                            sp_defense: p.sp_defense || 0,
+                            speed: p.speed || 0
+                        };
+                    }).filter(p => p.name && !isNaN(p.bst) && p.bst > 0 && p.national_number > 0);
                     
-                    const bst = p.hp + p.attack + p.defense + p.sp_attack + p.sp_defense + p.speed;
-                    return {
-                        name,
-                        national_number: nationalNum,
-                        bst,
-                        hp: p.hp || 0,
-                        attack: p.attack || 0,
-                        defense: p.defense || 0,
-                        sp_attack: p.sp_attack || 0,
-                        sp_defense: p.sp_defense || 0,
-                        speed: p.speed || 0
-                    };
-                }).filter(p => p.name && !isNaN(p.bst) && p.bst > 0 && p.national_number > 0);
-
-                console.log('Pokemon caricati:', allPokemon.length);
+                    console.log('Pokemon caricati:', allPokemon.length);
+                } else {
+                    console.error('No pokemon data found in Firebase');
+                    alert('Errore: dati Pokemon non trovati nel database!');
+                }
             } catch (error) {
                 console.error('Errore caricamento Pokemon:', error);
-                alert('Errore nel caricamento del file pokemon.csv. Assicurati che sia nella stessa cartella.');
+                alert('Errore nel caricamento dei dati Pokemon dal database.');
             }
         }
 
