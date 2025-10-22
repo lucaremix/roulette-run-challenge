@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Skyla - Stat Sorting Challenge</title>
+    <title>Skyla v2</title>
     <style>
         * {
             margin: 0;
@@ -789,16 +789,30 @@
                 }).join('');
             }
 
-            // Show intro or game based on state
-            if (state?.isActive && playerNames.includes(currentPlayer)) {
-                document.getElementById('playersSection').style.display = 'none';
-                if (state.isGameOver) {
+            // Show intro screen when 2 players are joined
+            if (playerNames.length === 2 && playerNames.includes(currentPlayer)) {
+                if (!state?.isActive) {
+                    // Show intro screen if game hasn't started
+                    document.getElementById('playersSection').style.display = 'none';
+                    document.getElementById('introScreen').classList.add('show');
+                } else if (state.isGameOver) {
+                    // Show final result if game is over
+                    document.getElementById('playersSection').style.display = 'none';
                     showFinalResult(state);
                 } else if (state.showRoundResult) {
+                    // Show round result
+                    document.getElementById('playersSection').style.display = 'none';
                     showRoundResult(state);
                 } else {
-                    document.getElementById('introScreen').classList.add('show');
+                    // Show game area
+                    document.getElementById('playersSection').style.display = 'none';
+                    renderGameArea(state);
                 }
+            } else {
+                // Show players section when less than 2 players
+                document.getElementById('playersSection').style.display = 'block';
+                document.getElementById('introScreen').classList.remove('show');
+                document.getElementById('gameArea').classList.remove('show');
             }
         }
 
@@ -1181,24 +1195,62 @@
         // Listen for state changes
         onValue(eventRef, (snapshot) => {
             const state = snapshot.val();
-            if (state) {
-                const currentPlayer = getCurrentPlayer();
-                const playerNames = state.players ? Object.keys(state.players) : [];
-                
-                if (state.isActive && playerNames.includes(currentPlayer)) {
-                    if (state.isGameOver && !document.getElementById('finalResult').classList.contains('show')) {
+            if (!state) {
+                renderLanding();
+                return;
+            }
+
+            const currentPlayer = getCurrentPlayer();
+            const playerNames = state.players ? Object.keys(state.players) : [];
+            
+            // Se non siamo iscritti, mostra sempre la landing
+            if (!playerNames.includes(currentPlayer)) {
+                document.getElementById('playersSection').style.display = 'block';
+                document.getElementById('introScreen').classList.remove('show');
+                document.getElementById('gameArea').classList.remove('show');
+                document.getElementById('waitingScreen').classList.remove('show');
+                document.getElementById('finalResult').classList.remove('show');
+                renderLanding();
+                return;
+            }
+
+            // Se ci sono 2 giocatori
+            if (playerNames.length === 2) {
+                if (state.isGameOver) {
+                    // Game over - mostra risultato finale
+                    if (!document.getElementById('finalResult').classList.contains('show')) {
                         showFinalResult(state);
-                    } else if (state.showRoundResult && !document.getElementById('resultOverlay').classList.contains('show')) {
+                    }
+                } else if (state.showRoundResult) {
+                    // Mostra risultato round
+                    if (!document.getElementById('resultOverlay').classList.contains('show')) {
                         showRoundResult(state);
-                    } else if (!state.showRoundResult && !state.isGameOver && state.currentPokemon) {
-                        const hasSubmitted = state.submissions && state.submissions[currentPlayer];
-                        if (!hasSubmitted && !document.getElementById('gameArea').classList.contains('show')) {
+                    }
+                } else if (state.isActive && state.currentPokemon) {
+                    // Game attivo - controlla se abbiamo già inviato
+                    const hasSubmitted = state.submissions && state.submissions[currentPlayer];
+                    if (hasSubmitted) {
+                        // Mostra waiting screen
+                        document.getElementById('gameArea').classList.remove('show');
+                        document.getElementById('waitingScreen').classList.add('show');
+                    } else {
+                        // Mostra game area
+                        document.getElementById('introScreen').classList.remove('show');
+                        document.getElementById('waitingScreen').classList.remove('show');
+                        if (!document.getElementById('gameArea').classList.contains('show')) {
                             renderGameArea(state);
                         }
                     }
-                } else if (!state.isActive || !playerNames.includes(currentPlayer)) {
-                    renderLanding();
+                } else if (!state.isActive) {
+                    // Gioco non ancora iniziato - mostra intro
+                    document.getElementById('playersSection').style.display = 'none';
+                    document.getElementById('introScreen').classList.add('show');
+                    document.getElementById('gameArea').classList.remove('show');
+                    document.getElementById('waitingScreen').classList.remove('show');
                 }
+            } else {
+                // Meno di 2 giocatori - mostra landing
+                renderLanding();
             }
         });
 
