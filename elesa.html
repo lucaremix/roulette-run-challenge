@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Elesa v3</title>
+    <title>Elesa v4</title>
     <style>
         * {
             margin: 0;
@@ -647,8 +647,8 @@
                 </div>
             </div>
             <div class="rewards-div" id="rewardsDiv"></div>
-            <button class="start-btn" onclick="window.location.href='index.html'" style="margin-top: 20px;">
-                Torna alla Home
+            <button class="start-btn" onclick="goToSpin()" style="margin-top: 20px;">
+                Vai allo Spin! 🎰
             </button>
         </div>
     </div>
@@ -862,7 +862,7 @@
             }
         }
 
-        function showResultPhase() {
+        async function showResultPhase() {
             document.getElementById('gameScreen').style.display = 'none';
             const resultScreen = document.getElementById('resultScreen');
             resultScreen.classList.add('show');
@@ -874,14 +874,25 @@
             document.getElementById('resultTitle').textContent = isWinner ? '🎉 Hai Vinto! 🎉' : '😢 Hai Perso';
 
             // Mostra i Pokémon
-            const yourPokemon = gameState.pokemon.find(p => p.national_number === gameState.selections[playerName]);
+            const yourPokemon = gameState.pokemon.find(p => parseInt(p.national_number) === parseInt(gameState.selections[playerName]));
             const opponentName = gameState.players.find(p => p !== playerName);
-            const opponentPokemon = gameState.pokemon.find(p => p.national_number === gameState.selections[opponentName]);
+            const opponentPokemon = gameState.pokemon.find(p => parseInt(p.national_number) === parseInt(gameState.selections[opponentName]));
 
-            document.getElementById('yourPokemonImg').src = getPokemonImageUrl(yourPokemon.national_number);
-            document.getElementById('yourPokemonName').textContent = yourPokemon.name;
-            document.getElementById('opponentPokemonImg').src = getPokemonImageUrl(opponentPokemon.national_number);
-            document.getElementById('opponentPokemonName').textContent = opponentPokemon.name;
+            if (yourPokemon) {
+                document.getElementById('yourPokemonImg').src = getPokemonImageUrl(yourPokemon.national_number);
+                document.getElementById('yourPokemonName').textContent = yourPokemon.name;
+            }
+            
+            if (opponentPokemon) {
+                document.getElementById('opponentPokemonImg').src = getPokemonImageUrl(opponentPokemon.national_number);
+                document.getElementById('opponentPokemonName').textContent = opponentPokemon.name;
+            }
+
+            // Ottieni i coins guadagnati
+            const playerRef = ref(database, `players/${playerName}`);
+            const playerSnap = await get(playerRef);
+            const playerData = playerSnap.val() || { coins: 0 };
+            const coinsEarned = isWinner ? 100 : 75;
 
             // Mostra ricompense
             const winner = gameState.winner;
@@ -890,6 +901,12 @@
                 <h3 style="color: #ffeb3b; margin-bottom: 15px;">Ricompense</h3>
                 <div class="reward-item">🏆 ${winner}: 1 Spin Pool A + 100 Coins</div>
                 <div class="reward-item">💔 ${loser}: 1 Spin Pool C + 75 Coins</div>
+                <div style="margin-top: 20px; font-size: 1.3em; color: #ffeb3b; font-weight: bold;">
+                    Hai guadagnato ${coinsEarned} coins! 💰
+                </div>
+                <div style="color: #aaa; margin-top: 10px;">
+                    Totale coins: ${playerData.coins} 🪙
+                </div>
             `;
         }
 
@@ -1036,8 +1053,19 @@
             await set(loserRef, loserData);
         }
 
+        async function goToSpin() {
+            // Rimuovi entrambi i giocatori dall'evento
+            await set(eventRef, {
+                players: [],
+                phase: 'waiting'
+            });
+            
+            window.location.href = 'pokemon-spin.html';
+        }
+
         window.toggleJoin = toggleJoin;
         window.startGame = startGame;
+        window.goToSpin = goToSpin;
 
         // Inizializzazione
         if (!getCurrentPlayer()) {
