@@ -723,8 +723,20 @@
         fetch('https://raw.githubusercontent.com/lucaremix/roulette-run-challenge/main/pokemon.json')
             .then(res => res.json())
             .then(data => {
-                allPokemon = data.filter(p => p.description && p.description.trim().length > 0);
-                console.log(`Caricati ${allPokemon.length} Pokémon con descrizioni`);
+                allPokemon = data.filter(p => {
+                    // Deve avere una descrizione
+                    if (!p.description || p.description.trim().length === 0) return false;
+                    
+                    // Deve avere un nome
+                    if (!p.english_name || p.english_name.trim().length === 0) return false;
+                    
+                    // Il nome NON deve essere presente nella descrizione
+                    const nameLower = p.english_name.toLowerCase();
+                    const descLower = p.description.toLowerCase();
+                    
+                    return !descLower.includes(nameLower);
+                });
+                console.log(`Caricati ${allPokemon.length} Pokémon con descrizioni valide (senza nome)`);
             })
             .catch(err => console.error('Errore nel caricamento dei Pokémon:', err));
 
