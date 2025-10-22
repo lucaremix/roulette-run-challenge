@@ -692,7 +692,7 @@
         }
 
         function getCurrentPlayer() {
-            return localStorage.getItem('currentPlayer');
+            return localStorage.getItem('playerName') || '';
         }
 
         function padNumber(num) {
