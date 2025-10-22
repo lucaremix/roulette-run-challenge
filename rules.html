@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Regolamento - Pokémon Roulette Run Challenge</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #0a0a0a;
+            color: #e0e0e0;
+            background-image: url('https://raw.githubusercontent.com/lucaremix/roulette-run-challenge/main/background/starters_background.png');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            min-height: 100vh;
+            line-height: 1.7;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 40px 20px;
+            background: rgba(10, 10, 10, 0.8);
+            border: 1px solid #2a2a2a;
+            border-radius: 12px;
+            margin-top: 40px;
+        }
+
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            background: #1a1a1a;
+            border: 1px solid #2a2a2a;
+            border-radius: 8px;
+            color: #e0e0e0;
+            text-decoration: none;
+            font-size: 1em;
+            transition: all 0.3s ease;
+            margin-bottom: 40px;
+        }
+
+        .back-btn:hover {
+            background: #252525;
+        }
+
+        h1 {
+            color: #ffa500;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+        }
+
+        h2 {
+            color: #ffa500;
+            margin-top: 40px;
+            margin-bottom: 15px;
+            font-size: 1.8em;
+            border-bottom: 1px solid #2a2a2a;
+            padding-bottom: 5px;
+        }
+
+        h3 {
+            color: #ffb733;
+            margin-top: 25px;
+            margin-bottom: 10px;
+        }
+
+        ul {
+            margin-left: 25px;
+            margin-top: 10px;
+        }
+
+        li {
+            margin-bottom: 8px;
+        }
+
+        .event {
+            background: #1a1a1a;
+            border: 1px solid #2a2a2a;
+            border-radius: 10px;
+            padding: 25px 30px;
+            margin-top: 25px;
+        }
+
+        .event h3 {
+            color: #ffa500;
+            margin-bottom: 10px;
+        }
+
+        .event p {
+            margin-bottom: 10px;
+        }
+
+        .bonus {
+            color: #7fff7f;
+            font-weight: 600;
+        }
+
+        .coins {
+            color: #ffb733;
+            font-weight: 600;
+        }
+
+        a {
+            color: #ffa500;
+        }
+
+        footer {
+            text-align: center;
+            color: #777;
+            font-size: 0.9em;
+            margin-top: 50px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="index.html" class="back-btn">← Torna alla Home</a>
+
+        <h1>🎲 Pokémon Roulette Run Challenge</h1>
+        <p style="text-align:center;">
+            🔗 <a href="https://lucaremix.github.io/roulette-run-challenge/" target="_blank">
+                https://lucaremix.github.io/roulette-run-challenge/
+            </a>
+        </p>
+
+        <h2>🌟 Introduzione</h2>
+        <p>
+            La <strong>Pokémon Roulette Run Challenge</strong> è una modalità competitiva basata su
+            <em>Pokémon Blaze Black / Volt White</em>, in cui due giocatori affrontano una sequenza di
+            <strong>eventi speciali</strong> dopo ogni boss battle.
+            Ogni evento può premiare con nuovi Pokémon, Coins o effetti casuali che influenzano la run.
+        </p>
+        <p>I Pokémon sono suddivisi in categorie di valore:</p>
+        <ul>
+            <li>🕊️ <strong>Legendary Tier</strong></li>
+            <li>🌌 <strong>S Tier</strong></li>
+            <li>💎 <strong>A Tier</strong></li>
+            <li>⚔️ <strong>B Tier</strong></li>
+            <li>🍃 <strong>C Tier</strong></li>
+        </ul>
+        <p>
+            💡 <em>Nota:</em> la run non segue le regole classiche.
+            È consentito usare <strong>999 Caramelle Rare</strong> e <strong>999 Repellenti</strong>.
+        </p>
+
+        <h2>🌀 Evento 1 – Starters</h2>
+        <p>Entrambi i giocatori hanno 5 spin per determinare il proprio Pokémon iniziale.</p>
+        <ul>
+            <li>Dopo ogni spin è possibile decidere se tenerlo o respinnare (max 5 tentativi totali).</li>
+            <li>Una volta scelto lo starter, non può essere modificato.</li>
+        </ul>
+        <p class="coins">💰 Si parte con 200 Coins.</p>
+
+        <div class="event">
+            <h3>⚔️ Evento 2 – N</h3>
+            <p>Ogni giocatore riceve un Pokémon nascosto dal Pool B. Bisogna indovinarlo in 5 tentativi, ricevendo progressivamente più indizi.</p>
+            <ul>
+                <li>2 statistiche → 🎁 IV Perfette · Abilità Scelta · +100 Coins · Shiny · Natura Perfetta</li>
+                <li>+2 statistiche + 1 debolezza → 🎁 IV Perfette · Abilità Nascosta · +100 Coins · Natura Perfetta</li>
+                <li>Ultime 2 statistiche + generazione → 🎁 +50 Coins · Natura Perfetta</li>
+                <li>Tipo/i → 🎁 +50 Coins</li>
+                <li>Immagine → 🎁 +10 Coins</li>
+            </ul>
+        </div>
+
+        <div class="event">
+            <h3>🧩 Evento 3 – CCC (Pokémon Bingo!)</h3>
+            <p>
+                Ogni giocatore riceve una tabella 4×4 con 16 missioni.
+                Chi completa per primo una riga o colonna grida “BINGO!” 🎉
+            </p>
+            <ul>
+                <li>🛡️ Vinci una lotta senza subire danni</li>
+                <li>✨ Cattura un Pokémon e fallo evolvere</li>
+                <li>💥 Effettua un OHKO</li>
+                <li>🌿🔥💧 Cattura un Pokémon Erba, Fuoco e Acqua</li>
+                <li>🚫 Subisci una mossa che non ha effetto</li>
+                <li>😵 Usa Struggle</li>
+                <li>📈 Maxa una statistica</li>
+                <li>⚡ Usa una mossa x4 Superefficace</li>
+                <li>🎯 Ottieni 3 colpi critici</li>
+                <li>⚔️ Vinci senza STAB né superefficacia</li>
+                <li>💔 Perdi una lotta e torna al Centro Pokémon</li>
+                <li>💪 Usa una mossa da 90 potenza o più</li>
+                <li>❤️ Vinci con 1 HP rimanente</li>
+                <li>🏠 Torna dalla mamma a piedi</li>
+                <li>🤯 Fai colpire se stesso un Pokémon</li>
+                <li>⚡ Rimani paralizzato 2 turni</li>
+            </ul>
+            <p class="coins">🏆 Vincitore → 1 Spin Pool B + 50 Coins<br>💀 Sconfitto → 1 Spin Pool C + 25 Coins</p>
+        </div>
+
+        <div class="event"><h3>🧪 Evento 4 – Cheren</h3><p>Entrambi scelgono segretamente un Pokémon del Pool B. Se scelgono lo stesso, nessuno ottiene nulla. Se diversi, ciascuno ottiene il proprio.</p></div>
+
+        <div class="event"><h3>📚 Evento 5 – Lenora</h3><p>Sfida sul BST. Chi si avvicina di più al valore corretto vince il round.</p><p class="coins">🏆 Vincitore → 1 Spin A Tier + 100 Coins<br>💀 Perdente → 1 Spin C Tier + 75 Coins</p></div>
+
+        <div class="event"><h3>🐛 Evento 6 – Burgh</h3><p>Sfida 1v1 di descrizioni Pokédex. Il primo a 5 risposte corrette vince.</p><p class="coins">🏆 Vincitore → 1 Spin A Tier + 125 Coins<br>💀 Perdente → 1 Spin B Tier + 75 Coins</p></div>
+
+        <div class="event"><h3>⚡ Evento 7 – Elesa</h3><p>Versione Pokémon di “Indovina Chi?”. Scopri il Pokémon avversario tramite domande mirate.</p><p class="coins">🏆 Vincitore → 1 Spin A Tier + 125 Coins<br>💀 Perdente → 1 Spin B Tier + 75 Coins</p></div>
+
+        <div class="event"><h3>🔮 Evento 8 – N (Chargestone Cave)</h3><p>Mini-gioco Split or Steal (300 Coins in palio).</p><ul><li>Steal / Steal → Nessuno ottiene nulla</li><li>Steal / Split → Chi ruba prende tutto</li><li>Split / Split → Entrambi ricevono 150 Coins</li></ul></div>
+
+        <div class="event"><h3>🥋 Evento 9 – Clay</h3><p>Battaglia Navale Pokémon con 3 “navi” di Tier S, A e B.</p><p class="coins">🏆 Vincitore → Mantiene i Pokémon non affondati<br>💰 Entrambi → +100 Coins</p></div>
+
+        <div class="event"><h3>🛫 Evento 10 – Skyla</h3><p>Ordina 5 Pokémon in base a una statistica. Chi ne azzecca di più vince il round.</p><p class="coins">🏆 Vincitore → 1 Spin A Tier + 150 Coins<br>💀 Perdente → 1 Spin B Tier + 100 Coins</p></div>
+
+        <div class="event"><h3>❄️ Evento 11 – Pryce</h3><p>Nomina Pokémon di un tipo scelto a turno (max 15s, no ripetizioni).</p><p class="coins">🏆 Vincitore → 1 Spin S Tier + 150 Coins<br>💀 Perdente → 1 Spin A Tier + 100 Coins</p></div>
+
+        <div class="event"><h3>🎁 Evento 12 – Bianca</h3><p>Modalità Wonder Trade: scambia un tuo Pokémon per 1 Spin dal Pool S, o rifiuta e tienilo.</p></div>
+
+        <div class="event"><h3>🐉 Evento 13 – Drayden</h3><p>Un giocatore conosce il contenuto di due box (Rossa e Blu): una contiene un Pokémon A Tier, l’altra un Legendary. Il secondo sceglie.</p><p class="coins">💰 Entrambi → +150 Coins</p></div>
+
+        <h2>🏪 Mercati</h2>
+        <h3>🕶️ Black Market</h3>
+        <p>Permette di acquistare Pokémon e Spin usando Coins. Si aggiorna ogni 24 ore con 5 Pokémon nuovi.</p>
+        <h3>💿 MT Market</h3>
+        <p>Simile al Black Market, ma dedicato alle MT. Anche qui, 5 MT nuove ogni 24 ore.</p>
+
+        <footer>
+            <p>Pokémon Roulette Run Challenge © 2025 | Progetto di <strong>Luca Remix</strong></p>
+        </footer>
+    </div>
+</body>
+</html>
