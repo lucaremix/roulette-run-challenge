@@ -1582,9 +1582,15 @@
 
         // Finalize Rewards
         async function finalizeRewards(winnerNumber, gameData) {
-            const winnerId = gameData[winnerNumber].name;
+            // winnerNumber is 'p1' or 'p2', but gameData has 'player1' and 'player2'
+            const winnerKey = winnerNumber === 'p1' ? 'player1' : 'player2';
+            const loserKey = winnerNumber === 'p1' ? 'player2' : 'player1';
+            
+            const winnerId = gameData[winnerKey].name;
             const loserNumber = winnerNumber === 'p1' ? 'p2' : 'p1';
-            const loserId = gameData[loserNumber].name;
+            const loserId = gameData[loserKey].name;
+
+            console.log('Finalizing rewards for winner:', winnerId);
 
             // Get chosen pokemon for both players from Firebase
             const chosenP1Ref = ref(database, `events/clay/chosen/p1`);
@@ -1595,6 +1601,9 @@
             
             const p1Chosen = p1ChosenSnap.val() || {};
             const p2Chosen = p2ChosenSnap.val() || {};
+
+            console.log('P1 Chosen:', p1Chosen);
+            console.log('P2 Chosen:', p2Chosen);
 
             // Determine alive pokemon for winner
             const winnerBoard = gameData.boards[winnerNumber];
@@ -1613,9 +1622,12 @@
                     const pokemon = winnerChosen[tier];
                     if (pokemon) {
                         alivePokemon.push({ tier, pokemon });
+                        console.log(`Winner keeps ${tier}: ${pokemon.english_name}`);
                     }
                 }
             });
+
+            console.log('Alive pokemon for winner:', alivePokemon.length);
 
             // Update coins for both
             const winnerRef = ref(database, `players/${winnerId}`);
@@ -1643,6 +1655,8 @@
             await set(winnerRef, winnerData);
             await set(loserRef, loserData);
 
+            console.log('Coins updated');
+
             // Remove all pokemon from pools (winner's alive + loser's all)
             const allPokemonToRemove = [...alivePokemon];
             
@@ -1652,19 +1666,48 @@
                 const pokemon = loserChosen[tier];
                 if (pokemon) {
                     allPokemonToRemove.push({ tier, pokemon });
+                    console.log(`Removing loser's ${tier}: ${pokemon.english_name}`);
                 }
             });
+
+            console.log('Total pokemon to remove from pools:', allPokemonToRemove.length);
 
             // Remove from pools
             for (const { tier, pokemon } of allPokemonToRemove) {
                 try {
                     const poolName = `${tier.toLowerCase()}_tier`;
-                    const poolRef = ref(database, `pools/${poolName}/${pokemon.key}`);
-                    await remove(poolRef);
+                    
+                    // For arrays, we need to find and remove the item
+                    const poolRef = ref(database, `pools/${poolName}`);
+                    const poolSnap = await get(poolRef);
+                    
+                    if (poolSnap.exists()) {
+                        const poolData = poolSnap.val();
+                        
+                        if (Array.isArray(poolData)) {
+                            // Find index and remove
+                            const index = poolData.findIndex(p => 
+                                p.national_number === pokemon.national_number && 
+                                p.english_name === pokemon.english_name
+                            );
+                            if (index !== -1) {
+                                poolData.splice(index, 1);
+                                await set(poolRef, poolData);
+                                console.log(`Removed ${pokemon.english_name} from ${poolName} (array)`);
+                            }
+                        } else {
+                            // Object structure
+                            const itemRef = ref(database, `pools/${poolName}/${pokemon.key}`);
+                            await remove(itemRef);
+                            console.log(`Removed ${pokemon.english_name} from ${poolName} (object)`);
+                        }
+                    }
                 } catch (error) {
                     console.error('Error removing pokemon from pool:', error);
                 }
             }
+
+            console.log('Pokemon removed from pools');
 
             // Update game status
             await update(eventRef, {
@@ -1673,6 +1716,8 @@
                 alivePokemonCount: alivePokemon.length
             });
 
+            console.log('Game status updated');
+
             // Remove players from event
             const playersRef = ref(database, `events/clay/players`);
             await remove(playersRef);
@@ -1680,6 +1725,14 @@
             // Clean up chosen and boards
             await remove(ref(database, `events/clay/chosen`));
             await remove(ref(database, `events/clay/boards`));
+
+            console.log('Cleanup complete - showing game over screen');
+            
+            // Force show game over screen
+            showGameOver({
+                winner: winnerId,
+                alivePokemonCount: alivePokemon.length
+            });
         }
 
         // Show Game Over
