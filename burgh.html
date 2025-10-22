@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Burgh v6</title>
+    <title>Burgh - Pokédex Description Challenge</title>
     <style>
         * {
             margin: 0;
@@ -911,6 +911,12 @@
         function renderGame() {
             if (!gameState) return;
 
+            // Gestisci la schermata di vittoria del round (visibile a entrambi)
+            if (gameState.showRoundWinner) {
+                showRoundWinner(gameState.showRoundWinner.winner, gameState.showRoundWinner.pokemon);
+                return;
+            }
+
             // Aggiorna punteggi
             document.getElementById('player1Name').textContent = gameState.player1.name;
             document.getElementById('player1Points').textContent = gameState.player1.score;
@@ -934,6 +940,7 @@
             const hasGuessed = gameState.guesses && gameState.guesses[currentPlayer];
 
             if (isMyTurn && !hasGuessed) {
+                // È il mio turno e non ho ancora indovinato
                 document.getElementById('myTurnSection').style.display = 'block';
                 document.getElementById('waitingSection').style.display = 'none';
                 document.getElementById('pokemonInput').value = '';
@@ -942,12 +949,26 @@
                 document.getElementById('resultMessage').innerHTML = '';
             } else if (!isMyTurn && gameState.firstPlayerGuessed && !hasGuessed) {
                 // È il turno dell'altro giocatore per il secondo tentativo
+                // Mostra cosa ha indovinato il primo giocatore
+                const firstPlayer = gameState.currentTurn;
+                const firstPlayerGuess = gameState.guesses[firstPlayer];
+                
                 document.getElementById('myTurnSection').style.display = 'block';
                 document.getElementById('waitingSection').style.display = 'none';
                 document.getElementById('pokemonInput').value = '';
                 document.getElementById('pokemonInput').disabled = false;
                 document.getElementById('submitBtn').disabled = true;
-                document.getElementById('resultMessage').innerHTML = '';
+                
+                if (firstPlayerGuess) {
+                    document.getElementById('resultMessage').innerHTML = `
+                        <div style="background: rgba(255, 100, 100, 0.1); border: 2px solid #ff6464; color: #ff6464; padding: 15px; border-radius: 8px; margin-bottom: 15px;">
+                            ❌ ${firstPlayer} ha indovinato: <strong>${firstPlayerGuess.pokemon}</strong><br>
+                            È il tuo turno!
+                        </div>
+                    `;
+                } else {
+                    document.getElementById('resultMessage').innerHTML = '';
+                }
             } else {
                 document.getElementById('myTurnSection').style.display = 'none';
                 document.getElementById('waitingSection').style.display = 'block';
@@ -995,11 +1016,20 @@
                     }
                     
                     await set(eventRef, state);
-                    showRoundWinner(currentPlayer, state.currentPokemon);
                     
-                    // Prossimo turno inizia con questo giocatore
+                    // Cambio turno alternato - passa all'altro giocatore
+                    const nextTurn = state.currentTurn === state.player1.name ? state.player2.name : state.player1.name;
+                    
+                    // Mostra schermata vittoria con flag per entrambi
+                    state.showRoundWinner = {
+                        winner: currentPlayer,
+                        pokemon: state.currentPokemon
+                    };
+                    await set(eventRef, state);
+                    
                     setTimeout(async () => {
-                        state.currentTurn = currentPlayer;
+                        delete state.showRoundWinner;
+                        state.currentTurn = nextTurn;
                         state.currentRound++;
                         
                         if (state.player1.score >= state.roundsToWin || state.player2.score >= state.roundsToWin) {
@@ -1011,7 +1041,7 @@
                         }
                     }, 3000);
                 } else {
-                    // Il primo ha sbagliato - passa al secondo
+                    // Il primo ha sbagliato - salva il guess e passa al secondo
                     await set(eventRef, state);
                 }
             } else {
@@ -1025,11 +1055,20 @@
                     }
                     
                     await set(eventRef, state);
-                    showRoundWinner(currentPlayer, state.currentPokemon);
                     
-                    // Prossimo turno inizia con questo giocatore
+                    // Cambio turno alternato - passa all'altro giocatore
+                    const nextTurn = state.currentTurn === state.player1.name ? state.player2.name : state.player1.name;
+                    
+                    // Mostra schermata vittoria con flag per entrambi
+                    state.showRoundWinner = {
+                        winner: currentPlayer,
+                        pokemon: state.currentPokemon
+                    };
+                    await set(eventRef, state);
+                    
                     setTimeout(async () => {
-                        state.currentTurn = currentPlayer;
+                        delete state.showRoundWinner;
+                        state.currentTurn = nextTurn;
                         state.currentRound++;
                         
                         if (state.player1.score >= state.roundsToWin || state.player2.score >= state.roundsToWin) {
@@ -1043,10 +1082,20 @@
                 } else {
                     // Entrambi hanno sbagliato - nessun punto
                     await set(eventRef, state);
-                    showRoundWinner(null, state.currentPokemon);
                     
-                    // Mantieni lo stesso ordine di turno
+                    // Cambio turno alternato - passa all'altro giocatore
+                    const nextTurn = state.currentTurn === state.player1.name ? state.player2.name : state.player1.name;
+                    
+                    // Mostra schermata "nessuno indovina" con flag per entrambi
+                    state.showRoundWinner = {
+                        winner: null,
+                        pokemon: state.currentPokemon
+                    };
+                    await set(eventRef, state);
+                    
                     setTimeout(async () => {
+                        delete state.showRoundWinner;
+                        state.currentTurn = nextTurn;
                         state.currentRound++;
                         await generateNewDescription(state);
                     }, 3000);
