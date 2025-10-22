@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Clay v4</title>
+    <title>Clay v5</title>
     <style>
         * {
             margin: 0;
@@ -892,7 +892,7 @@
                 <h2>🎉 Partita Terminata!</h2>
                 <div class="winner-name" id="winnerName"></div>
                 <div class="rewards-list" id="rewardsList"></div>
-                <button class="join-btn" onclick="location.reload()">Nuova Partita</button>
+                <button class="join-btn" onclick="window.location.href='index.html'">Torna alla Home</button>
             </div>
         </div>
     </div>
@@ -1129,6 +1129,10 @@
 
             const randomPokemon = pokemonList[Math.floor(Math.random() * pokemonList.length)];
             chosenPokemon[tier] = randomPokemon;
+
+            // Save chosen pokemon to Firebase for this player
+            const chosenRef = ref(database, `events/clay/chosen/${myPlayerNumber}/${tier}`);
+            await set(chosenRef, randomPokemon);
 
             // Disable the spin button
             document.getElementById(`spin${tier}`).classList.add('disabled');
@@ -1543,17 +1547,33 @@
             const loserNumber = winnerNumber === 'p1' ? 'p2' : 'p1';
             const loserId = gameData[loserNumber].name;
 
+            // Get chosen pokemon for both players from Firebase
+            const chosenP1Ref = ref(database, `events/clay/chosen/p1`);
+            const chosenP2Ref = ref(database, `events/clay/chosen/p2`);
+            
+            const p1ChosenSnap = await get(chosenP1Ref);
+            const p2ChosenSnap = await get(chosenP2Ref);
+            
+            const p1Chosen = p1ChosenSnap.val() || {};
+            const p2Chosen = p2ChosenSnap.val() || {};
+
             // Determine alive pokemon for winner
             const winnerBoard = gameData.boards[winnerNumber];
+            const winnerChosen = winnerNumber === 'p1' ? p1Chosen : p2Chosen;
             const alivePokemon = [];
 
             ['S', 'A', 'B'].forEach(tier => {
                 const shipData = winnerBoard[tier];
+                if (!shipData) return;
+                
                 const maxHits = shipData.w * shipData.h;
-                if (shipData.hits.length < maxHits) {
-                    // Get the pokemon for this player
-                    if (winnerNumber === myPlayerNumber && chosenPokemon[tier]) {
-                        alivePokemon.push({ tier, pokemon: chosenPokemon[tier] });
+                const hits = shipData.hits || [];
+                
+                if (hits.length < maxHits) {
+                    // Ship is alive
+                    const pokemon = winnerChosen[tier];
+                    if (pokemon) {
+                        alivePokemon.push({ tier, pokemon });
                     }
                 }
             });
@@ -1573,33 +1593,54 @@
 
             // Add alive pokemon to winner inventory
             if (!winnerData.team) winnerData.team = [];
-            if (winnerNumber === myPlayerNumber) {
-                alivePokemon.forEach(({ tier, pokemon }) => {
-                    winnerData.team.push({
-                        ...pokemon,
-                        won_from: 'clay',
-                        won_at: Date.now()
-                    });
+            alivePokemon.forEach(({ tier, pokemon }) => {
+                winnerData.team.push({
+                    ...pokemon,
+                    won_from: 'clay',
+                    won_at: Date.now()
                 });
-            }
+            });
 
             await set(winnerRef, winnerData);
             await set(loserRef, loserData);
 
-            // Remove pokemon from pools (only winner's alive pokemon)
-            if (winnerNumber === myPlayerNumber) {
-                for (const { tier, pokemon } of alivePokemon) {
+            // Remove all pokemon from pools (winner's alive + loser's all)
+            const allPokemonToRemove = [...alivePokemon];
+            
+            // Add loser's pokemon too
+            const loserChosen = winnerNumber === 'p1' ? p2Chosen : p1Chosen;
+            ['S', 'A', 'B'].forEach(tier => {
+                const pokemon = loserChosen[tier];
+                if (pokemon) {
+                    allPokemonToRemove.push({ tier, pokemon });
+                }
+            });
+
+            // Remove from pools
+            for (const { tier, pokemon } of allPokemonToRemove) {
+                try {
                     const poolName = `${tier.toLowerCase()}_tier`;
                     const poolRef = ref(database, `pools/${poolName}/${pokemon.key}`);
                     await remove(poolRef);
+                } catch (error) {
+                    console.error('Error removing pokemon from pool:', error);
                 }
             }
 
             // Update game status
             await update(eventRef, {
                 isGameOver: true,
-                winner: winnerId
+                winner: winnerId,
+                alivePokemonCount: alivePokemon.length
             });
+
+            // Remove players from event
+            const playersRef = ref(database, `events/clay/players`);
+            await remove(playersRef);
+
+            // Clean up chosen and boards
+            await remove(ref(database, `events/clay/chosen`));
+            await remove(ref(database, `events/clay/boards`));
         }
 
         // Show Game Over
@@ -1610,9 +1651,12 @@
 
             winnerName.textContent = `${gameData.winner} ha vinto!`;
 
+            const alivePokemonCount = gameData.alivePokemonCount || 0;
+
             rewardsList.innerHTML = `
-                <div class="reward-item">🏆 ${gameData.winner}: Pokémon non affondati + 100 Coins</div>
-                <div class="reward-item">💰 Tutti: +100 Coins</div>
+                <div class="reward-item">🏆 ${gameData.winner}: ${alivePokemonCount} Pokémon non affondati</div>
+                <div class="reward-item">💰 ${gameData.winner}: +100 Coins</div>
+                <div class="reward-item">💰 Perdente: +100 Coins</div>
             `;
 
             screen.classList.add('show');
