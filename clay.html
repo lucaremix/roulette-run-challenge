@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Clay - Pokémon Battleship Challenge</title>
+    <title>Clay v2</title>
     <style>
         * {
             margin: 0;
@@ -1031,7 +1031,9 @@
 
         // Spin Pokemon
         window.spinPokemon = async function(tier) {
-            const poolRef = ref(database, `pools/${tier.toLowerCase()}-tier`);
+            // Convert tier to correct pool name format
+            const poolName = `${tier.toLowerCase()}_tier`;
+            const poolRef = ref(database, `pools/${poolName}`);
             const snapshot = await get(poolRef);
             
             if (!snapshot.exists()) {
@@ -1040,7 +1042,14 @@
             }
 
             const poolData = snapshot.val();
-            const pokemonList = Object.entries(poolData).map(([key, value]) => ({ key, ...value }));
+            
+            // Check if it's an array or object
+            let pokemonList = [];
+            if (Array.isArray(poolData)) {
+                pokemonList = poolData.map((pokemon, index) => ({ key: index, ...pokemon }));
+            } else {
+                pokemonList = Object.entries(poolData).map(([key, value]) => ({ key, ...value }));
+            }
             
             if (pokemonList.length === 0) {
                 alert('Nessun Pokémon disponibile!');
@@ -1421,7 +1430,8 @@
             // Remove pokemon from pools (only winner's alive pokemon)
             if (winnerNumber === myPlayerNumber) {
                 for (const { tier, pokemon } of alivePokemon) {
-                    const poolRef = ref(database, `pools/${tier.toLowerCase()}-tier/${pokemon.key}`);
+                    const poolName = `${tier.toLowerCase()}_tier`;
+                    const poolRef = ref(database, `pools/${poolName}/${pokemon.key}`);
                     await remove(poolRef);
                 }
             }
