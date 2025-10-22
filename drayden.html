@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Drayden v2</title>
+    <title>Drayden v3</title>
     <style>
         * {
             margin: 0;
@@ -1037,13 +1037,21 @@
             delete observerPokemonData.rolled_nature;
             delete observerPokemonData.rolled_ability;
 
-            // Add pokemon to teams
-            const chooserTeamRef = push(ref(database, `players/${data.chooser}/team`));
-            const observerTeamRef = push(ref(database, `players/${data.observer}/team`));
-
-            await set(chooserTeamRef, chooserPokemonData);
-            await set(observerTeamRef, observerPokemonData);
-
+            // Add pokemon to teams with sequential numbers
+            // Get current team size for chooser
+            const chooserTeamSnapshot = await get(ref(database, `players/${data.chooser}/team`));
+            let chooserTeamSize = 0;
+            chooserTeamSnapshot.forEach(() => chooserTeamSize++);
+            
+            // Get current team size for observer
+            const observerTeamSnapshot = await get(ref(database, `players/${data.observer}/team`));
+            let observerTeamSize = 0;
+            observerTeamSnapshot.forEach(() => observerTeamSize++);
+            
+            // Add pokemon with sequential numbers
+            await set(ref(database, `players/${data.chooser}/team/${chooserTeamSize}`), chooserPokemonData);
+            await set(ref(database, `players/${data.observer}/team/${observerTeamSize}`), observerPokemonData);
+            
             console.log('Pokemon added to teams');
 
             // Add coins to both players
