@@ -1,0 +1,1051 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Elesa - Pokémon Guess Who?</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-image: url('https://raw.githubusercontent.com/lucaremix/roulette-run-challenge/main/background/Elesa_background.png');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            color: #e0e0e0;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            background: #1a1a1a;
+            border: 1px solid #2a2a2a;
+            border-radius: 8px;
+            color: #e0e0e0;
+            text-decoration: none;
+            font-size: 1em;
+            transition: all 0.3s ease;
+            margin-bottom: 30px;
+        }
+
+        .back-btn:hover {
+            background: #252525;
+        }
+
+        .event-header {
+            background: #1a1a1a;
+            border: 1px solid #2a2a2a;
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 30px;
+            display: flex;
+            align-items: center;
+            gap: 30px;
+        }
+
+        .event-trainer-img {
+            width: 160px;
+            height: 160px;
+            object-fit: contain;
+            border: none;
+            flex-shrink: 0;
+            image-rendering: pixelated;
+        }
+
+        .event-info {
+            flex: 1;
+        }
+
+        .event-title {
+            font-size: 2.5em;
+            color: #ffffff;
+            margin-bottom: 15px;
+        }
+
+        .event-status {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .status-badge {
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 1.1em;
+        }
+
+        .status-badge.joined {
+            background: #2d4a2d;
+            color: #7fff7f;
+        }
+
+        .status-badge.not-joined {
+            background: #2a2a2a;
+            color: #888;
+        }
+
+        .join-leave-btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+
+        .join-btn {
+            background: #2a7a2a;
+            color: white;
+        }
+
+        .join-btn:hover {
+            background: #357a35;
+        }
+
+        .leave-btn {
+            background: #7a2a2a;
+            color: white;
+        }
+
+        .leave-btn:hover {
+            background: #8a3535;
+        }
+
+        .players-section {
+            background: #1a1a1a;
+            border: 1px solid #2a2a2a;
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 30px;
+        }
+
+        .players-title {
+            font-size: 1.8em;
+            color: #ffffff;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .player-count-badge {
+            background: #2a2a2a;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.7em;
+            color: #888;
+        }
+
+        .players-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .player-card {
+            background: #0a0a0a;
+            border: 1px solid #2a2a2a;
+            border-radius: 8px;
+            padding: 15px 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .player-card.current-user {
+            border-color: #4a4a4a;
+            background: #1f1f1f;
+        }
+
+        .player-name {
+            font-size: 1.1em;
+            color: #e0e0e0;
+        }
+
+        .player-card.current-user .player-name {
+            color: #ffffff;
+            font-weight: 600;
+        }
+
+        .you-badge {
+            background: #2a7a2a;
+            color: white;
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 0.8em;
+            font-weight: 600;
+        }
+
+        .no-players {
+            text-align: center;
+            color: #555;
+            font-style: italic;
+            padding: 30px;
+        }
+
+        .intro-screen {
+            background: #1a1a1a;
+            border: 1px solid #2a2a2a;
+            border-radius: 12px;
+            padding: 40px;
+            display: none;
+        }
+
+        .intro-screen.show {
+            display: block;
+        }
+
+        .intro-content {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .intro-text h2 {
+            font-size: 2em;
+            color: #ffeb3b;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .intro-text p {
+            font-size: 1.2em;
+            line-height: 1.8;
+            color: #e0e0e0;
+            margin-bottom: 15px;
+        }
+
+        .intro-text .highlight {
+            color: #ffeb3b;
+            font-weight: bold;
+        }
+
+        .start-btn {
+            display: block;
+            margin: 30px auto 0;
+            padding: 20px 60px;
+            background: #ffeb3b;
+            color: #1a1a1a;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.3em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .start-btn:hover {
+            background: #fff176;
+            transform: translateY(-2px);
+        }
+
+        .game-screen {
+            display: none;
+        }
+
+        .game-screen.show {
+            display: block;
+        }
+
+        .phase-indicator {
+            background: #1a1a1a;
+            border: 1px solid #2a2a2a;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .phase-indicator h3 {
+            font-size: 1.5em;
+            color: #ffeb3b;
+            margin-bottom: 10px;
+        }
+
+        .phase-indicator p {
+            color: #aaa;
+            font-size: 1.1em;
+        }
+
+        .pokemon-grid {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .pokemon-card {
+            background: #1a1a1a;
+            border: 2px solid #2a2a2a;
+            border-radius: 10px;
+            padding: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            aspect-ratio: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .pokemon-card:hover {
+            transform: translateY(-5px);
+            border-color: #ffeb3b;
+        }
+
+        .pokemon-card.selected {
+            border-color: #4caf50;
+            background: rgba(76, 175, 80, 0.1);
+        }
+
+        .pokemon-card.flipped {
+            opacity: 0.3;
+            pointer-events: none;
+            background: #0a0a0a;
+        }
+
+        .pokemon-card.flipped::after {
+            content: '✕';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 3em;
+            color: #f44336;
+            font-weight: bold;
+        }
+
+        .pokemon-card.guessed-correct {
+            border-color: #4caf50;
+            background: rgba(76, 175, 80, 0.3);
+            animation: correctPulse 0.5s ease;
+        }
+
+        .pokemon-card.guessed-wrong {
+            border-color: #f44336;
+            background: rgba(244, 67, 54, 0.3);
+            animation: wrongShake 0.5s ease;
+        }
+
+        @keyframes correctPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        @keyframes wrongShake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+
+        .pokemon-card img {
+            width: 80%;
+            height: 80%;
+            object-fit: contain;
+            image-rendering: pixelated;
+        }
+
+        .pokemon-card .pokemon-name {
+            font-size: 0.8em;
+            color: #e0e0e0;
+            text-align: center;
+            margin-top: 5px;
+        }
+
+        .controls {
+            background: #1a1a1a;
+            border: 1px solid #2a2a2a;
+            border-radius: 12px;
+            padding: 20px;
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .control-btn {
+            padding: 15px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .control-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .flip-mode-btn {
+            background: #ff9800;
+            color: white;
+        }
+
+        .flip-mode-btn:hover:not(:disabled) {
+            background: #ffa726;
+        }
+
+        .flip-mode-btn.active {
+            background: #ff5722;
+            box-shadow: 0 0 15px rgba(255, 87, 34, 0.5);
+        }
+
+        .guess-mode-btn {
+            background: #2196f3;
+            color: white;
+        }
+
+        .guess-mode-btn:hover:not(:disabled) {
+            background: #42a5f5;
+        }
+
+        .guess-mode-btn.active {
+            background: #1976d2;
+            box-shadow: 0 0 15px rgba(25, 118, 210, 0.5);
+        }
+
+        .waiting-message {
+            background: #1a1a1a;
+            border: 1px solid #2a2a2a;
+            border-radius: 12px;
+            padding: 40px;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .waiting-message h3 {
+            font-size: 1.8em;
+            color: #ffeb3b;
+            margin-bottom: 15px;
+        }
+
+        .waiting-message p {
+            font-size: 1.2em;
+            color: #aaa;
+        }
+
+        .result-screen {
+            background: #1a1a1a;
+            border: 1px solid #2a2a2a;
+            border-radius: 12px;
+            padding: 40px;
+            text-align: center;
+            display: none;
+        }
+
+        .result-screen.show {
+            display: block;
+        }
+
+        .result-screen h2 {
+            font-size: 2.5em;
+            margin-bottom: 20px;
+        }
+
+        .result-screen.winner h2 {
+            color: #4caf50;
+        }
+
+        .result-screen.loser h2 {
+            color: #f44336;
+        }
+
+        .result-pokemon {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            margin: 30px 0;
+            flex-wrap: wrap;
+        }
+
+        .result-pokemon-card {
+            background: #0a0a0a;
+            border: 2px solid #2a2a2a;
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .result-pokemon-card h3 {
+            color: #ffeb3b;
+            margin-bottom: 10px;
+        }
+
+        .result-pokemon-card img {
+            width: 150px;
+            height: 150px;
+            object-fit: contain;
+            image-rendering: pixelated;
+        }
+
+        .result-pokemon-card p {
+            font-size: 1.2em;
+            color: #e0e0e0;
+            margin-top: 10px;
+        }
+
+        .rewards-div {
+            background: #0a0a0a;
+            border: 1px solid #2a2a2a;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+
+        .reward-item {
+            padding: 10px;
+            margin: 5px 0;
+            color: #e0e0e0;
+            font-size: 1.1em;
+        }
+
+        @media (max-width: 1200px) {
+            .pokemon-grid {
+                grid-template-columns: repeat(5, 1fr);
+            }
+        }
+
+        @media (max-width: 900px) {
+            .pokemon-grid {
+                grid-template-columns: repeat(4, 1fr);
+            }
+        }
+
+        @media (max-width: 600px) {
+            .pokemon-grid {
+                grid-template-columns: repeat(3, 1fr);
+                gap: 10px;
+            }
+
+            .pokemon-card {
+                padding: 5px;
+            }
+
+            .pokemon-card .pokemon-name {
+                font-size: 0.7em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="index.html" class="back-btn">← Torna alla Home</a>
+
+        <div class="event-header">
+            <img src="https://archives.bulbagarden.net/media/upload/thumb/7/76/Black_White_Elesa.png/150px-Black_White_Elesa.png" 
+                 alt="Elesa" class="event-trainer-img">
+            <div class="event-info">
+                <h1 class="event-title">Elesa - Pokémon Guess Who?</h1>
+                <p style="font-size: 1.1em; color: #aaa;">
+                    36 Pokémon casuali vengono estratti. I giocatori scelgono segretamente un Pokémon e si sfidano 
+                    in una versione Pokémon di "Indovina Chi?". Facendo domande a voce, devono escludere i Pokémon 
+                    fino a indovinare quello dell'avversario!
+                </p>
+                <div class="event-status">
+                    <span class="status-badge not-joined" id="statusBadge">Non Iscritto</span>
+                    <button class="join-leave-btn join-btn" id="joinBtn" onclick="toggleJoin()">
+                        Iscriviti
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="players-section" id="playersSection">
+            <div class="players-title">
+                Giocatori 
+                <span class="player-count-badge" id="playerCount">0/2</span>
+            </div>
+            <div class="players-list" id="playersList">
+                <div class="no-players">Nessun giocatore iscritto</div>
+            </div>
+        </div>
+
+        <div class="intro-screen" id="introScreen">
+            <div class="intro-content">
+                <div class="intro-text">
+                    <h2>⚡ Preparati per Guess Who? Pokémon! ⚡</h2>
+                    <p>
+                        Un set di <span class="highlight">36 Pokémon casuali</span> è stato estratto per questa partita. 
+                        Entrambi i giocatori vedranno gli stessi Pokémon.
+                    </p>
+                    <p>
+                        <strong>Fase 1 - Selezione:</strong> Scegli segretamente uno dei 36 Pokémon. 
+                        Questo sarà il Pokémon che l'avversario dovrà indovinare!
+                    </p>
+                    <p>
+                        <strong>Fase 2 - Deduzione:</strong> A turno, fate domande a voce 
+                        (es. "Il tuo Pokémon è di tipo Fuoco?", "Ha più di 100 in Attacco?"). 
+                        Usa i controlli per:
+                    </p>
+                    <ul style="list-style-position: inside; color: #e0e0e0; margin-left: 20px;">
+                        <li><span class="highlight">Girare le carte</span> per eliminare i Pokémon esclusi</li>
+                        <li><span class="highlight">Indovinare</span> quando pensi di sapere quale Pokémon ha scelto l'avversario</li>
+                    </ul>
+                    <p>
+                        Chi indovina per primo il Pokémon dell'avversario <span class="highlight">vince la partita!</span>
+                    </p>
+                </div>
+                <button class="start-btn" onclick="startGame()">Inizia la Partita!</button>
+            </div>
+        </div>
+
+        <div class="game-screen" id="gameScreen">
+            <div class="phase-indicator" id="phaseIndicator">
+                <h3 id="phaseTitle">Fase di Selezione</h3>
+                <p id="phaseDescription">Clicca su un Pokémon per sceglierlo come il tuo segreto!</p>
+            </div>
+
+            <div class="waiting-message" id="waitingMessage">
+                <h3>In attesa dell'altro giocatore...</h3>
+                <p>L'avversario deve ancora scegliere il suo Pokémon</p>
+            </div>
+
+            <div class="pokemon-grid" id="pokemonGrid">
+                <!-- Le carte Pokémon verranno generate qui -->
+            </div>
+
+            <div class="controls" id="controls">
+                <button class="control-btn flip-mode-btn" id="flipModeBtn" onclick="toggleFlipMode()">
+                    🔄 Modalità Gira Carte
+                </button>
+                <button class="control-btn guess-mode-btn" id="guessModeBtn" onclick="toggleGuessMode()">
+                    🎯 Modalità Indovina
+                </button>
+            </div>
+        </div>
+
+        <div class="result-screen" id="resultScreen">
+            <h2 id="resultTitle">Hai Vinto!</h2>
+            <div class="result-pokemon">
+                <div class="result-pokemon-card">
+                    <h3>Il tuo Pokémon</h3>
+                    <img id="yourPokemonImg" src="" alt="">
+                    <p id="yourPokemonName"></p>
+                </div>
+                <div class="result-pokemon-card">
+                    <h3>Pokémon Avversario</h3>
+                    <img id="opponentPokemonImg" src="" alt="">
+                    <p id="opponentPokemonName"></p>
+                </div>
+            </div>
+            <div class="rewards-div" id="rewardsDiv"></div>
+            <button class="start-btn" onclick="window.location.href='index.html'" style="margin-top: 20px;">
+                Torna alla Home
+            </button>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+        import { getDatabase, ref, set, get, onValue, update } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js';
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDEMbDA4NfiomKh6G1zPJxCnnubHP0FLxQ",
+            authDomain: "roulette-run-9e0f6.firebaseapp.com",
+            databaseURL: "https://roulette-run-9e0f6-default-rtdb.europe-west1.firebasedatabase.app",
+            projectId: "roulette-run-9e0f6",
+            storageBucket: "roulette-run-9e0f6.firebasestorage.app",
+            messagingSenderId: "46806711402",
+            appId: "1:46806711402:web:a73e8b50d881e4c02fa86f"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app);
+
+        let allPokemon = [];
+        let gameState = null;
+        let currentMode = null; // 'flip' o 'guess'
+        let selectedPokemon = null;
+        let flippedCards = new Set();
+
+        // Carica i dati dei Pokémon
+        async function loadPokemon() {
+            try {
+                const response = await fetch('pokemon.json');
+                const data = await response.json();
+                allPokemon = data.map(p => ({
+                    ...p,
+                    name: p.english_name,
+                    bst: p.hp + p.attack + p.defense + p.sp_attack + p.sp_defense + p.speed
+                }));
+            } catch (error) {
+                console.error('Errore nel caricamento dei Pokémon:', error);
+            }
+        }
+
+        function getCurrentPlayer() {
+            return localStorage.getItem('currentPlayer');
+        }
+
+        function padNumber(num) {
+            return String(num).padStart(3, '0');
+        }
+
+        function getPokemonImageUrl(nationalNumber) {
+            return `https://www.pokemon.com/static-assets/content-assets/cms2/img/pokedex/full/${padNumber(nationalNumber)}.png`;
+        }
+
+        const eventRef = ref(database, 'events/elesa');
+
+        onValue(eventRef, (snapshot) => {
+            const data = snapshot.val();
+            if (data) {
+                gameState = data;
+                updateUI();
+            }
+        });
+
+        async function toggleJoin() {
+            const playerName = getCurrentPlayer();
+            if (!playerName) {
+                alert('Errore: nome giocatore non trovato!');
+                return;
+            }
+
+            const snapshot = await get(eventRef);
+            const currentData = snapshot.val() || { players: [] };
+
+            const playerIndex = currentData.players.indexOf(playerName);
+            
+            if (playerIndex > -1) {
+                // Rimuovi il giocatore
+                currentData.players.splice(playerIndex, 1);
+                
+                // Se era in partita, resetta il gioco
+                if (currentData.phase && currentData.phase !== 'waiting') {
+                    currentData.phase = 'waiting';
+                    delete currentData.pokemon;
+                    delete currentData.selections;
+                    delete currentData.winner;
+                }
+            } else {
+                // Aggiungi il giocatore se c'è posto
+                if (currentData.players.length < 2) {
+                    currentData.players.push(playerName);
+                } else {
+                    alert('La partita è già piena!');
+                    return;
+                }
+            }
+
+            await set(eventRef, currentData);
+        }
+
+        function updateUI() {
+            const playerName = getCurrentPlayer();
+            
+            if (!gameState || !gameState.players) {
+                document.getElementById('playersList').innerHTML = '<div class="no-players">Nessun giocatore iscritto</div>';
+                document.getElementById('playerCount').textContent = '0/2';
+                return;
+            }
+
+            // Aggiorna lista giocatori
+            const isJoined = gameState.players.includes(playerName);
+            document.getElementById('statusBadge').className = `status-badge ${isJoined ? 'joined' : 'not-joined'}`;
+            document.getElementById('statusBadge').textContent = isJoined ? 'Iscritto' : 'Non Iscritto';
+            
+            const joinBtn = document.getElementById('joinBtn');
+            joinBtn.className = `join-leave-btn ${isJoined ? 'leave-btn' : 'join-btn'}`;
+            joinBtn.textContent = isJoined ? 'Abbandona' : 'Iscriviti';
+
+            document.getElementById('playerCount').textContent = `${gameState.players.length}/2`;
+
+            const playersHTML = gameState.players.map(p => `
+                <div class="player-card ${p === playerName ? 'current-user' : ''}">
+                    <span class="player-name">${p}</span>
+                    ${p === playerName ? '<span class="you-badge">TU</span>' : ''}
+                </div>
+            `).join('');
+            document.getElementById('playersList').innerHTML = playersHTML;
+
+            // Mostra intro se ci sono 2 giocatori e non è ancora iniziata
+            if (gameState.players.length === 2 && (!gameState.phase || gameState.phase === 'waiting')) {
+                document.getElementById('introScreen').classList.add('show');
+            } else {
+                document.getElementById('introScreen').classList.remove('show');
+            }
+
+            // Gestisci le fasi di gioco
+            if (gameState.phase === 'selection') {
+                showSelectionPhase();
+            } else if (gameState.phase === 'playing') {
+                showPlayingPhase();
+            } else if (gameState.phase === 'finished') {
+                showResultPhase();
+            }
+        }
+
+        async function startGame() {
+            if (!gameState || gameState.players.length !== 2) {
+                alert('Servono esattamente 2 giocatori per iniziare!');
+                return;
+            }
+
+            // Genera 36 Pokémon casuali
+            const shuffled = [...allPokemon].sort(() => Math.random() - 0.5);
+            const selectedPokemon = shuffled.slice(0, 36);
+
+            await update(eventRef, {
+                phase: 'selection',
+                pokemon: selectedPokemon.map(p => ({
+                    national_number: p.national_number,
+                    name: p.name,
+                    primary_type: p.primary_type,
+                    secondary_type: p.secondary_type,
+                    hp: p.hp,
+                    attack: p.attack,
+                    defense: p.defense,
+                    sp_attack: p.sp_attack,
+                    sp_defense: p.sp_defense,
+                    speed: p.speed,
+                    bst: p.bst
+                })),
+                selections: {},
+                flippedCards: {}
+            });
+
+            document.getElementById('introScreen').classList.remove('show');
+        }
+
+        function showSelectionPhase() {
+            document.getElementById('gameScreen').classList.add('show');
+            document.getElementById('phaseTitle').textContent = 'Fase di Selezione';
+            document.getElementById('phaseDescription').textContent = 'Clicca su un Pokémon per sceglierlo come il tuo segreto!';
+            document.getElementById('controls').style.display = 'none';
+            document.getElementById('waitingMessage').style.display = 'none';
+
+            renderPokemonGrid(true);
+
+            const playerName = getCurrentPlayer();
+            if (gameState.selections && gameState.selections[playerName]) {
+                document.getElementById('waitingMessage').style.display = 'block';
+                document.getElementById('phaseIndicator').style.display = 'none';
+            }
+        }
+
+        function showPlayingPhase() {
+            document.getElementById('gameScreen').classList.add('show');
+            document.getElementById('phaseTitle').textContent = 'Fase di Gioco';
+            document.getElementById('phaseDescription').textContent = 'Fate domande a voce e usate i controlli per girare le carte o indovinare!';
+            document.getElementById('controls').style.display = 'flex';
+            document.getElementById('waitingMessage').style.display = 'none';
+            document.getElementById('phaseIndicator').style.display = 'block';
+
+            renderPokemonGrid(false);
+
+            // Ripristina le carte girate
+            if (gameState.flippedCards) {
+                const playerName = getCurrentPlayer();
+                if (gameState.flippedCards[playerName]) {
+                    flippedCards = new Set(gameState.flippedCards[playerName]);
+                    updateCardVisuals();
+                }
+            }
+        }
+
+        function showResultPhase() {
+            document.getElementById('gameScreen').style.display = 'none';
+            const resultScreen = document.getElementById('resultScreen');
+            resultScreen.classList.add('show');
+
+            const playerName = getCurrentPlayer();
+            const isWinner = gameState.winner === playerName;
+            
+            resultScreen.className = `result-screen show ${isWinner ? 'winner' : 'loser'}`;
+            document.getElementById('resultTitle').textContent = isWinner ? '🎉 Hai Vinto! 🎉' : '😢 Hai Perso';
+
+            // Mostra i Pokémon
+            const yourPokemon = gameState.pokemon.find(p => p.national_number === gameState.selections[playerName]);
+            const opponentName = gameState.players.find(p => p !== playerName);
+            const opponentPokemon = gameState.pokemon.find(p => p.national_number === gameState.selections[opponentName]);
+
+            document.getElementById('yourPokemonImg').src = getPokemonImageUrl(yourPokemon.national_number);
+            document.getElementById('yourPokemonName').textContent = yourPokemon.name;
+            document.getElementById('opponentPokemonImg').src = getPokemonImageUrl(opponentPokemon.national_number);
+            document.getElementById('opponentPokemonName').textContent = opponentPokemon.name;
+
+            // Mostra ricompense
+            const winner = gameState.winner;
+            const loser = gameState.players.find(p => p !== winner);
+            document.getElementById('rewardsDiv').innerHTML = `
+                <h3 style="color: #ffeb3b; margin-bottom: 15px;">Ricompense</h3>
+                <div class="reward-item">🏆 ${winner}: 1 Spin Pool A + 100 Coins</div>
+                <div class="reward-item">💔 ${loser}: 1 Spin Pool C + 75 Coins</div>
+            `;
+        }
+
+        function renderPokemonGrid(selectionMode) {
+            const grid = document.getElementById('pokemonGrid');
+            if (!gameState.pokemon) return;
+
+            grid.innerHTML = gameState.pokemon.map(p => `
+                <div class="pokemon-card" data-number="${p.national_number}" onclick="handleCardClick(${p.national_number})">
+                    <img src="${getPokemonImageUrl(p.national_number)}" alt="${p.name}">
+                    <div class="pokemon-name">${p.name}</div>
+                </div>
+            `).join('');
+
+            if (!selectionMode) {
+                updateCardVisuals();
+            }
+        }
+
+        function updateCardVisuals() {
+            const cards = document.querySelectorAll('.pokemon-card');
+            cards.forEach(card => {
+                const number = card.getAttribute('data-number');
+                if (flippedCards.has(number)) {
+                    card.classList.add('flipped');
+                }
+            });
+        }
+
+        window.handleCardClick = async function(nationalNumber) {
+            const playerName = getCurrentPlayer();
+
+            if (gameState.phase === 'selection') {
+                // Seleziona il Pokémon segreto
+                const selections = gameState.selections || {};
+                selections[playerName] = nationalNumber;
+
+                await update(eventRef, { selections });
+
+                // Evidenzia visivamente la selezione
+                document.querySelectorAll('.pokemon-card').forEach(card => {
+                    if (card.getAttribute('data-number') === String(nationalNumber)) {
+                        card.classList.add('selected');
+                    } else {
+                        card.classList.remove('selected');
+                    }
+                });
+
+                // Se entrambi hanno scelto, passa alla fase di gioco
+                if (Object.keys(selections).length === 2) {
+                    await update(eventRef, { phase: 'playing' });
+                }
+            } else if (gameState.phase === 'playing') {
+                if (currentMode === 'flip') {
+                    // Gira la carta
+                    if (flippedCards.has(String(nationalNumber))) {
+                        flippedCards.delete(String(nationalNumber));
+                    } else {
+                        flippedCards.add(String(nationalNumber));
+                    }
+
+                    // Salva lo stato
+                    const flippedCardsData = gameState.flippedCards || {};
+                    flippedCardsData[playerName] = Array.from(flippedCards);
+                    await update(eventRef, { flippedCards: flippedCardsData });
+
+                    updateCardVisuals();
+
+                } else if (currentMode === 'guess') {
+                    // Indovina il Pokémon
+                    const opponentName = gameState.players.find(p => p !== playerName);
+                    const opponentChoice = gameState.selections[opponentName];
+
+                    const card = document.querySelector(`[data-number="${nationalNumber}"]`);
+
+                    if (nationalNumber === opponentChoice) {
+                        // Indovinato!
+                        card.classList.add('guessed-correct');
+                        
+                        await giveRewards(playerName);
+                        await update(eventRef, { 
+                            phase: 'finished',
+                            winner: playerName
+                        });
+                    } else {
+                        // Sbagliato!
+                        card.classList.add('guessed-wrong');
+                        setTimeout(() => {
+                            card.classList.remove('guessed-wrong');
+                        }, 500);
+                    }
+
+                    currentMode = null;
+                    document.getElementById('guessModeBtn').classList.remove('active');
+                }
+            }
+        };
+
+        window.toggleFlipMode = function() {
+            if (gameState.phase !== 'playing') return;
+
+            if (currentMode === 'flip') {
+                currentMode = null;
+                document.getElementById('flipModeBtn').classList.remove('active');
+            } else {
+                currentMode = 'flip';
+                document.getElementById('flipModeBtn').classList.add('active');
+                document.getElementById('guessModeBtn').classList.remove('active');
+            }
+        };
+
+        window.toggleGuessMode = function() {
+            if (gameState.phase !== 'playing') return;
+
+            if (currentMode === 'guess') {
+                currentMode = null;
+                document.getElementById('guessModeBtn').classList.remove('active');
+            } else {
+                currentMode = 'guess';
+                document.getElementById('guessModeBtn').classList.add('active');
+                document.getElementById('flipModeBtn').classList.remove('active');
+            }
+        };
+
+        async function giveRewards(winner) {
+            const loser = gameState.players.find(p => p !== winner);
+
+            const winnerRef = ref(database, `players/${winner}`);
+            const loserRef = ref(database, `players/${loser}`);
+
+            const winnerSnap = await get(winnerRef);
+            const loserSnap = await get(loserRef);
+
+            let winnerData = winnerSnap.val() || { coins: 0, team: [] };
+            let loserData = loserSnap.val() || { coins: 0, team: [] };
+
+            winnerData.coins = (winnerData.coins || 0) + 100;
+            winnerData.pendingSpin = { pool: 'a-tier', from: 'elesa' };
+
+            loserData.coins = (loserData.coins || 0) + 75;
+            loserData.pendingSpin = { pool: 'c-tier', from: 'elesa' };
+
+            await set(winnerRef, winnerData);
+            await set(loserRef, loserData);
+        }
+
+        window.toggleJoin = toggleJoin;
+        window.startGame = startGame;
+
+        // Inizializzazione
+        if (!getCurrentPlayer()) {
+            alert('Devi impostare il tuo nome dalla home page!');
+            window.location.href = 'index.html';
+        } else {
+            loadPokemon();
+        }
+    </script>
+</body>
+</html>
