@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Clay v3</title>
+    <title>Clay v4</title>
     <style>
         * {
             margin: 0;
@@ -518,6 +518,21 @@
             left: 50%;
             transform: translate(-50%, -50%);
             color: white;
+            font-size: 1.5em;
+            font-weight: bold;
+        }
+
+        .cell.sunk {
+            background: #aa2222 !important;
+        }
+
+        .cell.sunk::after {
+            content: '✕';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #ffff00;
             font-size: 1.5em;
             font-weight: bold;
         }
@@ -1354,6 +1369,14 @@
 
         // Mark Shot
         async function markShot(x, y) {
+            const enemyGrid = document.getElementById('enemyBattleGrid');
+            const cell = enemyGrid.querySelector(`[data-x="${x}"][data-y="${y}"]`);
+            
+            // Don't allow clicking same cell twice
+            if (!cell || cell.classList.contains('hit') || cell.classList.contains('miss')) {
+                return;
+            }
+
             const opponentNumber = myPlayerNumber === 'p1' ? 'p2' : 'p1';
             const opponentBoardRef = ref(database, `events/clay/boards/${opponentNumber}`);
             const snapshot = await get(opponentBoardRef);
@@ -1364,43 +1387,58 @@
             let isHit = false;
             let hitShip = null;
 
-            // Check if hit
+            // Check if this coordinate hits any ship
             ['S', 'A', 'B'].forEach(ship => {
                 const shipData = opponentBoard[ship];
-                if (!shipData || !shipData.hits) return;
+                if (!shipData) return;
                 
                 if (x >= shipData.x && x < shipData.x + shipData.w &&
                     y >= shipData.y && y < shipData.y + shipData.h) {
-                    
-                    // Check if already hit
-                    const alreadyHit = shipData.hits.some(hit => hit.x === x && hit.y === y);
-                    if (!alreadyHit) {
-                        isHit = true;
-                        hitShip = ship;
-                        shipData.hits.push({ x, y });
-                    }
+                    isHit = true;
+                    hitShip = ship;
                 }
             });
 
-            // Visual update
-            const enemyGrid = document.getElementById('enemyBattleGrid');
-            const cell = enemyGrid.querySelector(`[data-x="${x}"][data-y="${y}"]`);
-            if (!cell || cell.classList.contains('hit') || cell.classList.contains('miss')) {
-                return; // Already marked
-            }
-
             if (isHit) {
-                cell.classList.add('hit');
+                // Add hit to opponent's board
+                const shipData = opponentBoard[hitShip];
+                if (!shipData.hits) shipData.hits = [];
+                shipData.hits.push({ x, y });
+                
                 // Update Firebase
                 await update(opponentBoardRef, {
-                    [`${hitShip}/hits`]: opponentBoard[hitShip].hits
+                    [`${hitShip}/hits`]: shipData.hits
                 });
+
+                // Visual: Mark as hit
+                cell.classList.add('hit');
+
+                // Check if ship is sunk
+                const maxHits = shipData.w * shipData.h;
+                if (shipData.hits.length >= maxHits) {
+                    // Mark all hits of this ship as sunk
+                    markShipAsSunk(hitShip, shipData);
+                }
             } else {
+                // Visual: Mark as miss
                 cell.classList.add('miss');
             }
 
             // Check if game over
             setTimeout(() => checkGameOver(), 500);
+        }
+
+        // Mark all cells of a sunk ship with different color
+        function markShipAsSunk(ship, shipData) {
+            const enemyGrid = document.getElementById('enemyBattleGrid');
+            for (let dy = 0; dy < shipData.h; dy++) {
+                for (let dx = 0; dx < shipData.w; dx++) {
+                    const cell = enemyGrid.querySelector(`[data-x="${shipData.x + dx}"][data-y="${shipData.y + dy}"]`);
+                    if (cell) {
+                        cell.classList.add('sunk');
+                    }
+                }
+            }
         }
 
         // Listen to Battle Updates
@@ -1423,12 +1461,22 @@
                         }
                     });
 
-                    // Update ship status
+                    // Update ship status and check if sunk
                     const maxHits = shipData.w * shipData.h;
                     const statusEl = document.getElementById(`myShip${ship}`);
                     if (statusEl && shipData.hits.length >= maxHits) {
                         statusEl.textContent = `Le tue - ${ship}: Affondato`;
                         statusEl.className = 'ship-status-item sunk';
+                        
+                        // Mark my ship as sunk visually
+                        for (let dy = 0; dy < shipData.h; dy++) {
+                            for (let dx = 0; dx < shipData.w; dx++) {
+                                const cell = myGrid.querySelector(`[data-x="${shipData.x + dx}"][data-y="${shipData.y + dy}"]`);
+                                if (cell) {
+                                    cell.classList.add('sunk');
+                                }
+                            }
+                        }
                     }
                 });
 
@@ -1453,6 +1501,9 @@
                     if (statusEl && shipData.hits.length >= maxHits) {
                         statusEl.textContent = `Nemico - ${ship}: Affondato`;
                         statusEl.className = 'ship-status-item sunk';
+                        
+                        // Mark enemy ship as sunk on my grid
+                        markShipAsSunk(ship, shipData);
                     }
                 });
             });
