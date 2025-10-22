@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Burgh - Pokédex Description Challenge</title>
+    <title>Burgh - Pokédex Description Challenge v2</title>
     <style>
         * {
             margin: 0;
@@ -729,7 +729,7 @@
             .catch(err => console.error('Errore nel caricamento dei Pokémon:', err));
 
         function getCurrentPlayer() {
-            return localStorage.getItem('currentPlayer');
+            return localStorage.getItem('playerName') || '';
         }
 
         function padNumber(num) {
