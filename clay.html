@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Clay - Pokémon Battleship Challenge</title>
+    <title>Clay v9</title>
     <style>
         * {
             margin: 0;
@@ -719,6 +719,27 @@
             font-size: 1.1em;
         }
 
+        .home-btn {
+            display: block;
+            margin: 30px auto 0;
+            padding: 15px 50px;
+            background: #2a7a2a;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.2em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+        }
+
+        .home-btn:hover {
+            background: #357a35;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(42, 122, 42, 0.4);
+        }
+
         .hidden {
             display: none !important;
         }
@@ -892,7 +913,9 @@
                 <h2>🎉 Partita Terminata!</h2>
                 <div class="winner-name" id="winnerName"></div>
                 <div class="rewards-list" id="rewardsList"></div>
-                <button class="join-btn" onclick="window.location.href='index.html'">Torna alla Home</button>
+                <button class="home-btn" onclick="window.location.href='index.html'">
+                    ← Torna alla Home
+                </button>
             </div>
         </div>
     </div>
@@ -929,9 +952,39 @@
         let gameState = null;
         const MAX_PLAYERS = 2;
 
+        const natures = [
+            "Hardy", "Lonely", "Brave", "Adamant", "Naughty",
+            "Bold", "Docile", "Relaxed", "Impish", "Lax",
+            "Timid", "Hasty", "Serious", "Jolly", "Naive",
+            "Modest", "Mild", "Quiet", "Bashful", "Rash",
+            "Calm", "Gentle", "Sassy", "Careful", "Quirky"
+        ];
+
         // Helper Functions
         function getCurrentPlayer() {
             return localStorage.getItem('playerName');
+        }
+
+        function addNatureAndAbility(pokemon) {
+            // Random nature
+            const randomNature = natures[Math.floor(Math.random() * natures.length)];
+            
+            // Random ability (non-hidden)
+            const abilities = [
+                pokemon.abilities_0,
+                pokemon.abilities_1,
+                pokemon.abilities_2
+            ].filter(a => a && a.trim() !== '');
+            
+            const randomAbility = abilities.length > 0 
+                ? abilities[Math.floor(Math.random() * abilities.length)]
+                : 'Unknown';
+
+            return {
+                ...pokemon,
+                nature: randomNature,
+                ability: randomAbility
+            };
         }
 
         function padNumber(num) {
@@ -1645,8 +1698,9 @@
             // Add alive pokemon to winner inventory
             if (!winnerData.team) winnerData.team = [];
             alivePokemon.forEach(({ tier, pokemon }) => {
+                const pokemonWithStats = addNatureAndAbility(pokemon);
                 winnerData.team.push({
-                    ...pokemon,
+                    ...pokemonWithStats,
                     won_from: 'clay',
                     won_at: Date.now()
                 });
