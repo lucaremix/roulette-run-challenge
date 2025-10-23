@@ -158,11 +158,17 @@
             margin-bottom: 15px;
         }
 
+        .team-count {
+            color: #fff;
+            font-weight: bold;
+            margin-left: 8px;
+        }
+
         .team-bar-grid {
             display: grid;
-            grid-template-columns: repeat(10, 1fr);
+            grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
             gap: 10px;
-            max-width: 900px;
+            max-width: 100%;
             margin: 0 auto;
         }
 
@@ -179,12 +185,7 @@
             transition: all 0.3s;
         }
 
-        .team-slot.empty {
-            border-style: dashed;
-            opacity: 0.3;
-        }
-
-        .team-slot:not(.empty):hover {
+        .team-slot:hover {
             border-color: #4a4a4a;
             transform: scale(1.1);
             z-index: 10;
@@ -497,7 +498,7 @@
             }
 
             .team-bar-grid {
-                grid-template-columns: repeat(5, 1fr);
+                grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
             }
 
             .events-grid {
@@ -571,10 +572,9 @@
         </div>
     </div>
 
-    <!-- Firebase SDK -->
     <script type="module">
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
-        import { getDatabase, ref, set, onValue, remove, push } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js';
+        import { getDatabase, ref, onValue, remove } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js';
 
         const firebaseConfig = {
             apiKey: "AIzaSyDNuD9wViLLxteHMCEBlvfdONwcZbAjAvo",
@@ -668,6 +668,11 @@
             onValue(teamRef, (snapshot) => {
                 const team = snapshot.val() || [];
                 renderTeamBar(team);
+                
+                const teamBarTitle = document.querySelector('.team-bar-title');
+                if (teamBarTitle) {
+                    teamBarTitle.innerHTML = `Pokémons <span class="team-count">(${team.length})</span>`;
+                }
             });
 
             const mtsRef = ref(database, `players/${playerName}/mts`);
@@ -682,34 +687,30 @@
 
         function renderTeamBar(team) {
             const grid = document.getElementById('teamBarGrid');
-            const maxSlots = 10;
-
             grid.innerHTML = '';
 
-            for (let i = 0; i < maxSlots; i++) {
-                const pokemon = team[i];
-                const slot = document.createElement('div');
+            if (team.length === 0) {
+                grid.innerHTML = '<div style="grid-column: 1/-1; color: #555; font-style: italic; text-align: center; padding: 20px;">Nessun Pokémon nel team</div>';
+                return;
+            }
+
+            team.forEach(pokemon => {
+                const paddedNum = String(pokemon.national_number).padStart(3, '0');
+                const imgUrl = `https://www.pokemon.com/static-assets/content-assets/cms2/img/pokedex/full/${paddedNum}.png`;
                 
-                if (pokemon) {
-                    const paddedNum = String(pokemon.national_number).padStart(3, '0');
-                    const imgUrl = `https://www.pokemon.com/static-assets/content-assets/cms2/img/pokedex/full/${paddedNum}.png`;
-                    
-                    slot.className = 'team-slot';
-                    slot.innerHTML = `
-                        <img src="${imgUrl}" alt="${pokemon.english_name}">
-                        <div class="team-tooltip">
-                            <div class="tooltip-name">${pokemon.english_name}</div>
-                            <div class="tooltip-stat">Natura: ${pokemon.nature}</div>
-                            <div class="tooltip-stat">Abilità: ${pokemon.ability}</div>
-                        </div>
-                    `;
-                } else {
-                    slot.className = 'team-slot empty';
-                    slot.innerHTML = '<span style="color: #444; font-size: 1.5em;">?</span>';
-                }
+                const slot = document.createElement('div');
+                slot.className = 'team-slot';
+                slot.innerHTML = `
+                    <img src="${imgUrl}" alt="${pokemon.english_name}">
+                    <div class="team-tooltip">
+                        <div class="tooltip-name">${pokemon.english_name}</div>
+                        <div class="tooltip-stat">Natura: ${pokemon.nature}</div>
+                        <div class="tooltip-stat">Abilità: ${pokemon.ability}</div>
+                    </div>
+                `;
                 
                 grid.appendChild(slot);
-            }
+            });
         }
 
         function renderMtsBar(mts) {
@@ -743,7 +744,6 @@
                 alert('Imposta prima il tuo nome!');
                 return;
             }
-
             window.location.href = `${eventId}.html`;
         }
 
@@ -761,7 +761,6 @@
                     });
 
                     const isJoined = players.includes(currentPlayer);
-
                     let playersHTML;
                     if (players.length === 0) {
                         playersHTML = '<div class="no-players">Nessun giocatore</div>';
@@ -771,8 +770,6 @@
                             return `<div class="player-item ${currentClass}">• ${player}</div>`;
                         }).join('');
                     }
-
-                    const statusText = 'Clicca per entrare';
 
                     let card = grid.querySelector(`[data-event-id="${event.id}"]`);
                     if (!card) {
@@ -789,13 +786,11 @@
                         <img src="${event.trainer}" 
                              alt="${event.name}" 
                              class="trainer-img"
-                             onerror="this.src='https://via.placeholder.com/128x128/1a1a1a/888?text=${event.trainer}'">
+                             onerror="this.src='https://via.placeholder.com/128x128/1a1a1a/888?text=Event'">
                         <div class="event-info">
                             <div class="event-name">${event.name}</div>
-                            <div class="player-list">
-                                ${playersHTML}
-                            </div>
-                            ${currentPlayer ? `<div class="join-status ${isJoined ? 'joined' : ''}">${statusText}</div>` : ''}
+                            <div class="player-list">${playersHTML}</div>
+                            ${currentPlayer ? `<div class="join-status ${isJoined ? 'joined' : ''}">Clicca per entrare</div>` : ''}
                         </div>
                     `;
                 });
@@ -806,12 +801,8 @@
             if (confirm('Sei sicuro di voler eliminare TUTTI gli eventi? Questa azione è irreversibile!')) {
                 const eventsRef = ref(database, 'events');
                 remove(eventsRef)
-                    .then(() => {
-                        alert('Tutti gli eventi sono stati eliminati!');
-                    })
-                    .catch((error) => {
-                        alert('Errore durante l\'eliminazione: ' + error.message);
-                    });
+                    .then(() => alert('Tutti gli eventi sono stati eliminati!'))
+                    .catch((error) => alert('Errore: ' + error.message));
             }
         }
 
