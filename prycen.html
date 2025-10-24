@@ -1,0 +1,1069 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prycen - Pokémon Taboo Challenge</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-image: url('https://raw.githubusercontent.com/lucaremix/roulette-run-challenge/main/background/Prycen_background.png');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            color: #e0e0e0;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            background: #1a1a1a;
+            border: 1px solid #2a2a2a;
+            border-radius: 8px;
+            color: #e0e0e0;
+            text-decoration: none;
+            font-size: 1em;
+            transition: all 0.3s ease;
+            margin-bottom: 30px;
+        }
+
+        .back-btn:hover {
+            background: #252525;
+        }
+
+        .event-header {
+            background: #1a1a1a;
+            border: 1px solid #2a2a2a;
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 30px;
+            display: flex;
+            align-items: center;
+            gap: 30px;
+        }
+
+        .event-trainer-img {
+            width: 160px;
+            height: 160px;
+            object-fit: contain;
+            border: none;
+            flex-shrink: 0;
+            image-rendering: pixelated;
+        }
+
+        .event-info {
+            flex: 1;
+        }
+
+        .event-title {
+            font-size: 2.5em;
+            color: #ffffff;
+            margin-bottom: 15px;
+        }
+
+        .event-status {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .status-badge {
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 1.1em;
+        }
+
+        .status-badge.joined {
+            background: #2d4a2d;
+            color: #7fff7f;
+        }
+
+        .status-badge.not-joined {
+            background: #2a2a2a;
+            color: #888;
+        }
+
+        .join-leave-btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+
+        .join-btn {
+            background: #2a7a2a;
+            color: white;
+        }
+
+        .join-btn:hover {
+            background: #357a35;
+        }
+
+        .leave-btn {
+            background: #7a2a2a;
+            color: white;
+        }
+
+        .leave-btn:hover {
+            background: #8a3535;
+        }
+
+        .players-section {
+            background: #1a1a1a;
+            border: 1px solid #2a2a2a;
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 30px;
+        }
+
+        .players-title {
+            font-size: 1.8em;
+            color: #ffffff;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .player-count-badge {
+            background: #2a2a2a;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.7em;
+        }
+
+        .players-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .player-card {
+            background: #0a0a0a;
+            border: 1px solid #2a2a2a;
+            border-radius: 8px;
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .player-card.current-user {
+            border-color: #4a9eff;
+            background: rgba(74, 158, 255, 0.1);
+        }
+
+        .player-name {
+            font-weight: 600;
+        }
+
+        .you-badge {
+            background: #4a9eff;
+            color: #1a1a1a;
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 0.85em;
+            font-weight: bold;
+        }
+
+        .no-players {
+            text-align: center;
+            color: #888;
+            padding: 20px;
+        }
+
+        .rules-section {
+            background: #0a0a0a;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+
+        .rules-section h3 {
+            color: #4a9eff;
+            margin-bottom: 10px;
+        }
+
+        .rules-section ul {
+            list-style-position: inside;
+            line-height: 1.8;
+        }
+
+        .intro-screen {
+            display: none;
+            background: #1a1a1a;
+            border: 1px solid #2a2a2a;
+            border-radius: 12px;
+            padding: 40px;
+            text-align: center;
+        }
+
+        .intro-screen.show {
+            display: block;
+        }
+
+        .intro-screen h2 {
+            font-size: 2.5em;
+            color: #4a9eff;
+            margin-bottom: 30px;
+        }
+
+        .start-game-btn {
+            padding: 20px 60px;
+            background: #4a9eff;
+            color: #1a1a1a;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.3em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .start-game-btn:hover {
+            background: #6bb4ff;
+            transform: translateY(-2px);
+        }
+
+        .game-screen {
+            display: none;
+        }
+
+        .game-screen.show {
+            display: block;
+        }
+
+        .game-header {
+            background: #1a1a1a;
+            border: 1px solid #2a2a2a;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .timer {
+            font-size: 2em;
+            color: #4a9eff;
+            font-weight: bold;
+        }
+
+        .timer.warning {
+            color: #ff4444;
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .score {
+            font-size: 1.5em;
+            color: #ffffff;
+        }
+
+        .game-board {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+        }
+
+        .player-area {
+            background: #1a1a1a;
+            border: 1px solid #2a2a2a;
+            border-radius: 12px;
+            padding: 30px;
+        }
+
+        .player-area h2 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #4a9eff;
+        }
+
+        .pokemon-card {
+            background: #0a0a0a;
+            border-radius: 8px;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .pokemon-name {
+            font-size: 2em;
+            color: #ffffff;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+
+        .forbidden-words {
+            background: #1a1a1a;
+            border: 2px solid #ff4444;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+
+        .forbidden-words h3 {
+            color: #ff4444;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .forbidden-list {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .forbidden-item {
+            background: #0a0a0a;
+            padding: 10px;
+            border-radius: 5px;
+            text-align: center;
+            color: #ff6b6b;
+            font-weight: bold;
+        }
+
+        .skip-btn {
+            width: 100%;
+            padding: 15px;
+            margin-top: 20px;
+            background: #ff9500;
+            color: #1a1a1a;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .skip-btn:hover {
+            background: #ffab33;
+            transform: translateY(-2px);
+        }
+
+        .guess-area {
+            position: relative;
+        }
+
+        .pokemon-input {
+            width: 100%;
+            padding: 15px;
+            font-size: 1.2em;
+            border: 2px solid #2a2a2a;
+            border-radius: 8px;
+            background: #0a0a0a;
+            color: #e0e0e0;
+        }
+
+        .pokemon-input:focus {
+            outline: none;
+            border-color: #4a9eff;
+        }
+
+        .suggestions {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: #0a0a0a;
+            border: 1px solid #2a2a2a;
+            border-top: none;
+            border-radius: 0 0 8px 8px;
+            max-height: 200px;
+            overflow-y: auto;
+            display: none;
+            z-index: 100;
+        }
+
+        .suggestions.show {
+            display: block;
+        }
+
+        .suggestion-item {
+            padding: 10px 15px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .suggestion-item:hover {
+            background: #2a2a2a;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 15px;
+            margin-top: 15px;
+            background: #4a9eff;
+            color: #1a1a1a;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .submit-btn:hover:not(:disabled) {
+            background: #6bb4ff;
+            transform: translateY(-2px);
+        }
+
+        .submit-btn:disabled {
+            background: #333;
+            cursor: not-allowed;
+        }
+
+        .waiting-message {
+            text-align: center;
+            padding: 40px;
+            font-size: 1.2em;
+            color: #ccc;
+        }
+
+        .final-result {
+            display: none;
+            background: #1a1a1a;
+            border: 1px solid #2a2a2a;
+            border-radius: 12px;
+            padding: 40px;
+            text-align: center;
+        }
+
+        .final-result.show {
+            display: block;
+        }
+
+        .final-result h2 {
+            font-size: 3em;
+            color: #4a9eff;
+            margin-bottom: 30px;
+        }
+
+        .final-score {
+            font-size: 2em;
+            color: #ffffff;
+            margin-bottom: 30px;
+        }
+
+        .rewards-box {
+            background: #0a0a0a;
+            border-radius: 8px;
+            padding: 30px;
+            margin: 30px 0;
+        }
+
+        .reward-item {
+            font-size: 1.3em;
+            padding: 15px;
+            margin: 10px 0;
+            background: #1a1a1a;
+            border-radius: 8px;
+        }
+
+        .spin-link-btn {
+            margin-top: 30px;
+            padding: 20px 60px;
+            background: #ff9500;
+            color: #1a1a1a;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.3em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .spin-link-btn:hover {
+            background: #ffab33;
+            transform: translateY(-2px);
+        }
+
+        .feedback {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0);
+            background: #1a1a1a;
+            border: 2px solid;
+            border-radius: 12px;
+            padding: 30px 50px;
+            font-size: 2em;
+            font-weight: bold;
+            z-index: 1000;
+            transition: transform 0.3s ease;
+        }
+
+        .feedback.show {
+            transform: translate(-50%, -50%) scale(1);
+        }
+
+        .feedback.correct {
+            border-color: #44ff44;
+            color: #44ff44;
+        }
+
+        .feedback.wrong {
+            border-color: #ff4444;
+            color: #ff4444;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="index.html" class="back-btn">← Torna alla Home</a>
+
+        <!-- Landing Section -->
+        <div id="landingSection">
+            <div class="event-header">
+                <img src="https://raw.githubusercontent.com/lucaremix/roulette-run-challenge/main/trainers/Prycen.png" 
+                     alt="Prycen" class="event-trainer-img">
+                <div class="event-info">
+                    <h1 class="event-title">Prycen - Pokémon Taboo Challenge</h1>
+                    <p style="font-size: 1.1em; color: #ccc;">
+                        Gioco in stile Taboo per 2 giocatori. Un giocatore deve far indovinare il Pokémon 
+                        senza usare le parole proibite, l'altro deve indovinare!
+                    </p>
+                    <div class="event-status">
+                        <span class="status-badge not-joined" id="joinStatus">Non partecipante</span>
+                        <button class="join-leave-btn join-btn" id="joinBtn" onclick="toggleJoin()">
+                            Unisciti all'evento
+                        </button>
+                    </div>
+                    <div class="rules-section">
+                        <h3>📋 Regole del Gioco:</h3>
+                        <ul>
+                            <li><strong>Tempo totale:</strong> 120 secondi</li>
+                            <li><strong>Player 1</strong> vede il Pokémon da far indovinare e le parole vietate</li>
+                            <li><strong>Player 2</strong> deve indovinare il Pokémon digitandone il nome</li>
+                            <li><strong>Parole vietate:</strong> Generazione, Tipo Primario, Tipo Secondario, Evoluzioni</li>
+                            <li><strong>Premi:</strong> 12+ corretti = Spin S + 150 coins | 6+ corretti = Spin A + 100 coins | 0+ corretti = Spin B + 50 coins</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="players-section">
+                <div class="players-title">
+                    👥 Giocatori 
+                    <span class="player-count-badge" id="playerCount">0/2</span>
+                </div>
+                <div class="players-grid" id="playersList">
+                    <div class="no-players">Nessun giocatore nell'evento</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Intro Screen -->
+        <div id="introScreen" class="intro-screen">
+            <h2>🎮 Tutti i giocatori sono pronti!</h2>
+            <p style="font-size: 1.2em; margin: 30px 0; color: #ccc;">
+                Premete il pulsante per iniziare la sfida Taboo!
+            </p>
+            <button class="start-game-btn" onclick="startGame()">
+                ▶️ Inizia la Sfida
+            </button>
+        </div>
+
+        <!-- Game Screen -->
+        <div id="gameScreen" class="game-screen">
+            <div class="game-header">
+                <div class="score" id="scoreDisplay">Corretti: 0</div>
+                <div class="timer" id="timer">120</div>
+            </div>
+
+            <div class="game-board">
+                <!-- Player 1 Area (Descrive) -->
+                <div class="player-area">
+                    <h2 id="player1Title">Player 1 (Descrive)</h2>
+                    <div class="pokemon-card">
+                        <div class="pokemon-name" id="pokemonName">---</div>
+                        <div class="forbidden-words">
+                            <h3>🚫 PAROLE VIETATE</h3>
+                            <div class="forbidden-list" id="forbiddenWords">
+                                <!-- Popolato dinamicamente -->
+                            </div>
+                        </div>
+                        <button class="skip-btn" onclick="skipPokemon()">
+                            ⏭️ Skip Pokémon
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Player 2 Area (Indovina) -->
+                <div class="player-area">
+                    <h2 id="player2Title">Player 2 (Indovina)</h2>
+                    <div class="pokemon-card">
+                        <div class="guess-area">
+                            <input type="text" 
+                                   class="pokemon-input" 
+                                   id="guessInput" 
+                                   placeholder="Scrivi il nome del Pokémon..."
+                                   autocomplete="off">
+                            <div class="suggestions" id="suggestions"></div>
+                            <button class="submit-btn" onclick="submitGuess()" id="submitBtn" disabled>
+                                ✅ Conferma
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Results Section -->
+        <div id="finalResult" class="final-result">
+            <h2>🎉 Partita Terminata!</h2>
+            <div class="final-score" id="finalScore">
+                Pokémon Corretti: 0
+            </div>
+            <div class="rewards-box">
+                <h3 style="color: #4a9eff; margin-bottom: 20px;">🎁 Ricompense</h3>
+                <div id="rewardsDisplay">
+                    <!-- Popolato dinamicamente -->
+                </div>
+            </div>
+            <a href="pokemon-spin.html" class="spin-link-btn">
+                🎰 Vai agli Spin
+            </a>
+        </div>
+
+        <!-- Feedback -->
+        <div id="feedback" class="feedback"></div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+        import { getDatabase, ref, set, get, onValue, remove, push } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js';
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDNuD9wViLLxteHMCEBlvfdONwcZbAjAvo",
+            authDomain: "roulette-run-challenge.firebaseapp.com",
+            databaseURL: "https://roulette-run-challenge-default-rtdb.europe-west1.firebasedatabase.app",
+            projectId: "roulette-run-challenge",
+            storageBucket: "roulette-run-challenge.firebasestorage.app",
+            messagingSenderId: "994019156093",
+            appId: "1:994019156093:web:9792bdce75c486f589d114"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app);
+        const eventRef = ref(database, 'events/prycen');
+
+        let allPokemon = [];
+        let gameState = null;
+        let timerInterval;
+
+        // Carica Pokemon
+        fetch('https://raw.githubusercontent.com/lucaremix/roulette-run-challenge/main/pokemon.json')
+            .then(res => res.json())
+            .then(data => {
+                allPokemon = data;
+                console.log(`Caricati ${allPokemon.length} Pokémon`);
+            })
+            .catch(err => console.error('Errore nel caricamento dei Pokémon:', err));
+
+        function getCurrentPlayer() {
+            return localStorage.getItem('playerName') || '';
+        }
+
+        // Render Landing
+        function renderLanding() {
+            const currentPlayer = getCurrentPlayer();
+            const playersRef = ref(database, `events/prycen/players`);
+
+            onValue(playersRef, (snapshot) => {
+                const players = [];
+                snapshot.forEach((childSnapshot) => {
+                    players.push(childSnapshot.val());
+                });
+
+                const isJoined = players.includes(currentPlayer);
+
+                const statusBadge = document.getElementById('joinStatus');
+                const joinLeaveBtn = document.getElementById('joinBtn');
+
+                if (statusBadge && joinLeaveBtn) {
+                    if (isJoined) {
+                        statusBadge.textContent = 'Partecipante';
+                        statusBadge.className = 'status-badge joined';
+                        joinLeaveBtn.textContent = 'Abbandona evento';
+                        joinLeaveBtn.className = 'join-leave-btn leave-btn';
+                    } else {
+                        statusBadge.textContent = 'Non partecipante';
+                        statusBadge.className = 'status-badge not-joined';
+                        joinLeaveBtn.textContent = 'Unisciti all\'evento';
+                        joinLeaveBtn.className = 'join-leave-btn join-btn';
+                    }
+                }
+
+                const countBadge = document.getElementById('playerCount');
+                if (countBadge) {
+                    countBadge.textContent = `${players.length}/2`;
+                }
+
+                const playersList = document.getElementById('playersList');
+                
+                if (playersList) {
+                    if (players.length === 0) {
+                        playersList.innerHTML = '<div class="no-players">Nessun giocatore nell\'evento</div>';
+                    } else {
+                        playersList.innerHTML = players.map(player => {
+                            const isCurrentUser = player === currentPlayer;
+                            return `
+                                <div class="player-card ${isCurrentUser ? 'current-user' : ''}">
+                                    <span class="player-name">${player}</span>
+                                    ${isCurrentUser ? '<span class="you-badge">Tu</span>' : ''}
+                                </div>
+                            `;
+                        }).join('');
+                    }
+                }
+
+                if (players.length === 2) {
+                    document.getElementById('landingSection').style.display = 'none';
+                    document.getElementById('introScreen').classList.add('show');
+                } else {
+                    document.getElementById('landingSection').style.display = 'block';
+                    document.getElementById('introScreen').classList.remove('show');
+                }
+            });
+
+            // Listener per lo stato del gioco
+            onValue(eventRef, (snapshot) => {
+                const data = snapshot.val();
+                if (!data) return;
+
+                gameState = data;
+
+                // Se il gioco è iniziato
+                if (data.gameStarted && !data.isGameOver) {
+                    document.getElementById('landingSection').style.display = 'none';
+                    document.getElementById('introScreen').classList.remove('show');
+                    document.getElementById('gameScreen').classList.add('show');
+                    renderGame();
+                }
+
+                // Se il gioco è finito
+                if (data.isGameOver) {
+                    document.getElementById('landingSection').style.display = 'none';
+                    document.getElementById('introScreen').classList.remove('show');
+                    document.getElementById('gameScreen').classList.remove('show');
+                    document.getElementById('finalResult').classList.add('show');
+                    showFinalResult(data);
+                }
+            });
+        }
+
+        async function toggleJoin() {
+            const playerName = getCurrentPlayer();
+            if (!playerName) {
+                alert('Devi impostare il tuo nome dalla home page!');
+                window.location.href = 'index.html';
+                return;
+            }
+
+            const playersRef = ref(database, `events/prycen/players`);
+            
+            const snapshot = await new Promise((resolve) => {
+                onValue(playersRef, (snap) => resolve(snap), { onlyOnce: true });
+            });
+
+            let isInEvent = false;
+            let playerNodeKey = null;
+
+            snapshot.forEach((childSnapshot) => {
+                if (childSnapshot.val() === playerName) {
+                    isInEvent = true;
+                    playerNodeKey = childSnapshot.key;
+                }
+            });
+
+            if (isInEvent && playerNodeKey) {
+                await remove(ref(database, `events/prycen/players/${playerNodeKey}`));
+            } else {
+                const newPlayerRef = push(ref(database, `events/prycen/players`));
+                await set(newPlayerRef, playerName);
+            }
+        }
+
+        window.toggleJoin = toggleJoin;
+
+        window.startGame = async function() {
+            const playersRef = ref(database, `events/prycen/players`);
+            const snapshot = await get(playersRef);
+            
+            const players = [];
+            snapshot.forEach((childSnapshot) => {
+                players.push(childSnapshot.val());
+            });
+
+            if (players.length !== 2) {
+                alert('Servono esattamente 2 giocatori per iniziare!');
+                return;
+            }
+
+            // Inizializza il gioco
+            const newGame = {
+                gameStarted: true,
+                player1: players[0],
+                player2: players[1],
+                correctGuesses: 0,
+                timeLeft: 120,
+                isGameOver: false,
+                currentPokemon: null,
+                usedPokemon: []
+            };
+
+            await set(eventRef, newGame);
+            await loadNextPokemon(newGame);
+        };
+
+        async function loadNextPokemon(state) {
+            if (allPokemon.length === 0) return;
+
+            const availablePokemon = allPokemon.filter(p => !state.usedPokemon.includes(p.national_number));
+            
+            if (availablePokemon.length === 0) {
+                state.usedPokemon = [];
+            }
+
+            const randomPokemon = availablePokemon[Math.floor(Math.random() * availablePokemon.length)];
+            state.currentPokemon = randomPokemon;
+            state.usedPokemon.push(randomPokemon.national_number);
+
+            await set(eventRef, state);
+        }
+
+        function renderGame() {
+            if (!gameState) return;
+
+            // Aggiorna titoli
+            document.getElementById('player1Title').textContent = `${gameState.player1} (Descrive)`;
+            document.getElementById('player2Title').textContent = `${gameState.player2} (Indovina)`;
+
+            // Mostra Pokemon a Player 1
+            if (gameState.currentPokemon) {
+                document.getElementById('pokemonName').textContent = gameState.currentPokemon.english_name;
+
+                // Mostra parole vietate
+                const forbiddenWordsEl = document.getElementById('forbiddenWords');
+                forbiddenWordsEl.innerHTML = '';
+
+                const forbiddenWords = [
+                    `Gen: ${gameState.currentPokemon.gen}`,
+                    `Tipo: ${gameState.currentPokemon.primary_type}`,
+                    gameState.currentPokemon.secondary_type ? `Tipo 2: ${gameState.currentPokemon.secondary_type}` : null,
+                    gameState.currentPokemon.evochain_0 ? `Evo: ${gameState.currentPokemon.evochain_0}` : null,
+                    gameState.currentPokemon.evochain_2 ? `Evo: ${gameState.currentPokemon.evochain_2}` : null,
+                    gameState.currentPokemon.evochain_4 ? `Evo: ${gameState.currentPokemon.evochain_4}` : null
+                ].filter(w => w !== null);
+
+                forbiddenWords.forEach(word => {
+                    const div = document.createElement('div');
+                    div.className = 'forbidden-item';
+                    div.textContent = word;
+                    forbiddenWordsEl.appendChild(div);
+                });
+            }
+
+            // Aggiorna score e timer
+            document.getElementById('scoreDisplay').textContent = `Corretti: ${gameState.correctGuesses}`;
+            document.getElementById('timer').textContent = gameState.timeLeft;
+
+            if (gameState.timeLeft <= 30) {
+                document.getElementById('timer').classList.add('warning');
+            }
+
+            // Gestisci timer
+            if (!timerInterval && gameState.timeLeft > 0) {
+                timerInterval = setInterval(async () => {
+                    const snapshot = await get(eventRef);
+                    const currentState = snapshot.val();
+                    
+                    if (currentState && currentState.timeLeft > 0) {
+                        currentState.timeLeft--;
+                        await set(eventRef, currentState);
+
+                        if (currentState.timeLeft <= 0) {
+                            clearInterval(timerInterval);
+                            await endGame(currentState);
+                        }
+                    }
+                }, 1000);
+            }
+        }
+
+        window.skipPokemon = async function() {
+            const snapshot = await get(eventRef);
+            const state = snapshot.val();
+            if (state && !state.isGameOver) {
+                await loadNextPokemon(state);
+            }
+        };
+
+        window.submitGuess = async function() {
+            const input = document.getElementById('guessInput').value.trim().toLowerCase();
+            if (!input) return;
+
+            const snapshot = await get(eventRef);
+            const state = snapshot.val();
+
+            if (!state || !state.currentPokemon) return;
+
+            const correct = state.currentPokemon.english_name.toLowerCase();
+
+            if (input === correct) {
+                state.correctGuesses++;
+                showFeedback(true);
+                await set(eventRef, state);
+                await loadNextPokemon(state);
+            } else {
+                showFeedback(false);
+            }
+
+            document.getElementById('guessInput').value = '';
+            document.getElementById('submitBtn').disabled = true;
+        };
+
+        function showFeedback(isCorrect) {
+            const feedback = document.getElementById('feedback');
+            feedback.textContent = isCorrect ? '✅ CORRETTO!' : '❌ SBAGLIATO!';
+            feedback.className = 'feedback show ' + (isCorrect ? 'correct' : 'wrong');
+
+            setTimeout(() => {
+                feedback.classList.remove('show');
+            }, 1500);
+        }
+
+        async function endGame(state) {
+            state.isGameOver = true;
+            await set(eventRef, state);
+        }
+
+        function showFinalResult(data) {
+            document.getElementById('finalScore').textContent = `Pokémon Corretti: ${data.correctGuesses}`;
+
+            // Determina premi
+            let spinPool, coins;
+            if (data.correctGuesses >= 12) {
+                spinPool = 's-tier';
+                coins = 150;
+            } else if (data.correctGuesses >= 6) {
+                spinPool = 'a-tier';
+                coins = 100;
+            } else {
+                spinPool = 'b-tier';
+                coins = 50;
+            }
+
+            const rewardsDisplay = document.getElementById('rewardsDisplay');
+            rewardsDisplay.innerHTML = `
+                <div class="reward-item">
+                    🎰 Spin ${spinPool.split('-')[0].toUpperCase()}-Tier per entrambi
+                </div>
+                <div class="reward-item">
+                    💰 ${coins} Coins ciascuno
+                </div>
+            `;
+
+            // Salva ricompense
+            saveRewards(data.player1, spinPool, coins);
+            saveRewards(data.player2, spinPool, coins);
+        }
+
+        async function saveRewards(playerName, spinPool, coins) {
+            const playerRef = ref(database, `players/${playerName}`);
+            const snapshot = await get(playerRef);
+            let playerData = snapshot.val() || { coins: 0, team: [] };
+
+            playerData.coins = (playerData.coins || 0) + coins;
+            playerData.pendingSpin = { pool: spinPool, from: 'prycen' };
+
+            await set(playerRef, playerData);
+        }
+
+        // Autocomplete
+        const input = document.getElementById('guessInput');
+        const suggestionsDiv = document.getElementById('suggestions');
+
+        input.addEventListener('input', function(e) {
+            const value = e.target.value.toLowerCase().trim();
+            
+            if (value.length > 0) {
+                document.getElementById('submitBtn').disabled = false;
+            } else {
+                document.getElementById('submitBtn').disabled = true;
+            }
+            
+            if (value.length < 2) {
+                suggestionsDiv.classList.remove('show');
+                return;
+            }
+
+            const matches = allPokemon
+                .filter(p => p.english_name.toLowerCase().startsWith(value))
+                .slice(0, 8);
+
+            if (matches.length > 0) {
+                suggestionsDiv.innerHTML = matches
+                    .map(p => `<div class="suggestion-item" onclick="selectPokemon('${p.english_name}')">${p.english_name}</div>`)
+                    .join('');
+                suggestionsDiv.classList.add('show');
+            } else {
+                suggestionsDiv.classList.remove('show');
+            }
+        });
+
+        window.selectPokemon = function(name) {
+            input.value = name;
+            suggestionsDiv.classList.remove('show');
+            document.getElementById('submitBtn').disabled = false;
+        };
+
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.guess-area')) {
+                suggestionsDiv.classList.remove('show');
+            }
+        });
+
+        input.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter' && !document.getElementById('submitBtn').disabled) {
+                submitGuess();
+            }
+        });
+
+        // Inizializza
+        if (!getCurrentPlayer()) {
+            alert('Devi impostare il tuo nome dalla home page!');
+            window.location.href = 'index.html';
+        } else {
+            renderLanding();
+        }
+    </script>
+</body>
+</html>
