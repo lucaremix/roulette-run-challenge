@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Brycen - Pokémon Taboo Challenge</title>
+    <title>Brycen v2</title>
     <style>
         * {
             margin: 0;
@@ -288,6 +288,12 @@
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 30px;
+        }
+
+        .game-board.single-player {
+            grid-template-columns: 1fr;
+            max-width: 600px;
+            margin: 0 auto;
         }
 
         .player-area {
@@ -862,36 +868,62 @@
         function renderGame() {
             if (!gameState) return;
 
+            const currentPlayer = getCurrentPlayer();
+            const isPlayer1 = currentPlayer === gameState.player1;
+            const isPlayer2 = currentPlayer === gameState.player2;
+
             // Aggiorna titoli
             document.getElementById('player1Title').textContent = `${gameState.player1} (Descrive)`;
             document.getElementById('player2Title').textContent = `${gameState.player2} (Indovina)`;
 
-            // Mostra Pokemon a Player 1
-            if (gameState.currentPokemon) {
-                document.getElementById('pokemonName').textContent = gameState.currentPokemon.english_name;
+            // Mostra/Nascondi aree in base al ruolo
+            const gameBoard = document.querySelector('.game-board');
+            const player1Area = document.querySelector('.player-area:nth-child(1)');
+            const player2Area = document.querySelector('.player-area:nth-child(2)');
 
-                // Mostra parole vietate
-                const forbiddenWordsEl = document.getElementById('forbiddenWords');
-                forbiddenWordsEl.innerHTML = '';
+            if (isPlayer1) {
+                // Player 1 vede solo la sua area (Pokemon e parole vietate)
+                gameBoard.classList.add('single-player');
+                player1Area.style.display = 'block';
+                player2Area.style.display = 'none';
 
-                const forbiddenWords = [
-                    `Gen: ${gameState.currentPokemon.gen}`,
-                    `Tipo: ${gameState.currentPokemon.primary_type}`,
-                    gameState.currentPokemon.secondary_type ? `Tipo 2: ${gameState.currentPokemon.secondary_type}` : null,
-                    gameState.currentPokemon.evochain_0 ? `Evo: ${gameState.currentPokemon.evochain_0}` : null,
-                    gameState.currentPokemon.evochain_2 ? `Evo: ${gameState.currentPokemon.evochain_2}` : null,
-                    gameState.currentPokemon.evochain_4 ? `Evo: ${gameState.currentPokemon.evochain_4}` : null
-                ].filter(w => w !== null);
+                // Mostra Pokemon
+                if (gameState.currentPokemon) {
+                    document.getElementById('pokemonName').textContent = gameState.currentPokemon.english_name;
 
-                forbiddenWords.forEach(word => {
-                    const div = document.createElement('div');
-                    div.className = 'forbidden-item';
-                    div.textContent = word;
-                    forbiddenWordsEl.appendChild(div);
-                });
+                    // Mostra parole vietate
+                    const forbiddenWordsEl = document.getElementById('forbiddenWords');
+                    forbiddenWordsEl.innerHTML = '';
+
+                    const forbiddenWords = [
+                        `Gen: ${gameState.currentPokemon.gen}`,
+                        `Tipo: ${gameState.currentPokemon.primary_type}`,
+                        gameState.currentPokemon.secondary_type ? `Tipo 2: ${gameState.currentPokemon.secondary_type}` : null,
+                        gameState.currentPokemon.evochain_0 ? `Evo: ${gameState.currentPokemon.evochain_0}` : null,
+                        gameState.currentPokemon.evochain_2 ? `Evo: ${gameState.currentPokemon.evochain_2}` : null,
+                        gameState.currentPokemon.evochain_4 ? `Evo: ${gameState.currentPokemon.evochain_4}` : null
+                    ].filter(w => w !== null);
+
+                    forbiddenWords.forEach(word => {
+                        const div = document.createElement('div');
+                        div.className = 'forbidden-item';
+                        div.textContent = word;
+                        forbiddenWordsEl.appendChild(div);
+                    });
+                }
+            } else if (isPlayer2) {
+                // Player 2 vede solo la sua area (input per indovinare)
+                gameBoard.classList.add('single-player');
+                player1Area.style.display = 'none';
+                player2Area.style.display = 'block';
+            } else {
+                // Spettatore vede entrambe le aree
+                gameBoard.classList.remove('single-player');
+                player1Area.style.display = 'block';
+                player2Area.style.display = 'block';
             }
 
-            // Aggiorna score e timer
+            // Aggiorna score e timer (visibili a entrambi)
             document.getElementById('scoreDisplay').textContent = `Corretti: ${gameState.correctGuesses}`;
             document.getElementById('timer').textContent = gameState.timeLeft;
 
@@ -899,8 +931,8 @@
                 document.getElementById('timer').classList.add('warning');
             }
 
-            // Gestisci timer
-            if (!timerInterval && gameState.timeLeft > 0) {
+            // Gestisci timer (solo player1 lo esegue per evitare conflitti)
+            if (isPlayer1 && !timerInterval && gameState.timeLeft > 0) {
                 timerInterval = setInterval(async () => {
                     const snapshot = await get(eventRef);
                     const currentState = snapshot.val();
