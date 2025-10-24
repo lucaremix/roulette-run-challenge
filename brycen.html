@@ -547,7 +547,7 @@
         <!-- Landing Section -->
         <div id="landingSection">
             <div class="event-header">
-                <img src="https://raw.githubusercontent.com/lucaremix/roulette-run-challenge/main/trainers/Brycen.png" 
+                <img src="https://img.nuzlocke.app/leaders/blwh-brycen.png" 
                      alt="Brycen" class="event-trainer-img">
                 <div class="event-info">
                     <h1 class="event-title">Brycen - Pokémon Taboo Challenge</h1>
@@ -568,7 +568,7 @@
                             <li><strong>Player 1</strong> vede il Pokémon da far indovinare e le parole vietate</li>
                             <li><strong>Player 2</strong> deve indovinare il Pokémon digitandone il nome</li>
                             <li><strong>Parole vietate:</strong> Generazione, Tipo Primario, Tipo Secondario, Evoluzioni</li>
-                            <li><strong>Premi:</strong> 12+ corretti = Spin S + 150 coins | 6+ corretti = Spin A + 100 coins | 0+ corretti = Spin B + 50 coins</li>
+                            <li><strong>Premi:</strong> 10+ corretti = Spin S + 150 coins | 5+ corretti = Spin A + 100 coins | 0+ corretti = Spin B + 50 coins</li>
                         </ul>
                     </div>
                 </div>
@@ -1002,10 +1002,10 @@
 
             // Determina premi
             let spinPool, coins;
-            if (data.correctGuesses >= 12) {
+            if (data.correctGuesses >= 10) {
                 spinPool = 's-tier';
                 coins = 150;
-            } else if (data.correctGuesses >= 6) {
+            } else if (data.correctGuesses >= 5) {
                 spinPool = 'a-tier';
                 coins = 100;
             } else {
