@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Prycen - Pokémon Taboo Challenge</title>
+    <title>Brycen - Pokémon Taboo Challenge</title>
     <style>
         * {
             margin: 0;
@@ -13,7 +13,7 @@
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-image: url('https://raw.githubusercontent.com/lucaremix/roulette-run-challenge/main/background/Prycen_background.png');
+            background-image: url('https://raw.githubusercontent.com/lucaremix/roulette-run-challenge/main/background/Brycen_background.png');
             background-size: cover;
             background-position: center;
             background-attachment: fixed;
@@ -541,10 +541,10 @@
         <!-- Landing Section -->
         <div id="landingSection">
             <div class="event-header">
-                <img src="https://raw.githubusercontent.com/lucaremix/roulette-run-challenge/main/trainers/Prycen.png" 
-                     alt="Prycen" class="event-trainer-img">
+                <img src="https://raw.githubusercontent.com/lucaremix/roulette-run-challenge/main/trainers/Brycen.png" 
+                     alt="Brycen" class="event-trainer-img">
                 <div class="event-info">
-                    <h1 class="event-title">Prycen - Pokémon Taboo Challenge</h1>
+                    <h1 class="event-title">Brycen - Pokémon Taboo Challenge</h1>
                     <p style="font-size: 1.1em; color: #ccc;">
                         Gioco in stile Taboo per 2 giocatori. Un giocatore deve far indovinare il Pokémon 
                         senza usare le parole proibite, l'altro deve indovinare!
@@ -672,7 +672,7 @@
 
         const app = initializeApp(firebaseConfig);
         const database = getDatabase(app);
-        const eventRef = ref(database, 'events/prycen');
+        const eventRef = ref(database, 'events/brycen');
 
         let allPokemon = [];
         let gameState = null;
@@ -694,7 +694,7 @@
         // Render Landing
         function renderLanding() {
             const currentPlayer = getCurrentPlayer();
-            const playersRef = ref(database, `events/prycen/players`);
+            const playersRef = ref(database, `events/brycen/players`);
 
             onValue(playersRef, (snapshot) => {
                 const players = [];
@@ -787,7 +787,7 @@
                 return;
             }
 
-            const playersRef = ref(database, `events/prycen/players`);
+            const playersRef = ref(database, `events/brycen/players`);
             
             const snapshot = await new Promise((resolve) => {
                 onValue(playersRef, (snap) => resolve(snap), { onlyOnce: true });
@@ -804,9 +804,9 @@
             });
 
             if (isInEvent && playerNodeKey) {
-                await remove(ref(database, `events/prycen/players/${playerNodeKey}`));
+                await remove(ref(database, `events/brycen/players/${playerNodeKey}`));
             } else {
-                const newPlayerRef = push(ref(database, `events/prycen/players`));
+                const newPlayerRef = push(ref(database, `events/brycen/players`));
                 await set(newPlayerRef, playerName);
             }
         }
@@ -814,7 +814,7 @@
         window.toggleJoin = toggleJoin;
 
         window.startGame = async function() {
-            const playersRef = ref(database, `events/prycen/players`);
+            const playersRef = ref(database, `events/brycen/players`);
             const snapshot = await get(playersRef);
             
             const players = [];
@@ -1002,7 +1002,7 @@
             let playerData = snapshot.val() || { coins: 0, team: [] };
 
             playerData.coins = (playerData.coins || 0) + coins;
-            playerData.pendingSpin = { pool: spinPool, from: 'prycen' };
+            playerData.pendingSpin = { pool: spinPool, from: 'brycen' };
 
             await set(playerRef, playerData);
         }
