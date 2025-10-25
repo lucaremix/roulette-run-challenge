@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Roulette Run Challenge - Scegli il Gioco</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-image: url('https://raw.githubusercontent.com/lucaremix/roulette-run-challenge/main/background/home_background.png');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            color: #e0e0e0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 50px;
+            padding: 20px;
+        }
+
+        .logo-img {
+            max-width: 100%;
+            height: auto;
+            max-height: 120px;
+        }
+
+        .main-container {
+            max-width: 1200px;
+            width: 100%;
+            margin: 0 auto;
+        }
+
+        .title-section {
+            text-align: center;
+            margin-bottom: 50px;
+        }
+
+        .title-section h1 {
+            font-size: 2.5em;
+            color: #ffffff;
+            letter-spacing: 3px;
+            font-weight: 600;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        .title-section p {
+            font-size: 1.2em;
+            color: #888;
+            letter-spacing: 1px;
+        }
+
+        .games-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .game-card {
+            background: #1a1a1a;
+            border: 2px solid #2a2a2a;
+            border-radius: 16px;
+            padding: 30px;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .game-card:hover:not(.coming-soon) {
+            transform: translateY(-10px);
+            border-color: #4a4a4a;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        .game-card.coming-soon {
+            opacity: 0.5;
+            cursor: not-allowed;
+            border-color: #2a2a2a;
+        }
+
+        .game-card.coming-soon::before {
+            content: 'COMING SOON';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(-15deg);
+            font-size: 2em;
+            font-weight: bold;
+            color: #555;
+            z-index: 10;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+            letter-spacing: 3px;
+            pointer-events: none;
+        }
+
+        .game-card.coming-soon .game-logo {
+            filter: grayscale(100%);
+        }
+
+        .game-logo {
+            width: 100%;
+            max-width: 280px;
+            height: auto;
+            margin: 0 auto;
+            display: block;
+            transition: transform 0.3s ease;
+        }
+
+        .game-card:hover:not(.coming-soon) .game-logo {
+            transform: scale(1.05);
+        }
+
+        .game-card.coming-soon .game-logo {
+            opacity: 0.4;
+        }
+
+        @media (max-width: 768px) {
+            .title-section h1 {
+                font-size: 2em;
+            }
+
+            .title-section p {
+                font-size: 1em;
+            }
+
+            .games-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+
+            .game-card {
+                padding: 20px;
+            }
+
+            .game-logo {
+                max-width: 220px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .title-section h1 {
+                font-size: 1.5em;
+            }
+
+            .logo-img {
+                max-height: 80px;
+            }
+
+            .game-card.coming-soon::before {
+                font-size: 1.5em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <img src="https://raw.githubusercontent.com/lucaremix/roulette-run-challenge/main/logo/LOGO.png" 
+             alt="Roulette Run Challenge Logo" 
+             class="logo-img"
+             onerror="this.style.display='none'">
+    </header>
+
+    <div class="main-container">
+        <div class="title-section">
+            <h1>SCEGLI IL GIOCO</h1>
+            <p>Seleziona la tua avventura</p>
+        </div>
+
+        <div class="games-grid">
+            <div class="game-card" onclick="window.location.href='rising-ruby.html'">
+                <img src="https://img.nuzlocke.app/logos/rising-ruby-logo.png" 
+                     alt="Rising Ruby" 
+                     class="game-logo">
+            </div>
+
+            <div class="game-card" onclick="window.location.href='blaze-black.html'">
+                <img src="https://img.nuzlocke.app/logos/blaze-black-logo.png" 
+                     alt="Blaze Black" 
+                     class="game-logo">
+            </div>
+
+            <div class="game-card coming-soon">
+                <img src="https://img.nuzlocke.app/logos/sacred-gold-logo.png" 
+                     alt="Sacred Gold" 
+                     class="game-logo">
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Previene il click sulla card "coming soon"
+        document.querySelectorAll('.game-card.coming-soon').forEach(card => {
+            card.onclick = function(e) {
+                e.preventDefault();
+                return false;
+            };
+        });
+    </script>
+</body>
+</html>
