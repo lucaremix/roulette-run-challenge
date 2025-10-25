@@ -157,36 +157,38 @@
         }
 
         .achievements-section {
-            max-width: 1000px;
+            max-width: 700px;
             width: 100%;
-            margin: 60px auto 40px;
+            margin: 50px auto 30px;
             padding: 0 20px;
         }
 
         .achievements-title {
             text-align: center;
-            color: #fff;
-            font-size: 1.8em;
-            font-weight: 600;
-            margin-bottom: 30px;
-            letter-spacing: 2px;
+            color: #ffd700;
+            font-size: 1.3em;
+            font-weight: 500;
+            margin-bottom: 20px;
+            letter-spacing: 1px;
+            font-style: italic;
+            opacity: 0.9;
         }
 
         .achievements-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-            gap: 20px;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 12px;
             background: #1a1a1a;
             border: 1px solid #2a2a2a;
             border-radius: 12px;
-            padding: 30px;
+            padding: 20px;
         }
 
         .badge-slot {
             aspect-ratio: 1;
             background: #0a0a0a;
             border: 2px solid #2a2a2a;
-            border-radius: 12px;
+            border-radius: 8px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -206,14 +208,14 @@
         }
 
         .badge-img {
-            width: 80%;
-            height: 80%;
+            width: 70%;
+            height: 70%;
             object-fit: contain;
-            filter: drop-shadow(0 0 10px rgba(255, 215, 0, 0.3));
+            filter: drop-shadow(0 0 8px rgba(255, 215, 0, 0.3));
         }
 
         .badge-lock {
-            font-size: 3em;
+            font-size: 2em;
             color: #444;
             font-weight: bold;
         }
@@ -257,14 +259,18 @@
         }
 
         @media (max-width: 768px) {
+            .achievements-section {
+                max-width: 500px;
+            }
+
             .achievements-grid {
                 grid-template-columns: repeat(3, 1fr);
-                gap: 15px;
-                padding: 20px;
+                gap: 10px;
+                padding: 15px;
             }
 
             .achievements-title {
-                font-size: 1.5em;
+                font-size: 1.1em;
             }
 
             .badge-tooltip {
@@ -273,19 +279,28 @@
             }
 
             .badge-lock {
-                font-size: 2em;
+                font-size: 1.5em;
             }
         }
 
         @media (max-width: 480px) {
+            .achievements-section {
+                max-width: 350px;
+            }
+
             .achievements-grid {
-                grid-template-columns: repeat(2, 1fr);
-                gap: 10px;
+                grid-template-columns: repeat(3, 1fr);
+                gap: 8px;
+                padding: 12px;
             }
 
             .badge-tooltip {
                 min-width: 180px;
                 font-size: 0.9em;
+            }
+
+            .badge-lock {
+                font-size: 1.2em;
             }
         }
     </style>
@@ -326,10 +341,10 @@
     </div>
 
     <div class="achievements-section">
-        <h2 class="achievements-title">Achievement Badges</h2>
+        <h2 class="achievements-title">Achievements</h2>
         <div class="achievements-grid">
             <div class="badge-slot">
-                <img src="https://raw.githubusercontent.com/lucaremix/roulette-run-challenge/main/background/black_badge.png" 
+                <img src="https://raw.githubusercontent.com/lucaremix/roulette-run-challenge/main/images/black_badge.png" 
                      alt="Blaze Black Master" 
                      class="badge-img">
                 <div class="badge-tooltip">
