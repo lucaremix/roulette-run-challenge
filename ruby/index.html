@@ -707,6 +707,9 @@
         </div>
 
         <div class="footer-buttons">
+            <a href="regole.html" class="footer-btn">📖 Regole</a>
+            <a href="pool.html" class="footer-btn">🎲 Pool</a>
+            <button class="footer-btn" onclick="resetEvents()">🔄 Reset Eventi</button>
             <button class="footer-btn danger" onclick="resetAllData()">🗑️ Reset Tutto</button>
         </div>
     </div>
@@ -843,12 +846,25 @@
                 `).join('');
             }
 
-            // ITEMS CONSUMABILI
+            // ITEMS CONSUMABILI (incluse le mints)
             const consumableGrid = document.getElementById('consumableItemsGrid');
             const consumableItems = [];
 
             if (playerInventory.itemconsumabili) {
                 Object.entries(playerInventory.itemconsumabili).forEach(([name, quantity]) => {
+                    if (quantity > 0) {
+                        consumableItems.push({
+                            name: name,
+                            quantity: quantity,
+                            image: getItemImage(name)
+                        });
+                    }
+                });
+            }
+
+            // Aggiungi anche le mints dal loro campo separato
+            if (playerInventory.mints) {
+                Object.entries(playerInventory.mints).forEach(([name, quantity]) => {
                     if (quantity > 0) {
                         consumableItems.push({
                             name: name,
@@ -891,6 +907,12 @@
                 'Limit Breaker Ball': 'https://github.com/lucaremix/roulette-run-challenge/blob/main/images/items/item-limitbreakerball.png?raw=true',
                 'Squirt Bottle': 'https://github.com/lucaremix/roulette-run-challenge/blob/main/images/items/item-squirtbottle.png?raw=true'
             };
+            
+            // Se è una mint, usa l'immagine della mint
+            if (name.endsWith(' Mint')) {
+                return 'https://github.com/lucaremix/roulette-run-challenge/blob/main/images/items/item-mint.png?raw=true';
+            }
+            
             return imageMap[name] || 'https://via.placeholder.com/50?text=Item';
         }
 
@@ -901,8 +923,9 @@
             }
 
             const applicableItems = ['Bottle Cap', 'Golden Bottle Cap', 'Ability Capsule', 'Golden Soothe Bell', 'Pokérus Sludge'];
+            const isMint = itemName.endsWith(' Mint');
             
-            if (!applicableItems.includes(itemName)) {
+            if (!applicableItems.includes(itemName) && !isMint) {
                 alert('Questo item non è applicabile ai Pokémon');
                 return;
             }
@@ -964,7 +987,10 @@
             const playerData = snapshot.val();
             const pokemon = playerData.rubyteam[index];
 
-            if (selectedItem.name === 'Bottle Cap') {
+            // Se è una mint, cambia la natura
+            if (selectedItem.name.endsWith(' Mint')) {
+                await applyMint(index, selectedItem.name);
+            } else if (selectedItem.name === 'Bottle Cap') {
                 openStatModal(index);
             } else if (selectedItem.name === 'Golden Bottle Cap') {
                 await applyEffect(index, 'ALL_IV_MAXED', 'All IVs Maxed');
@@ -990,6 +1016,34 @@
             await applyEffect(selectedPokemon, `MAXED_IV_${stat}`, `Maxed IV: ${stat}`);
             closeStatModal();
         };
+
+        async function applyMint(index, mintName) {
+            try {
+                // Estrae il nome della natura dalla mint (es. "Adamant Mint" -> "Adamant")
+                const nature = mintName.replace(' Mint', '');
+                
+                const playerRef = ref(database, `players/${playerName}`);
+                const snapshot = await get(playerRef);
+                const playerData = snapshot.val();
+                
+                // Cambia la natura del Pokemon
+                playerData.rubyteam[index].nature = nature;
+
+                await set(playerRef, playerData);
+
+                // Consuma item
+                await consumeItem(selectedItem.name);
+                
+                selectedItem = null;
+                selectedPokemon = null;
+                
+                alert(`Natura cambiata in ${nature}!`);
+                
+            } catch (error) {
+                console.error('Errore applicazione mint:', error);
+                alert('Errore durante l\'applicazione della mint');
+            }
+        }
 
         async function applyEffect(index, effectKey, effectLabel) {
             try {
@@ -1057,12 +1111,24 @@
         }
 
         async function consumeItem(itemName) {
-            const currentQuantity = playerInventory.itemconsumabili[itemName] || 0;
-            if (currentQuantity > 0) {
-                await update(ref(database), {
-                    [`players/${playerName}/inventory/itemconsumabili/${itemName}`]: currentQuantity - 1
-                });
-                await loadPlayerInventory();
+            // Controlla se è una mint
+            if (itemName.endsWith(' Mint')) {
+                const currentQuantity = (playerInventory.mints && playerInventory.mints[itemName]) || 0;
+                if (currentQuantity > 0) {
+                    await update(ref(database), {
+                        [`players/${playerName}/inventory/mints/${itemName}`]: currentQuantity - 1
+                    });
+                    await loadPlayerInventory();
+                }
+            } else {
+                // Item consumabile normale
+                const currentQuantity = playerInventory.itemconsumabili[itemName] || 0;
+                if (currentQuantity > 0) {
+                    await update(ref(database), {
+                        [`players/${playerName}/inventory/itemconsumabili/${itemName}`]: currentQuantity - 1
+                    });
+                    await loadPlayerInventory();
+                }
             }
         }
 
@@ -1160,6 +1226,30 @@
             } catch (error) {
                 console.error('Errore:', error);
                 alert('Errore durante l\'operazione');
+            }
+        };
+
+        window.resetEvents = async function() {
+            if (!confirm('Vuoi resettare la tua partecipazione a tutti gli eventi?')) {
+                return;
+            }
+
+            try {
+                const eventsRef = ref(database, 'events');
+                const snapshot = await get(eventsRef);
+                const events = snapshot.val() || {};
+
+                // Rimuovi il player da tutti gli eventi
+                for (const eventId in events) {
+                    if (events[eventId].players && events[eventId].players[playerName]) {
+                        await remove(ref(database, `events/${eventId}/players/${playerName}`));
+                    }
+                }
+
+                alert('Partecipazione agli eventi resettata!');
+            } catch (error) {
+                console.error('Errore:', error);
+                alert('Errore durante il reset degli eventi');
             }
         };
 
