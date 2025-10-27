@@ -907,9 +907,40 @@
             wonPokemon = currentPool[randomIndex];
             wonPokemonKey = wonPokemon.key;
 
-            // Determina se è shiny basandosi sul numero di shiny nel pool
-            const shinyChance = shinyPokemonCount / currentPool.length;
-            wonPokemon.isShiny = Math.random() < shinyChance;
+            // Determina se questo specifico Pokemon è shiny guardando il reel
+            // Nel setup, alcuni Pokemon hanno lo shiny badge, dobbiamo matchare quello
+            const reel = document.getElementById('slotReel');
+            const reelChildren = reel.children;
+            
+            // Cerca il Pokemon vincente nella seconda metà del reel per centrarlo
+            let targetSlotIndex = -1;
+            let isShinyInReel = false;
+            
+            for (let i = Math.floor(reelChildren.length / 2); i < reelChildren.length; i++) {
+                const poolIndex = i % currentPool.length;
+                const slotPokemon = currentPool[poolIndex];
+                
+                // Verifica se questo slot ha il Pokemon vincente
+                if (slotPokemon.national_number === wonPokemon.national_number && 
+                    slotPokemon.english_name === wonPokemon.english_name &&
+                    slotPokemon.key === wonPokemon.key) {
+                    
+                    // Verifica se questo slot specifico ha il badge shiny
+                    const slotElement = reelChildren[i];
+                    isShinyInReel = slotElement.querySelector('.shiny-badge') !== null;
+                    
+                    if (targetSlotIndex === -1) {
+                        targetSlotIndex = i;
+                        wonPokemon.isShiny = isShinyInReel;
+                    }
+                }
+            }
+
+            // Fallback se non trovato
+            if (targetSlotIndex === -1) {
+                targetSlotIndex = Math.floor(reelChildren.length * 0.7);
+                wonPokemon.isShiny = false;
+            }
 
             // Genera natura e abilità casuali
             const randomNature = natures[Math.floor(Math.random() * natures.length)];
@@ -928,12 +959,9 @@
             wonPokemon.rolled_ability = randomAbility;
 
             // Animazione slot machine
-            const reel = document.getElementById('slotReel');
             const slotWidth = 170; // 150px + 20px gap
             
-            const reelChildren = reel.children;
-            const targetSlotIndex = Math.floor(reelChildren.length * 0.7);
-
+            // Calcola lo spostamento per centrare PERFETTAMENTE il Pokemon nella finestra dorata
             const machineWidth = document.querySelector('.slot-machine').offsetWidth;
             const machineCenter = machineWidth / 2;
             const slotCenter = slotWidth / 2;
