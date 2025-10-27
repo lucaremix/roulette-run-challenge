@@ -13,7 +13,7 @@
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-image: url('https://raw.githubusercontent.com/lucaremix/roulette-run-challenge/main/background/r-index_background.png');
+            background-image: url('https://raw.githubusercontent.com/lucaremix/roulette-run-challenge/main/background/Index_background.png');
             background-size: cover;
             background-position: center;
             background-attachment: fixed;
@@ -602,7 +602,7 @@
 <body>
     <div class="container">
         <header>
-            <img src="https://raw.githubusercontent.com/lucaremix/roulette-run-challenge/main/images/rising-ruby-logo.webp" 
+            <img src="https://raw.githubusercontent.com/lucaremix/roulette-run-challenge/main/logo.png" 
                  alt="Roulette Run Challenge" 
                  class="logo-img"
                  onerror="this.style.display='none'">
@@ -737,17 +737,34 @@
         import { getDatabase, ref, onValue, get, set, update, remove } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js';
 
         const firebaseConfig = {
-            apiKey: "AIzaSyBQpow283Yne3xY88NZHRFәlk9TElI8Ey0",
+            apiKey: "AIzaSyDNuD9wViLLxteHMCEBlvfdONwcZbAjAvo",
             authDomain: "roulette-run-challenge.firebaseapp.com",
             databaseURL: "https://roulette-run-challenge-default-rtdb.europe-west1.firebasedatabase.app",
             projectId: "roulette-run-challenge",
             storageBucket: "roulette-run-challenge.firebasestorage.app",
-            messagingSenderId: "155292105112",
-            appId: "1:155292105112:web:b00b86bc4ee2fd46f9d8b6"
+            messagingSenderId: "994019156093",
+            appId: "1:994019156093:web:9792bdce75c486f589d114"
         };
 
         const app = initializeApp(firebaseConfig);
         const database = getDatabase(app);
+
+        // Eventi statici - cliccando si va alla pagina dell'evento
+        const events = [
+            { id: 'starters', name: 'Starters', trainer: 'https://img.nuzlocke.app/leaders/blwh-alder.png' },
+            { id: 'n-1', name: 'N', trainer: 'https://raw.githubusercontent.com/lucaremix/roulette-run-challenge/main/blwh-n-2.webp' },
+            { id: 'ccc', name: 'Chili, Cress & Cilian', trainer: 'https://img.nuzlocke.app/leaders/blwh-ccc.png' },
+            { id: 'cheren', name: 'Cheren', trainer: 'https://img.nuzlocke.app/leaders/blwh-cheren.png' },
+            { id: 'lenora', name: 'Lenora', trainer: 'https://img.nuzlocke.app/leaders/blwh-lenora.png' },
+            { id: 'burgh', name: 'Burgh', trainer: 'https://img.nuzlocke.app/leaders/blwh-burgh.png' },
+            { id: 'elesa', name: 'Elesa', trainer: 'https://img.nuzlocke.app/leaders/blwh-elesa.png' },
+            { id: 'clay', name: 'Clay', trainer: 'https://img.nuzlocke.app/leaders/blwh-clay.png' },
+            { id: 'n-2', name: 'N (Chargestone Cave)', trainer: 'https://raw.githubusercontent.com/lucaremix/roulette-run-challenge/main/blwh-n-2.webp' },
+            { id: 'skyla', name: 'Skyla', trainer: 'https://img.nuzlocke.app/leaders/blwh-skyla.png' },
+            { id: 'brycen', name: 'Brycen', trainer: 'https://img.nuzlocke.app/leaders/blwh-brycen.png' },
+            { id: 'bianca', name: 'Bianca', trainer: 'https://img.nuzlocke.app/leaders/blwh-bianca.png' },
+            { id: 'drayden', name: 'Drayden', trainer: 'https://img.nuzlocke.app/leaders/blwh-drayden.png' }
+        ];
 
         let playerName = localStorage.getItem('playerName');
         let selectedItem = null;
@@ -1156,57 +1173,69 @@
         }
 
         function loadEvents() {
-            const eventsRef = ref(database, 'events');
-            
-            onValue(eventsRef, (snapshot) => {
-                const events = snapshot.val();
-                renderEvents(events || {});
+            renderEvents();
+        }
+
+        function renderEvents() {
+            const grid = document.getElementById('eventsGrid');
+            const currentPlayer = playerName;
+
+            grid.innerHTML = ''; // Pulisci la griglia
+
+            events.forEach(event => {
+                const eventRef = ref(database, `events/${event.id}/players`);
+                
+                onValue(eventRef, (snapshot) => {
+                    const players = [];
+                    snapshot.forEach((childSnapshot) => {
+                        players.push(childSnapshot.val());
+                    });
+
+                    const isJoined = players.includes(currentPlayer);
+                    let playersHTML;
+                    if (players.length === 0) {
+                        playersHTML = '<div class="no-players">Nessun giocatore</div>';
+                    } else {
+                        playersHTML = players.map(player => {
+                            const currentClass = player === currentPlayer ? 'current-user' : '';
+                            return `<div class="player-item ${currentClass}">${player === currentPlayer ? '👤 ' : ''}${player}</div>`;
+                        }).join('');
+                    }
+
+                    let card = grid.querySelector(`[data-event-id="${event.id}"]`);
+                    if (!card) {
+                        card = document.createElement('div');
+                        card.setAttribute('data-event-id', event.id);
+                        card.className = `event-card ${isJoined ? 'joined' : ''}`;
+                        card.onclick = () => togglePlayerInEvent(event.id);
+                        grid.appendChild(card);
+                    } else {
+                        card.className = `event-card ${isJoined ? 'joined' : ''}`;
+                    }
+
+                    card.innerHTML = `
+                        <img src="${event.trainer}" 
+                             alt="${event.name}" 
+                             class="trainer-img"
+                             onerror="this.src='https://via.placeholder.com/128x128/1a1a1a/888?text=Event'">
+                        <div class="event-info">
+                            <div class="event-name">${event.name}</div>
+                            <div class="player-list">${playersHTML}</div>
+                            <div class="join-status ${isJoined ? 'joined' : ''}">
+                                ${isJoined ? '✓ Partecipante' : 'Clicca per entrare'}
+                            </div>
+                        </div>
+                    `;
+                });
             });
         }
 
-        function renderEvents(events) {
-            const eventsGrid = document.getElementById('eventsGrid');
-            
-            const eventsList = Object.entries(events).map(([id, event]) => ({
-                id,
-                ...event
-            }));
-
-            if (eventsList.length === 0) {
-                eventsGrid.innerHTML = '<div style="text-align: center; color: #888; padding: 40px;">Nessun evento disponibile</div>';
+        function togglePlayerInEvent(eventId) {
+            if (!playerName) {
+                alert('Imposta prima il tuo nome!');
                 return;
             }
-
-            eventsGrid.innerHTML = eventsList.map(event => {
-                const players = event.players || {};
-                const playersList = Object.keys(players);
-                const isJoined = playersList.includes(playerName);
-
-                return `
-                    <div class="event-card ${isJoined ? 'joined' : ''}" onclick="toggleJoinEvent('${event.id}', ${isJoined})">
-                        <img src="${event.image}" 
-                             alt="${event.name}" 
-                             class="trainer-img"
-                             onerror="this.src='https://via.placeholder.com/128?text=${event.name}'">
-                        <div class="event-info">
-                            <div class="event-name">${event.name}</div>
-                            <div class="player-list">
-                                ${playersList.length > 0 
-                                    ? playersList.map(p => `
-                                        <div class="player-item ${p === playerName ? 'current-user' : ''}">
-                                            ${p === playerName ? '👤 ' : ''}${p}
-                                        </div>
-                                    `).join('')
-                                    : '<div class="no-players">Nessun giocatore</div>'
-                                }
-                            </div>
-                            <div class="join-status ${isJoined ? 'joined' : ''}">
-                                ${isJoined ? '✓ Partecipante' : 'Clicca per partecipare'}
-                            </div>
-                        </div>
-                    </div>
-                `;
-            }).join('');
+            window.location.href = `${eventId}.html`;
         }
 
         window.toggleJoinEvent = async function(eventId, isJoined) {
