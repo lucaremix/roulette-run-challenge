@@ -1,0 +1,1063 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Type Spin - Roulette Run Challenge</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            min-height: 100vh;
+            color: #e0e0e0;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+        }
+
+        h1 {
+            font-size: 2.5em;
+            color: #fff;
+            margin-bottom: 10px;
+            text-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+        }
+
+        .back-btn {
+            display: inline-block;
+            padding: 10px 20px;
+            background: #1a1a1a;
+            border: 1px solid #2a2a2a;
+            border-radius: 8px;
+            color: #e0e0e0;
+            text-decoration: none;
+            margin-bottom: 20px;
+            transition: all 0.3s;
+        }
+
+        .back-btn:hover {
+            background: #252525;
+            border-color: #3a3a3a;
+            transform: translateY(-2px);
+        }
+
+        .player-info {
+            text-align: center;
+            font-size: 1.3em;
+            color: #ffd700;
+            margin-bottom: 20px;
+            text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+        }
+
+        /* ITEMS BOX */
+        .items-box {
+            background: rgba(26, 26, 26, 0.9);
+            border: 2px solid #3a3a3a;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            backdrop-filter: blur(10px);
+        }
+
+        .items-title {
+            font-size: 1.3em;
+            color: #ffd700;
+            margin-bottom: 15px;
+            text-align: center;
+            text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+        }
+
+        .items-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 15px;
+        }
+
+        .item-card {
+            background: rgba(10, 10, 10, 0.8);
+            border: 2px solid #2a2a2a;
+            border-radius: 10px;
+            padding: 15px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+        }
+
+        .item-card:hover:not(.disabled) {
+            border-color: #ffd700;
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(255, 215, 0, 0.3);
+        }
+
+        .item-card.active {
+            border-color: #2a7a2a;
+            background: rgba(26, 58, 26, 0.8);
+            box-shadow: 0 0 30px rgba(42, 122, 42, 0.6);
+        }
+
+        .item-card.disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        .item-image {
+            width: 70px;
+            height: 70px;
+            object-fit: contain;
+            margin-bottom: 10px;
+            image-rendering: auto;
+        }
+
+        .item-name {
+            font-size: 1em;
+            color: #fff;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        .item-quantity {
+            font-size: 0.9em;
+            color: #ffd700;
+        }
+
+        .item-effect {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: #2a7a2a;
+            color: white;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.75em;
+            font-weight: bold;
+            box-shadow: 0 0 10px rgba(42, 122, 42, 0.8);
+        }
+
+        /* TYPE SELECTOR */
+        .type-selector {
+            background: rgba(26, 26, 26, 0.9);
+            border: 2px solid #3a3a3a;
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 20px;
+            backdrop-filter: blur(10px);
+        }
+
+        .type-title {
+            font-size: 1.5em;
+            color: #ffd700;
+            margin-bottom: 20px;
+            text-align: center;
+            text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+        }
+
+        .type-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 12px;
+        }
+
+        .type-btn {
+            padding: 15px 10px;
+            background: rgba(10, 10, 10, 0.8);
+            border: 3px solid #2a2a2a;
+            border-radius: 10px;
+            color: #fff;
+            font-size: 1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+            text-transform: uppercase;
+        }
+
+        .type-btn:hover {
+            transform: scale(1.08);
+            box-shadow: 0 5px 20px rgba(255, 255, 255, 0.2);
+        }
+
+        .type-btn.selected {
+            border-width: 4px;
+            box-shadow: 0 0 30px currentColor;
+            transform: scale(1.05);
+        }
+
+        /* Type colors */
+        .type-normal { border-color: #A8A878; color: #A8A878; }
+        .type-fire { border-color: #F08030; color: #F08030; }
+        .type-water { border-color: #6890F0; color: #6890F0; }
+        .type-electric { border-color: #F8D030; color: #F8D030; }
+        .type-grass { border-color: #78C850; color: #78C850; }
+        .type-ice { border-color: #98D8D8; color: #98D8D8; }
+        .type-fighting { border-color: #C03028; color: #C03028; }
+        .type-poison { border-color: #A040A0; color: #A040A0; }
+        .type-ground { border-color: #E0C068; color: #E0C068; }
+        .type-flying { border-color: #A890F0; color: #A890F0; }
+        .type-psychic { border-color: #F85888; color: #F85888; }
+        .type-bug { border-color: #A8B820; color: #A8B820; }
+        .type-rock { border-color: #B8A038; color: #B8A038; }
+        .type-ghost { border-color: #705898; color: #705898; }
+        .type-dragon { border-color: #7038F8; color: #7038F8; }
+        .type-dark { border-color: #705848; color: #705848; }
+        .type-steel { border-color: #B8B8D0; color: #B8B8D0; }
+        .type-fairy { border-color: #EE99AC; color: #EE99AC; }
+
+        .controls {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .spin-btn {
+            padding: 18px 50px;
+            background: linear-gradient(135deg, #2a7a2a 0%, #1a5a1a 100%);
+            color: white;
+            border: 3px solid #3a9a3a;
+            border-radius: 12px;
+            font-size: 1.3em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 5px 20px rgba(42, 122, 42, 0.4);
+        }
+
+        .spin-btn:hover:not(:disabled) {
+            background: linear-gradient(135deg, #357a35 0%, #2a6a2a 100%);
+            transform: scale(1.08);
+            box-shadow: 0 8px 30px rgba(42, 122, 42, 0.6);
+        }
+
+        .spin-btn:disabled {
+            background: #2a2a2a;
+            border-color: #1a1a1a;
+            cursor: not-allowed;
+            opacity: 0.5;
+            box-shadow: none;
+        }
+
+        .slot-machine {
+            position: relative;
+            margin: 40px auto;
+            width: 100%;
+            max-width: 800px;
+            height: 200px;
+            background: rgba(26, 26, 26, 0.9);
+            border: 3px solid #3a3a3a;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(10px);
+        }
+
+        .slot-window {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            width: 180px;
+            height: 180px;
+            border: 4px solid #ffd700;
+            border-radius: 12px;
+            z-index: 10;
+            pointer-events: none;
+            box-shadow: 0 0 40px rgba(255, 215, 0, 0.8);
+            animation: glow 2s infinite;
+        }
+
+        @keyframes glow {
+            0%, 100% {
+                box-shadow: 0 0 40px rgba(255, 215, 0, 0.8);
+            }
+            50% {
+                box-shadow: 0 0 60px rgba(255, 215, 0, 1);
+            }
+        }
+
+        .slot-reel {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            transition: transform 3s cubic-bezier(0.25, 0.1, 0.25, 1);
+        }
+
+        .pokemon-slot {
+            position: relative;
+            width: 150px;
+            height: 150px;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(10, 10, 10, 0.8);
+            border-radius: 8px;
+            border: 2px solid #2a2a2a;
+        }
+
+        .pokemon-slot img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            image-rendering: auto;
+        }
+
+        .shiny-badge {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            font-size: 1.5em;
+            z-index: 5;
+            text-shadow: 0 0 15px rgba(255, 215, 0, 1);
+            animation: sparkle 1.5s infinite;
+        }
+
+        @keyframes sparkle {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+        }
+
+        .result-panel {
+            background: rgba(26, 26, 26, 0.95);
+            border: 2px solid #3a3a3a;
+            border-radius: 12px;
+            padding: 35px;
+            margin-top: 30px;
+            text-align: center;
+            display: none;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+        }
+
+        .result-panel.show {
+            display: block;
+            animation: slideIn 0.5s;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .result-pokemon {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 40px;
+            margin: 25px 0;
+            flex-wrap: wrap;
+        }
+
+        .result-pokemon-image {
+            position: relative;
+            width: 220px;
+            height: 220px;
+            background: rgba(10, 10, 10, 0.5);
+            border-radius: 12px;
+            border: 3px solid #3a3a3a;
+            padding: 10px;
+        }
+
+        .result-pokemon-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .result-shiny-badge {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-size: 2.5em;
+            z-index: 5;
+            text-shadow: 0 0 20px rgba(255, 215, 0, 1);
+            animation: sparkle 1.5s infinite;
+        }
+
+        .result-info {
+            text-align: left;
+        }
+
+        .result-info h2 {
+            font-size: 2.2em;
+            color: #ffd700;
+            margin-bottom: 20px;
+            text-shadow: 0 0 15px rgba(255, 215, 0, 0.6);
+        }
+
+        .result-stat {
+            margin: 12px 0;
+            font-size: 1.15em;
+            padding: 8px;
+            background: rgba(10, 10, 10, 0.3);
+            border-radius: 6px;
+        }
+
+        .result-stat strong {
+            color: #888;
+            margin-right: 10px;
+        }
+
+        .shiny-text {
+            color: #ffd700;
+            font-weight: bold;
+            font-size: 1.3em;
+            text-shadow: 0 0 15px rgba(255, 215, 0, 1);
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.7; transform: scale(1.05); }
+        }
+
+        .add-btn {
+            padding: 18px 50px;
+            background: linear-gradient(135deg, #2a7a2a 0%, #1a5a1a 100%);
+            color: white;
+            border: 3px solid #3a9a3a;
+            border-radius: 12px;
+            font-size: 1.2em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 25px;
+            box-shadow: 0 5px 20px rgba(42, 122, 42, 0.4);
+        }
+
+        .add-btn:hover {
+            background: linear-gradient(135deg, #357a35 0%, #2a6a2a 100%);
+            transform: scale(1.08);
+            box-shadow: 0 8px 30px rgba(42, 122, 42, 0.6);
+        }
+
+        /* Type Avoider Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.85);
+            backdrop-filter: blur(5px);
+        }
+
+        .modal.show {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: rgba(26, 26, 26, 0.98);
+            border: 3px solid #3a3a3a;
+            border-radius: 15px;
+            padding: 35px;
+            max-width: 700px;
+            width: 90%;
+            box-shadow: 0 10px 50px rgba(0, 0, 0, 0.8);
+        }
+
+        .modal-title {
+            font-size: 1.8em;
+            color: #ffd700;
+            margin-bottom: 25px;
+            text-align: center;
+            text-shadow: 0 0 15px rgba(255, 215, 0, 0.6);
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .modal-btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 10px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 1.1em;
+        }
+
+        .modal-btn.cancel {
+            background: linear-gradient(135deg, #c41e3a 0%, #a01828 100%);
+            color: white;
+            box-shadow: 0 5px 15px rgba(196, 30, 58, 0.4);
+        }
+
+        .modal-btn.cancel:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 25px rgba(196, 30, 58, 0.6);
+        }
+
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #888;
+            font-size: 1.1em;
+        }
+
+        .pool-info {
+            text-align: center;
+            color: #888;
+            margin-top: 10px;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="index.html" class="back-btn">← Torna alla Home</a>
+        
+        <header>
+            <h1>🎨 Type Spin</h1>
+            <div class="player-info">
+                👤 Player: <span id="playerName">Loading...</span>
+            </div>
+        </header>
+
+        <!-- ITEMS BOX -->
+        <div class="items-box">
+            <div class="items-title">🎁 Items Attivi</div>
+            <div class="items-grid" id="itemsGrid">
+                <div class="loading">Caricamento items...</div>
+            </div>
+        </div>
+
+        <!-- TYPE SELECTOR -->
+        <div class="type-selector">
+            <div class="type-title">⚡ Seleziona Tipo Pokémon</div>
+            <div class="type-grid" id="typeGrid"></div>
+            <div class="pool-info" id="poolInfo">Seleziona un tipo per vedere i Pokémon disponibili</div>
+        </div>
+
+        <div class="controls">
+            <button id="spinBtn" class="spin-btn" onclick="startSpin()" disabled>🎲 SPIN!</button>
+        </div>
+
+        <div class="slot-machine">
+            <div class="slot-window"></div>
+            <div id="slotReel" class="slot-reel"></div>
+        </div>
+
+        <div id="resultPanel" class="result-panel">
+            <h2>🎉 Hai vinto!</h2>
+            <div id="resultPokemon" class="result-pokemon"></div>
+            <button class="add-btn" onclick="addToTeam()">➕ Aggiungi al Ruby Team</button>
+        </div>
+    </div>
+
+    <!-- Type Avoider Modal -->
+    <div id="typeModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-title">Seleziona Tipo da Evitare</div>
+            <div class="type-grid" id="typeModalGrid"></div>
+            <div class="modal-buttons">
+                <button class="modal-btn cancel" onclick="closeTypeModal()">Annulla</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js';
+        import { getDatabase, ref, get, set, update, remove, onValue } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js';
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBQpow283Yne3xY88NZHRFәlk9TElI8Ey0",
+            authDomain: "roulette-run-challenge.firebaseapp.com",
+            databaseURL: "https://roulette-run-challenge-default-rtdb.europe-west1.firebasedatabase.app",
+            projectId: "roulette-run-challenge",
+            storageBucket: "roulette-run-challenge.firebasestorage.app",
+            messagingSenderId: "155292105112",
+            appId: "1:155292105112:web:b00b86bc4ee2fd46f9d8b6"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app);
+
+        let playerName = localStorage.getItem('playerName');
+        let playerInventory = null;
+        let currentPool = [];
+        let selectedType = null;
+        let shinyPokemonCount = 1;
+        let wonPokemon = null;
+        let wonPokemonKey = null;
+        let wonPokemonTier = null;
+        let isSpinning = false;
+
+        // Active items state
+        let activeItems = {
+            shinyCharm: false,
+            typeAvoider: null
+        };
+
+        const natures = [
+            "Hardy", "Lonely", "Brave", "Adamant", "Naughty",
+            "Bold", "Docile", "Relaxed", "Impish", "Lax",
+            "Timid", "Hasty", "Serious", "Jolly", "Naive",
+            "Modest", "Mild", "Quiet", "Bashful", "Rash",
+            "Calm", "Gentle", "Sassy", "Careful", "Quirky"
+        ];
+
+        const pokemonTypes = [
+            "Normal", "Fire", "Water", "Electric", "Grass", "Ice",
+            "Fighting", "Poison", "Ground", "Flying", "Psychic", "Bug",
+            "Rock", "Ghost", "Dragon", "Dark", "Steel", "Fairy"
+        ];
+
+        function padNumber(num) {
+            return String(num).padStart(3, '0');
+        }
+
+        function getPokemonImageUrl(nationalNumber) {
+            return `https://www.pokemon.com/static-assets/content-assets/cms2/img/pokedex/full/${padNumber(nationalNumber)}.png`;
+        }
+
+        async function init() {
+            if (!playerName) {
+                alert('Nessun giocatore selezionato! Torna alla home.');
+                window.location.href = 'index.html';
+                return;
+            }
+
+            document.getElementById('playerName').textContent = playerName;
+            await loadPlayerInventory();
+            renderItems();
+            renderTypeGrid();
+        }
+
+        async function loadPlayerInventory() {
+            try {
+                const inventoryRef = ref(database, `players/${playerName}/inventory`);
+                const snapshot = await get(inventoryRef);
+                
+                if (snapshot.exists()) {
+                    playerInventory = snapshot.val();
+                } else {
+                    playerInventory = {
+                        itempermanenti: {},
+                        itemconsumabili: {}
+                    };
+                }
+            } catch (error) {
+                console.error('Errore caricamento inventario:', error);
+                playerInventory = { itempermanenti: {}, itemconsumabili: {} };
+            }
+        }
+
+        function renderItems() {
+            const itemsGrid = document.getElementById('itemsGrid');
+            const items = [];
+
+            // Shiny Charm (Permanent)
+            if (playerInventory.itempermanenti && playerInventory.itempermanenti['Shiny Charm']) {
+                items.push({
+                    name: 'Shiny Charm',
+                    image: 'https://github.com/lucaremix/roulette-run-challenge/blob/main/images/items/item-shinycharm.png?raw=true',
+                    quantity: null,
+                    effect: '3 Shiny',
+                    consumable: false,
+                    key: 'shinyCharm'
+                });
+            }
+
+            // Type Avoider Herb (Consumable)
+            const typeAvoiderCount = (playerInventory.itemconsumabili && playerInventory.itemconsumabili['Type Avoider Herb']) || 0;
+            if (typeAvoiderCount > 0) {
+                items.push({
+                    name: 'Type Avoider Herb',
+                    image: 'https://github.com/lucaremix/roulette-run-challenge/blob/main/images/items/item-typeavoiderherb.png?raw=true',
+                    quantity: typeAvoiderCount,
+                    effect: 'Skip Type',
+                    consumable: true,
+                    key: 'typeAvoider'
+                });
+            }
+
+            if (items.length === 0) {
+                itemsGrid.innerHTML = '<div class="loading">Nessun item disponibile</div>';
+                return;
+            }
+
+            itemsGrid.innerHTML = items.map(item => `
+                <div class="item-card ${activeItems[item.key] ? 'active' : ''}" 
+                     onclick="toggleItem('${item.key}', ${item.consumable})">
+                    ${activeItems[item.key] ? '<div class="item-effect">ATTIVO</div>' : ''}
+                    <img src="${item.image}" alt="${item.name}" class="item-image" 
+                         onerror="this.src='https://via.placeholder.com/70?text=Item'">
+                    <div class="item-name">${item.name}</div>
+                    ${item.quantity !== null ? `<div class="item-quantity">x${item.quantity}</div>` : ''}
+                </div>
+            `).join('');
+        }
+
+        window.toggleItem = async function(itemKey, consumable) {
+            if (itemKey === 'typeAvoider') {
+                openTypeModal();
+                return;
+            }
+
+            // Toggle item
+            activeItems[itemKey] = !activeItems[itemKey];
+
+            if (activeItems[itemKey]) {
+                if (itemKey === 'shinyCharm') {
+                    shinyPokemonCount = 3;
+                }
+            } else {
+                if (itemKey === 'shinyCharm') {
+                    shinyPokemonCount = 1;
+                }
+            }
+
+            renderItems();
+            if (selectedType) {
+                setupSlotMachine();
+            }
+        };
+
+        function renderTypeGrid() {
+            const typeGrid = document.getElementById('typeGrid');
+            
+            typeGrid.innerHTML = pokemonTypes.map(type => `
+                <div class="type-btn type-${type.toLowerCase()}" 
+                     onclick="selectType('${type}')">
+                    ${type}
+                </div>
+            `).join('');
+        }
+
+        window.selectType = async function(type) {
+            selectedType = type;
+            
+            // Aggiorna visuale
+            document.querySelectorAll('.type-grid .type-btn').forEach(btn => {
+                btn.classList.remove('selected');
+            });
+            
+            document.querySelectorAll('.type-grid .type-btn').forEach(btn => {
+                if (btn.textContent.trim() === type) {
+                    btn.classList.add('selected');
+                }
+            });
+
+            // Carica il pool
+            await loadTypePool();
+        };
+
+        async function loadTypePool() {
+            const pools = ['c_tier', 'b_tier', 'a_tier', 's_tier'];
+            let allPokemon = [];
+
+            try {
+                for (const poolName of pools) {
+                    const poolRef = ref(database, `pools/${poolName}`);
+                    const snapshot = await get(poolRef);
+                    
+                    if (snapshot.exists()) {
+                        const data = snapshot.val();
+                        const pokemonList = Object.entries(data).map(([key, value]) => ({
+                            key: key,
+                            tier: poolName,
+                            ...value
+                        }));
+                        
+                        // Filtra per tipo
+                        const filtered = pokemonList.filter(p => 
+                            p.primary_type === selectedType || p.secondary_type === selectedType
+                        );
+                        
+                        allPokemon = allPokemon.concat(filtered);
+                    }
+                }
+
+                // Filtra per Type Avoider se attivo
+                if (activeItems.typeAvoider) {
+                    allPokemon = allPokemon.filter(pokemon => {
+                        return pokemon.primary_type !== activeItems.typeAvoider && 
+                               pokemon.secondary_type !== activeItems.typeAvoider;
+                    });
+                }
+
+                currentPool = allPokemon;
+                
+                // Aggiorna info pool
+                const poolInfo = document.getElementById('poolInfo');
+                poolInfo.textContent = `${currentPool.length} Pokémon ${selectedType} disponibili`;
+                
+                // Abilita spin button
+                document.getElementById('spinBtn').disabled = currentPool.length === 0;
+                
+                setupSlotMachine();
+
+            } catch (error) {
+                console.error('Errore caricamento pool:', error);
+                currentPool = [];
+                document.getElementById('poolInfo').textContent = 'Errore nel caricamento dei Pokémon';
+            }
+        }
+
+        function openTypeModal() {
+            const modal = document.getElementById('typeModal');
+            const typeGrid = document.getElementById('typeModalGrid');
+            
+            // Escludi il tipo già selezionato
+            const availableTypes = pokemonTypes.filter(t => t !== selectedType);
+            
+            typeGrid.innerHTML = availableTypes.map(type => `
+                <div class="type-btn type-${type.toLowerCase()}" onclick="selectAvoiderType('${type}')">${type}</div>
+            `).join('');
+            
+            modal.classList.add('show');
+        }
+
+        window.closeTypeModal = function() {
+            document.getElementById('typeModal').classList.remove('show');
+        };
+
+        window.selectAvoiderType = async function(type) {
+            activeItems.typeAvoider = type;
+            closeTypeModal();
+            
+            // Consuma l'item
+            const currentCount = playerInventory.itemconsumabili['Type Avoider Herb'] || 0;
+            if (currentCount > 0) {
+                await update(ref(database), {
+                    [`players/${playerName}/inventory/itemconsumabili/Type Avoider Herb`]: currentCount - 1
+                });
+                await loadPlayerInventory();
+            }
+            
+            renderItems();
+            await loadTypePool();
+            alert(`Type Avoider attivato! Verrà evitato il tipo ${type}`);
+        };
+
+        function setupSlotMachine() {
+            const reel = document.getElementById('slotReel');
+            
+            if (currentPool.length === 0) {
+                reel.innerHTML = '<div class="loading">Nessun Pokémon disponibile!</div>';
+                return;
+            }
+
+            // Determina quanti Pokemon shiny ci saranno
+            const shinyIndices = [];
+            const poolSize = currentPool.length;
+            
+            for (let i = 0; i < Math.min(shinyPokemonCount, poolSize); i++) {
+                let randomIndex;
+                do {
+                    randomIndex = Math.floor(Math.random() * poolSize);
+                } while (shinyIndices.includes(randomIndex));
+                shinyIndices.push(randomIndex);
+            }
+
+            const totalSlots = Math.max(50, currentPool.length * 3);
+            const slots = [];
+            
+            for (let i = 0; i < totalSlots; i++) {
+                const poolIndex = i % currentPool.length;
+                const pokemon = currentPool[poolIndex];
+                const isShiny = shinyIndices.includes(poolIndex);
+                slots.push({ pokemon, isShiny });
+            }
+
+            reel.innerHTML = slots.map(slot => `
+                <div class="pokemon-slot">
+                    ${slot.isShiny ? '<div class="shiny-badge">✨</div>' : ''}
+                    <img src="${getPokemonImageUrl(slot.pokemon.national_number)}" 
+                         alt="${slot.pokemon.english_name}">
+                </div>
+            `).join('');
+
+            reel.style.transition = 'none';
+            reel.style.transform = 'translateX(100px)';
+        }
+
+        window.startSpin = async function() {
+            if (isSpinning || currentPool.length === 0) return;
+
+            isSpinning = true;
+            document.getElementById('spinBtn').disabled = true;
+            document.getElementById('resultPanel').classList.remove('show');
+
+            const randomIndex = Math.floor(Math.random() * currentPool.length);
+            wonPokemon = currentPool[randomIndex];
+            wonPokemonKey = wonPokemon.key;
+            wonPokemonTier = wonPokemon.tier;
+
+            const reel = document.getElementById('slotReel');
+            const reelChildren = reel.children;
+            
+            let targetSlotIndex = -1;
+            let isShinyInReel = false;
+            
+            for (let i = Math.floor(reelChildren.length / 2); i < reelChildren.length; i++) {
+                const poolIndex = i % currentPool.length;
+                const slotPokemon = currentPool[poolIndex];
+                
+                if (slotPokemon.national_number === wonPokemon.national_number && 
+                    slotPokemon.english_name === wonPokemon.english_name &&
+                    slotPokemon.key === wonPokemon.key) {
+                    
+                    const slotElement = reelChildren[i];
+                    isShinyInReel = slotElement.querySelector('.shiny-badge') !== null;
+                    
+                    if (targetSlotIndex === -1) {
+                        targetSlotIndex = i;
+                        wonPokemon.isShiny = isShinyInReel;
+                    }
+                }
+            }
+
+            if (targetSlotIndex === -1) {
+                targetSlotIndex = Math.floor(reelChildren.length * 0.7);
+                wonPokemon.isShiny = false;
+            }
+
+            const randomNature = natures[Math.floor(Math.random() * natures.length)];
+            
+            const abilities = [
+                wonPokemon.abilities_0,
+                wonPokemon.abilities_1,
+                wonPokemon.abilities_2
+            ].filter(a => a && a.trim() !== '');
+            
+            const randomAbility = abilities.length > 0 
+                ? abilities[Math.floor(Math.random() * abilities.length)]
+                : 'Unknown';
+
+            wonPokemon.rolled_nature = randomNature;
+            wonPokemon.rolled_ability = randomAbility;
+
+            const slotWidth = 170;
+            const machineWidth = document.querySelector('.slot-machine').offsetWidth;
+            const machineCenter = machineWidth / 2;
+            const slotCenter = slotWidth / 2;
+            const targetPosition = (targetSlotIndex * slotWidth) + slotCenter;
+            const finalTransform = machineCenter - targetPosition;
+
+            reel.style.transition = 'transform 5s cubic-bezier(0.25, 0.1, 0.25, 1)';
+            reel.style.transform = `translateX(${finalTransform}px)`;
+
+            setTimeout(async () => {
+                showResult();
+                
+                // Reset Type Avoider dopo lo spin
+                if (activeItems.typeAvoider) {
+                    activeItems.typeAvoider = null;
+                    renderItems();
+                }
+
+                isSpinning = false;
+                document.getElementById('spinBtn').disabled = false;
+            }, 5000);
+        };
+
+        function showResult() {
+            const resultPanel = document.getElementById('resultPanel');
+            const resultPokemon = document.getElementById('resultPokemon');
+
+            const types = [wonPokemon.primary_type];
+            if (wonPokemon.secondary_type) types.push(wonPokemon.secondary_type);
+
+            const shinyBadge = wonPokemon.isShiny ? '<div class="result-shiny-badge">✨</div>' : '';
+            const shinyStatus = wonPokemon.isShiny ? '<div class="result-stat"><span class="shiny-text">⭐ SHINY! ⭐</span></div>' : '';
+
+            resultPokemon.innerHTML = `
+                <div class="result-pokemon-image">
+                    ${shinyBadge}
+                    <img src="${getPokemonImageUrl(wonPokemon.national_number)}" 
+                         alt="${wonPokemon.english_name}">
+                </div>
+                <div class="result-info">
+                    <h2>${wonPokemon.english_name}</h2>
+                    <div class="result-stat"><strong>Numero:</strong> #${padNumber(wonPokemon.national_number)}</div>
+                    <div class="result-stat"><strong>Tipo:</strong> ${types.join(' / ')}</div>
+                    <div class="result-stat"><strong>BST:</strong> ${wonPokemon.bst}</div>
+                    <div class="result-stat"><strong>Tier:</strong> ${wonPokemon.tier.replace('_tier', '').toUpperCase()}</div>
+                    <div class="result-stat"><strong>Natura:</strong> ${wonPokemon.rolled_nature}</div>
+                    <div class="result-stat"><strong>Abilità:</strong> ${wonPokemon.rolled_ability}</div>
+                    ${shinyStatus}
+                </div>
+            `;
+
+            resultPanel.classList.add('show');
+        }
+
+        window.addToTeam = async function() {
+            if (!wonPokemon) return;
+
+            try {
+                // 1. Aggiungi al rubyteam
+                const playerRef = ref(database, `players/${playerName}`);
+                const playerSnapshot = await get(playerRef);
+                
+                let playerData = playerSnapshot.val() || { coins: 0, rubyteam: [] };
+                if (!playerData.rubyteam) playerData.rubyteam = [];
+
+                playerData.rubyteam.push({
+                    ...wonPokemon,
+                    nature: wonPokemon.rolled_nature,
+                    ability: wonPokemon.rolled_ability,
+                    shiny: wonPokemon.isShiny || false,
+                    won_from: `${wonPokemonTier}_type_spin`,
+                    won_at: Date.now()
+                });
+
+                await set(playerRef, playerData);
+
+                // 2. Rimuovi dal pool originale
+                const pokemonRef = ref(database, `pools/${wonPokemonTier}/${wonPokemonKey}`);
+                await remove(pokemonRef);
+
+                const shinyMessage = wonPokemon.isShiny ? ' SHINY ✨' : '';
+                alert(`${wonPokemon.english_name}${shinyMessage} aggiunto al Ruby Team!`);
+                
+                // Reset e ricarica
+                document.getElementById('resultPanel').classList.remove('show');
+                await loadTypePool();
+
+            } catch (error) {
+                console.error('Errore:', error);
+                alert('Errore durante l\'aggiunta del Pokemon!');
+            }
+        };
+
+        init();
+    </script>
+</body>
+</html>
