@@ -13,7 +13,7 @@
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-image: url('https://raw.githubusercontent.com/lucaremix/roulette-run-challenge/main/background/r-index_background.png');
+            background-image: url('https://raw.githubusercontent.com/lucaremix/roulette-run-challenge/main/background/r-ndex_background.png');
             background-size: cover;
             background-position: center;
             background-attachment: fixed;
@@ -606,7 +606,7 @@
 <body>
     <div class="container">
         <header>
-            <img src="https://raw.githubusercontent.com/lucaremix/roulette-run-challenge/images/rising-ruby-logo.webp" 
+            <img src="https://github.com/lucaremix/roulette-run-challenge/blob/main/images/rising-ruby-logo.webp?raw=true" 
                  alt="Roulette Run Challenge" 
                  class="logo-img"
                  onerror="this.style.display='none'">
@@ -783,7 +783,7 @@
             return `https://www.pokemon.com/static-assets/content-assets/cms2/img/pokedex/full/${padNumber(nationalNumber)}.png`;
         }
 
-        function init() {
+        async function init() {
             if (!playerName) {
                 playerName = prompt('Inserisci il tuo nome:');
                 if (!playerName) {
@@ -795,12 +795,13 @@
 
             document.getElementById('playerTeamTitle').textContent = `${playerName}'s Team`;
             loadPlayerData();
-            loadEvents();
+            await loadEvents(); // Aspetta che gli eventi siano caricati
         }
 
         function loadPlayerData() {
             const playerRef = ref(database, `players/${playerName}`);
             
+            // Usa onValue solo per i dati del player (coins, team, mts)
             onValue(playerRef, (snapshot) => {
                 const data = snapshot.val();
                 
@@ -828,7 +829,8 @@
                 } else {
                     playerInventory = {
                         itempermanenti: {},
-                        itemconsumabili: {}
+                        itemconsumabili: {},
+                        mints: {}
                     };
                 }
 
@@ -915,7 +917,7 @@
         function getItemImage(name) {
             const imageMap = {
                 'Bottle Cap': 'https://github.com/lucaremix/roulette-run-challenge/blob/main/images/items/item-bottlecap.png?raw=true',
-                'Golden Bottle Cap': 'https://github.com/lucaremix/roulette-run-challenge/blob/main/images/items/item-goldbottlecap.png?raw=true',
+                'Golden Bottle Cap': 'https://github.com/lucaremix/roulette-run-challenge/blob/main/images/items/item-goldenbottlecap.png?raw=true',
                 'Ability Capsule': 'https://github.com/lucaremix/roulette-run-challenge/blob/main/images/items/item-abilitycapsule.png?raw=true',
                 'Golden Soothe Bell': 'https://github.com/lucaremix/roulette-run-challenge/blob/main/images/items/item-goldensoothebell.png?raw=true',
                 'Pokérus Sludge': 'https://github.com/lucaremix/roulette-run-challenge/blob/main/images/items/item-pokerussludge.png?raw=true',
@@ -1189,20 +1191,20 @@
             `).join('');
         }
 
-        function loadEvents() {
-            renderEvents();
+        async function loadEvents() {
+            await renderEvents();
         }
 
-        function renderEvents() {
+        async function renderEvents() {
             const grid = document.getElementById('eventsGrid');
             const currentPlayer = playerName;
 
             grid.innerHTML = ''; // Pulisci la griglia
 
-            events.forEach(async (event) => {
+            // Usa Promise.all per caricare tutti gli eventi in parallelo
+            await Promise.all(events.map(async (event) => {
                 const eventRef = ref(database, `events/${event.id}/players`);
                 
-                // Usa get invece di onValue per evitare il loop
                 const snapshot = await get(eventRef);
                 const players = [];
                 snapshot.forEach((childSnapshot) => {
@@ -1240,7 +1242,7 @@
                 `;
                 
                 grid.appendChild(card);
-            });
+            }));
         }
 
         function togglePlayerInEvent(eventId) {
