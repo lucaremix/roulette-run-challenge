@@ -138,7 +138,7 @@
             height: 100px;
             object-fit: contain;
             margin-bottom: 15px;
-            image-rendering: auto;
+            image-rendering: pixelated;
         }
 
         .item-name {
@@ -467,7 +467,8 @@
                     playerInventory = {
                         itempermanenti: {},
                         itemconsumabili: {},
-                        mints: {}
+                        mints: {},
+                        mints_purchased: {}
                     };
                 }
 
@@ -492,10 +493,12 @@
                 isSoldOut = true;
             }
 
-            // Controlla la disponibilità (mints)
+            // Controlla la disponibilità (mints) - usa mints_purchased per il limite di acquisto
             if (item.type === 'mint') {
-                const purchased = (playerInventory.mints && playerInventory.mints[item.name]) || 0;
-                currentStock = item.maxStock - purchased;
+                const totalPurchased = (playerInventory.mints_purchased && playerInventory.mints_purchased[item.name]) || 0;
+                const currentOwned = (playerInventory.mints && playerInventory.mints[item.name]) || 0;
+                currentStock = item.maxStock - totalPurchased;
+                
                 if (currentStock <= 0) {
                     isSoldOut = true;
                 }
@@ -569,8 +572,12 @@
                 if (itemType === 'permanent') {
                     updates[`players/${playerName}/inventory/itempermanenti/${itemName}`] = true;
                 } else if (itemType === 'mint') {
-                    const currentCount = (playerInventory.mints && playerInventory.mints[itemName]) || 0;
-                    updates[`players/${playerName}/inventory/mints/${itemName}`] = currentCount + 1;
+                    // Per le mints, aggiorna sia il possesso corrente che il contatore permanente
+                    const currentOwned = (playerInventory.mints && playerInventory.mints[itemName]) || 0;
+                    const totalPurchased = (playerInventory.mints_purchased && playerInventory.mints_purchased[itemName]) || 0;
+                    
+                    updates[`players/${playerName}/inventory/mints/${itemName}`] = currentOwned + 1;
+                    updates[`players/${playerName}/inventory/mints_purchased/${itemName}`] = totalPurchased + 1;
                 } else if (itemType === 'consumable') {
                     const currentCount = (playerInventory.itemconsumabili && playerInventory.itemconsumabili[itemName]) || 0;
                     updates[`players/${playerName}/inventory/itemconsumabili/${itemName}`] = currentCount + 1;
