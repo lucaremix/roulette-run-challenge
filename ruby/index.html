@@ -1,0 +1,1189 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Roulette Run Challenge</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-image: url('https://raw.githubusercontent.com/lucaremix/roulette-run-challenge/main/background/Index_background.png');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            color: #e0e0e0;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            position: relative;
+        }
+
+        .logo-img {
+            max-width: 100%;
+            height: auto;
+            max-height: 100px;
+        }
+
+        h1 {
+            font-size: 2em;
+            color: #ffffff;
+            letter-spacing: 2px;
+            font-weight: 600;
+            display: none;
+        }
+
+        .subtitle {
+            font-size: 1em;
+            color: #888;
+            margin-top: 5px;
+            display: none;
+        }
+
+        .coin-counter {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: #1a1a1a;
+            border: 1px solid #2a2a2a;
+            border-radius: 8px;
+            padding: 10px 20px;
+        }
+
+        .coin-img {
+            width: 32px;
+            height: 32px;
+            image-rendering: pixelated;
+        }
+
+        .coin-amount {
+            font-size: 1.3em;
+            font-weight: bold;
+            color: #ffd700;
+        }
+
+        .team-bar {
+            background: #1a1a1a;
+            border: 1px solid #2a2a2a;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .team-bar-title {
+            text-align: center;
+            color: #fff;
+            font-size: 1.3em;
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+
+        .team-count {
+            color: #888;
+            font-weight: normal;
+            margin-left: 8px;
+            font-size: 0.9em;
+        }
+
+        .team-bar-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+            gap: 10px;
+            max-width: 100%;
+            margin: 0 auto;
+        }
+
+        .team-slot {
+            aspect-ratio: 1;
+            background: #0a0a0a;
+            border: 2px solid #2a2a2a;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .team-slot:hover {
+            border-color: #4a4a4a;
+            transform: scale(1.1);
+            z-index: 10;
+        }
+
+        .team-slot.selected {
+            border-color: #2a7a2a;
+            box-shadow: 0 0 15px rgba(42, 122, 42, 0.6);
+        }
+
+        .team-slot img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .team-tooltip {
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #1a1a1a;
+            border: 1px solid #2a2a2a;
+            border-radius: 8px;
+            padding: 10px 15px;
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
+            margin-bottom: 5px;
+            font-size: 0.9em;
+            z-index: 100;
+            min-width: 150px;
+        }
+
+        .team-slot:hover .team-tooltip {
+            opacity: 1;
+        }
+
+        .tooltip-name {
+            font-weight: bold;
+            color: #fff;
+            margin-bottom: 5px;
+        }
+
+        .tooltip-stat {
+            color: #888;
+            font-size: 0.85em;
+            margin: 2px 0;
+        }
+
+        .tooltip-effect {
+            color: #2a7a2a;
+            font-size: 0.85em;
+            margin: 2px 0;
+            font-weight: bold;
+        }
+
+        /* ITEMS BARS */
+        .items-bar {
+            background: #1a1a1a;
+            border: 1px solid #2a2a2a;
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+
+        .items-bar-title {
+            text-align: center;
+            color: #888;
+            font-size: 0.85em;
+            margin-bottom: 10px;
+        }
+
+        .items-bar-grid {
+            display: flex;
+            gap: 8px;
+            max-width: 900px;
+            margin: 0 auto;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .item-slot {
+            width: 50px;
+            height: 50px;
+            background: #0a0a0a;
+            border: 2px solid #2a2a2a;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .item-slot:hover {
+            border-color: #4a4a4a;
+            transform: scale(1.1);
+            z-index: 10;
+        }
+
+        .item-slot.selected {
+            border-color: #2a7a2a;
+            box-shadow: 0 0 15px rgba(42, 122, 42, 0.6);
+        }
+
+        .item-slot img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .item-quantity {
+            position: absolute;
+            bottom: 2px;
+            right: 2px;
+            background: #000;
+            color: #ffd700;
+            font-size: 0.7em;
+            padding: 2px 4px;
+            border-radius: 3px;
+            font-weight: bold;
+        }
+
+        .item-tooltip {
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #1a1a1a;
+            border: 1px solid #2a2a2a;
+            border-radius: 8px;
+            padding: 8px 12px;
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
+            margin-bottom: 5px;
+            font-size: 0.85em;
+            z-index: 100;
+        }
+
+        .item-slot:hover .item-tooltip {
+            opacity: 1;
+        }
+
+        .mts-bar {
+            background: #1a1a1a;
+            border: 1px solid #2a2a2a;
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+
+        .mts-bar-title {
+            text-align: center;
+            color: #888;
+            font-size: 0.85em;
+            margin-bottom: 10px;
+        }
+
+        .mts-bar-grid {
+            display: flex;
+            gap: 8px;
+            max-width: 900px;
+            margin: 0 auto;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .mt-slot {
+            width: 50px;
+            height: 50px;
+            background: #0a0a0a;
+            border: 2px solid #2a2a2a;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .mt-slot:hover {
+            border-color: #4a4a4a;
+            transform: scale(1.1);
+            z-index: 10;
+        }
+
+        .mt-slot img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .mt-tooltip {
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #1a1a1a;
+            border: 1px solid #2a2a2a;
+            border-radius: 8px;
+            padding: 8px 12px;
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
+            margin-bottom: 5px;
+            font-size: 0.85em;
+            z-index: 100;
+        }
+
+        .mt-slot:hover .mt-tooltip {
+            opacity: 1;
+        }
+
+        .events-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .event-card {
+            background: #1a1a1a;
+            border: 1px solid #2a2a2a;
+            border-radius: 12px;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .event-card:hover {
+            border-color: #3a3a3a;
+            background: #1f1f1f;
+            transform: translateY(-2px);
+        }
+
+        .event-card.joined {
+            border-color: #4a4a4a;
+            background: #252525;
+        }
+
+        .trainer-img {
+            width: 128px;
+            height: 128px;
+            object-fit: contain;
+            border: none;
+            border-radius: 0;
+            flex-shrink: 0;
+            image-rendering: pixelated;
+        }
+
+        .event-info {
+            flex: 1;
+        }
+
+        .event-name {
+            font-size: 1.4em;
+            font-weight: 600;
+            margin-bottom: 12px;
+            color: #ffffff;
+        }
+
+        .player-list {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .player-item {
+            font-size: 0.95em;
+            color: #888;
+            padding: 4px 0;
+        }
+
+        .player-item.current-user {
+            color: #ccc;
+            font-weight: 600;
+        }
+
+        .no-players {
+            color: #555;
+            font-style: italic;
+        }
+
+        .join-status {
+            margin-top: 10px;
+            padding: 8px 16px;
+            background: #2a2a2a;
+            border-radius: 6px;
+            font-size: 0.9em;
+            color: #aaa;
+            display: inline-block;
+        }
+
+        .join-status.joined {
+            background: #2d2d2d;
+            color: #bbb;
+        }
+
+        .markets-section {
+            margin-top: 50px;
+            padding-top: 30px;
+            border-top: 1px solid #2a2a2a;
+        }
+
+        .markets-title {
+            text-align: center;
+            color: #fff;
+            font-size: 2em;
+            margin-bottom: 30px;
+            letter-spacing: 1px;
+        }
+
+        .markets-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 20px;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .market-card {
+            background: #1a1a1a;
+            border: 1px solid #2a2a2a;
+            border-radius: 12px;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .market-card:hover {
+            border-color: #3a3a3a;
+            background: #1f1f1f;
+            transform: translateY(-2px);
+        }
+
+        .footer-buttons {
+            margin-top: 50px;
+            padding: 30px 0;
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .footer-btn {
+            padding: 10px 20px;
+            background: #1a1a1a;
+            color: #e0e0e0;
+            border: 1px solid #2a2a2a;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .footer-btn:hover {
+            background: #2a2a2a;
+            border-color: #3a3a3a;
+        }
+
+        .footer-btn.danger {
+            border-color: #5a2a2a;
+        }
+
+        .footer-btn.danger:hover {
+            background: #3a1a1a;
+            border-color: #7a3a3a;
+        }
+
+        /* Modal for stat selection */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.8);
+        }
+
+        .modal.show {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: #1a1a1a;
+            border: 2px solid #2a2a2a;
+            border-radius: 12px;
+            padding: 30px;
+            max-width: 500px;
+            width: 90%;
+        }
+
+        .modal-title {
+            font-size: 1.5em;
+            color: #fff;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .stat-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .stat-btn {
+            padding: 15px;
+            background: #0a0a0a;
+            border: 2px solid #2a2a2a;
+            border-radius: 8px;
+            color: #fff;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .stat-btn:hover {
+            border-color: #ffd700;
+            transform: scale(1.05);
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        .modal-btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .modal-btn.cancel {
+            background: #c41e3a;
+            color: white;
+        }
+
+        @media (max-width: 768px) {
+            .coin-counter {
+                position: static;
+                margin: 15px auto 0;
+                justify-content: center;
+            }
+
+            .team-bar-grid {
+                grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <img src="https://raw.githubusercontent.com/lucaremix/roulette-run-challenge/main/logo.png" 
+                 alt="Roulette Run Challenge" 
+                 class="logo-img"
+                 onerror="this.style.display='none'">
+            <h1>ROULETTE RUN CHALLENGE</h1>
+            <p class="subtitle">Gira la roulette, sfida gli allenatori!</p>
+            
+            <div class="coin-counter">
+                <img src="https://raw.githubusercontent.com/lucaremix/roulette-run-challenge/main/pixel-art-red-chinese-gold-coin-png.png" 
+                     alt="Coins" 
+                     class="coin-img"
+                     onerror="this.style.display='none'">
+                <span class="coin-amount" id="coinAmount">0</span>
+            </div>
+        </header>
+
+        <!-- TEAM BAR -->
+        <div class="team-bar" id="teamBar">
+            <div class="team-bar-title">
+                <span id="playerTeamTitle">Team</span>
+                <span class="team-count" id="teamCount">(0/∞)</span>
+            </div>
+            <div class="team-bar-grid" id="teamBarGrid"></div>
+        </div>
+
+        <!-- ITEMS PERMANENTI -->
+        <div class="items-bar" id="itemsPermanentBar">
+            <div class="items-bar-title">ITEMS PERMANENTI <span class="team-count" id="permanentCount">(0)</span></div>
+            <div class="items-bar-grid" id="permanentItemsGrid"></div>
+        </div>
+
+        <!-- ITEMS CONSUMABILI -->
+        <div class="items-bar" id="itemsConsumableBar">
+            <div class="items-bar-title">ITEMS CONSUMABILI <span class="team-count" id="consumableCount">(0)</span></div>
+            <div class="items-bar-grid" id="consumableItemsGrid"></div>
+        </div>
+
+        <!-- ITEMS DI GIOCO -->
+        <div class="items-bar" id="itemsGameBar">
+            <div class="items-bar-title">ITEMS DI GIOCO <span class="team-count" id="gameCount">(0)</span></div>
+            <div class="items-bar-grid" id="gameItemsGrid">
+                <div style="text-align: center; color: #888; padding: 20px; width: 100%;">Coming soon...</div>
+            </div>
+        </div>
+
+        <!-- MTS BAR -->
+        <div class="mts-bar" id="mtsBar">
+            <div class="mts-bar-title">MTS POSSEDUTE <span class="team-count" id="mtsCount">(0)</span></div>
+            <div class="mts-bar-grid" id="mtsBarGrid"></div>
+        </div>
+
+        <!-- EVENTS -->
+        <div class="events-grid" id="eventsGrid"></div>
+
+        <!-- MARKETS -->
+        <div class="markets-section">
+            <h2 class="markets-title">Markets</h2>
+            <div class="markets-grid">
+                <div class="market-card" onclick="window.location.href='mt-market.html'">
+                    <img src="https://raw.githubusercontent.com/lucaremix/roulette-run-challenge/main/trainer-sprites/blackmarket.png" 
+                         alt="MT Market" 
+                         class="trainer-img"
+                         onerror="this.src='https://via.placeholder.com/128?text=MT'">
+                    <div class="event-info">
+                        <div class="event-name">MT Market</div>
+                        <p style="color: #888; font-size: 0.95em;">Acquista MT per potenziare il tuo team</p>
+                    </div>
+                </div>
+
+                <div class="market-card" onclick="window.location.href='items-market.html'">
+                    <img src="https://raw.githubusercontent.com/lucaremix/roulette-run-challenge/main/trainer-sprites/blackmarket.png" 
+                         alt="Items Market" 
+                         class="trainer-img"
+                         onerror="this.src='https://via.placeholder.com/128?text=Items'">
+                    <div class="event-info">
+                        <div class="event-name">Items Market</div>
+                        <p style="color: #888; font-size: 0.95em;">Acquista items speciali</p>
+                    </div>
+                </div>
+
+                <div class="market-card" onclick="alert('Coming soon!')">
+                    <img src="https://raw.githubusercontent.com/lucaremix/roulette-run-challenge/main/trainer-sprites/blackmarket.png" 
+                         alt="Items di Gioco" 
+                         class="trainer-img"
+                         onerror="this.src='https://via.placeholder.com/128?text=Game'">
+                    <div class="event-info">
+                        <div class="event-name">Items di Gioco</div>
+                        <p style="color: #888; font-size: 0.95em;">Items di gioco speciali</p>
+                    </div>
+                </div>
+
+                <div class="market-card" onclick="alert('Coming soon!')">
+                    <img src="https://raw.githubusercontent.com/lucaremix/roulette-run-challenge/main/trainer-sprites/blackmarket.png" 
+                         alt="Campo di Bacche" 
+                         class="trainer-img"
+                         onerror="this.src='https://via.placeholder.com/128?text=Berry'">
+                    <div class="event-info">
+                        <div class="event-name">Campo di Bacche</div>
+                        <p style="color: #888; font-size: 0.95em;">Coltiva e raccogli bacche</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer-buttons">
+            <button class="footer-btn danger" onclick="resetAllData()">🗑️ Reset Tutto</button>
+        </div>
+    </div>
+
+    <!-- Stat Selection Modal -->
+    <div id="statModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-title">Seleziona Statistica</div>
+            <div class="stat-grid">
+                <div class="stat-btn" onclick="selectStat('HP')">HP</div>
+                <div class="stat-btn" onclick="selectStat('Attack')">Attack</div>
+                <div class="stat-btn" onclick="selectStat('Defense')">Defense</div>
+                <div class="stat-btn" onclick="selectStat('Sp. Atk')">Sp. Atk</div>
+                <div class="stat-btn" onclick="selectStat('Sp. Def')">Sp. Def</div>
+                <div class="stat-btn" onclick="selectStat('Speed')">Speed</div>
+            </div>
+            <div class="modal-buttons">
+                <button class="modal-btn cancel" onclick="closeStatModal()">Annulla</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js';
+        import { getDatabase, ref, onValue, get, set, update, remove } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js';
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBQpow283Yne3xY88NZHRFәlk9TElI8Ey0",
+            authDomain: "roulette-run-challenge.firebaseapp.com",
+            databaseURL: "https://roulette-run-challenge-default-rtdb.europe-west1.firebasedatabase.app",
+            projectId: "roulette-run-challenge",
+            storageBucket: "roulette-run-challenge.firebasestorage.app",
+            messagingSenderId: "155292105112",
+            appId: "1:155292105112:web:b00b86bc4ee2fd46f9d8b6"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app);
+
+        let playerName = localStorage.getItem('playerName');
+        let selectedItem = null;
+        let selectedPokemon = null;
+        let playerInventory = null;
+
+        function padNumber(num) {
+            return String(num).padStart(3, '0');
+        }
+
+        function getPokemonImageUrl(nationalNumber) {
+            return `https://www.pokemon.com/static-assets/content-assets/cms2/img/pokedex/full/${padNumber(nationalNumber)}.png`;
+        }
+
+        function init() {
+            if (!playerName) {
+                playerName = prompt('Inserisci il tuo nome:');
+                if (!playerName) {
+                    alert('Nome richiesto!');
+                    return;
+                }
+                localStorage.setItem('playerName', playerName);
+            }
+
+            document.getElementById('playerTeamTitle').textContent = `${playerName}'s Team`;
+            loadPlayerData();
+            loadEvents();
+        }
+
+        function loadPlayerData() {
+            const playerRef = ref(database, `players/${playerName}`);
+            
+            onValue(playerRef, (snapshot) => {
+                const data = snapshot.val();
+                
+                if (data) {
+                    document.getElementById('coinAmount').textContent = data.coins || 0;
+                    renderTeam(data.rubyteam || []);
+                    renderMTs(data.mts || []);
+                } else {
+                    document.getElementById('coinAmount').textContent = 0;
+                    renderTeam([]);
+                    renderMTs([]);
+                }
+            });
+
+            loadPlayerInventory();
+        }
+
+        async function loadPlayerInventory() {
+            try {
+                const inventoryRef = ref(database, `players/${playerName}/inventory`);
+                const snapshot = await get(inventoryRef);
+                
+                if (snapshot.exists()) {
+                    playerInventory = snapshot.val();
+                } else {
+                    playerInventory = {
+                        itempermanenti: {},
+                        itemconsumabili: {}
+                    };
+                }
+
+                renderItems();
+            } catch (error) {
+                console.error('Errore caricamento inventario:', error);
+            }
+        }
+
+        function renderItems() {
+            // ITEMS PERMANENTI
+            const permanentGrid = document.getElementById('permanentItemsGrid');
+            const permanentItems = [];
+
+            if (playerInventory.itempermanenti) {
+                Object.entries(playerInventory.itempermanenti).forEach(([name, value]) => {
+                    if (value === true) {
+                        permanentItems.push({
+                            name: name,
+                            image: getItemImage(name)
+                        });
+                    }
+                });
+            }
+
+            document.getElementById('permanentCount').textContent = `(${permanentItems.length})`;
+
+            if (permanentItems.length === 0) {
+                permanentGrid.innerHTML = '<div style="text-align: center; color: #888; padding: 10px; width: 100%;">Nessun item permanente</div>';
+            } else {
+                permanentGrid.innerHTML = permanentItems.map(item => `
+                    <div class="item-slot">
+                        <img src="${item.image}" alt="${item.name}" onerror="this.src='https://via.placeholder.com/50?text=Item'">
+                        <div class="item-tooltip">${item.name}</div>
+                    </div>
+                `).join('');
+            }
+
+            // ITEMS CONSUMABILI
+            const consumableGrid = document.getElementById('consumableItemsGrid');
+            const consumableItems = [];
+
+            if (playerInventory.itemconsumabili) {
+                Object.entries(playerInventory.itemconsumabili).forEach(([name, quantity]) => {
+                    if (quantity > 0) {
+                        consumableItems.push({
+                            name: name,
+                            quantity: quantity,
+                            image: getItemImage(name)
+                        });
+                    }
+                });
+            }
+
+            document.getElementById('consumableCount').textContent = `(${consumableItems.length})`;
+
+            if (consumableItems.length === 0) {
+                consumableGrid.innerHTML = '<div style="text-align: center; color: #888; padding: 10px; width: 100%;">Nessun item consumabile</div>';
+            } else {
+                consumableGrid.innerHTML = consumableItems.map(item => `
+                    <div class="item-slot ${selectedItem?.name === item.name ? 'selected' : ''}" 
+                         onclick="selectItem('${item.name}')">
+                        <img src="${item.image}" alt="${item.name}" onerror="this.src='https://via.placeholder.com/50?text=Item'">
+                        <div class="item-quantity">x${item.quantity}</div>
+                        <div class="item-tooltip">${item.name}</div>
+                    </div>
+                `).join('');
+            }
+        }
+
+        function getItemImage(name) {
+            const imageMap = {
+                'Bottle Cap': 'https://github.com/lucaremix/roulette-run-challenge/blob/main/images/items/item-bottlecap.png?raw=true',
+                'Golden Bottle Cap': 'https://github.com/lucaremix/roulette-run-challenge/blob/main/images/items/item-goldenbottlecap.png?raw=true',
+                'Ability Capsule': 'https://github.com/lucaremix/roulette-run-challenge/blob/main/images/items/item-abilitycapsule.png?raw=true',
+                'Golden Soothe Bell': 'https://github.com/lucaremix/roulette-run-challenge/blob/main/images/items/item-goldensoothebell.png?raw=true',
+                'Pokérus Sludge': 'https://github.com/lucaremix/roulette-run-challenge/blob/main/images/items/item-pokerussludge.png?raw=true',
+                'Lottery Ticket': 'https://github.com/lucaremix/roulette-run-challenge/blob/main/images/items/item-lotteryticket.webp?raw=true',
+                'Spin Enhancer Cell': 'https://github.com/lucaremix/roulette-run-challenge/blob/main/images/items/item-spinenhancercell.png?raw=true',
+                'Type Avoider Herb': 'https://github.com/lucaremix/roulette-run-challenge/blob/main/images/items/item-typeavoiderherb.png?raw=true',
+                'Shiny Charm': 'https://github.com/lucaremix/roulette-run-challenge/blob/main/images/items/item-shinycharm.png?raw=true',
+                'Amulet Coin': 'https://github.com/lucaremix/roulette-run-challenge/blob/main/images/items/item-amuletcoin.png?raw=true',
+                'Credit Voucher': 'https://github.com/lucaremix/roulette-run-challenge/blob/main/images/items/item-creditvoucher.png?raw=true',
+                'Limit Breaker Ball': 'https://github.com/lucaremix/roulette-run-challenge/blob/main/images/items/item-limitbreakerball.png?raw=true',
+                'Squirt Bottle': 'https://github.com/lucaremix/roulette-run-challenge/blob/main/images/items/item-squirtbottle.png?raw=true'
+            };
+            return imageMap[name] || 'https://via.placeholder.com/50?text=Item';
+        }
+
+        window.selectItem = function(itemName) {
+            if (itemName === 'Lottery Ticket') {
+                window.location.href = 'roulette.html';
+                return;
+            }
+
+            const applicableItems = ['Bottle Cap', 'Golden Bottle Cap', 'Ability Capsule', 'Golden Soothe Bell', 'Pokérus Sludge'];
+            
+            if (!applicableItems.includes(itemName)) {
+                alert('Questo item non è applicabile ai Pokémon');
+                return;
+            }
+
+            if (selectedItem?.name === itemName) {
+                selectedItem = null;
+            } else {
+                selectedItem = { name: itemName };
+            }
+
+            renderItems();
+        };
+
+        function renderTeam(team) {
+            const teamBarGrid = document.getElementById('teamBarGrid');
+            document.getElementById('teamCount').textContent = `(${team.length}/∞)`;
+
+            if (team.length === 0) {
+                teamBarGrid.innerHTML = '<div style="text-align: center; color: #888; padding: 20px; width: 100%;">Nessun Pokémon nel team</div>';
+                return;
+            }
+
+            teamBarGrid.innerHTML = team.map((pokemon, index) => {
+                const types = [pokemon.primary_type];
+                if (pokemon.secondary_type) types.push(pokemon.secondary_type);
+
+                const effects = pokemon.effects || {};
+                const effectsText = Object.entries(effects).map(([key, value]) => {
+                    return `<div class="tooltip-effect">${key}: ${value}</div>`;
+                }).join('');
+
+                return `
+                    <div class="team-slot ${selectedPokemon === index ? 'selected' : ''}" 
+                         onclick="selectPokemon(${index})">
+                        ${pokemon.shiny ? '<div style="position: absolute; top: 2px; right: 2px; font-size: 1.2em;">✨</div>' : ''}
+                        <img src="${getPokemonImageUrl(pokemon.national_number)}" 
+                             alt="${pokemon.english_name}">
+                        <div class="team-tooltip">
+                            <div class="tooltip-name">${pokemon.english_name}</div>
+                            <div class="tooltip-stat">Tipo: ${types.join('/')}</div>
+                            <div class="tooltip-stat">Natura: ${pokemon.nature || 'Unknown'}</div>
+                            <div class="tooltip-stat">Abilità: ${pokemon.ability || 'Unknown'}</div>
+                            ${effectsText}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        window.selectPokemon = async function(index) {
+            if (!selectedItem) {
+                return;
+            }
+
+            selectedPokemon = index;
+
+            const playerRef = ref(database, `players/${playerName}`);
+            const snapshot = await get(playerRef);
+            const playerData = snapshot.val();
+            const pokemon = playerData.rubyteam[index];
+
+            if (selectedItem.name === 'Bottle Cap') {
+                openStatModal(index);
+            } else if (selectedItem.name === 'Golden Bottle Cap') {
+                await applyEffect(index, 'ALL_IV_MAXED', 'All IVs Maxed');
+            } else if (selectedItem.name === 'Ability Capsule') {
+                await toggleAbility(index, pokemon);
+            } else if (selectedItem.name === 'Golden Soothe Bell') {
+                await applyEffect(index, 'MAXED_FRIENDSHIP', 'Maxed Friendship');
+            } else if (selectedItem.name === 'Pokérus Sludge') {
+                await applyEffect(index, 'POKERUS', 'Pokérus');
+            }
+        };
+
+        function openStatModal(pokemonIndex) {
+            selectedPokemon = pokemonIndex;
+            document.getElementById('statModal').classList.add('show');
+        }
+
+        window.closeStatModal = function() {
+            document.getElementById('statModal').classList.remove('show');
+        };
+
+        window.selectStat = async function(stat) {
+            await applyEffect(selectedPokemon, `MAXED_IV_${stat}`, `Maxed IV: ${stat}`);
+            closeStatModal();
+        };
+
+        async function applyEffect(index, effectKey, effectLabel) {
+            try {
+                const playerRef = ref(database, `players/${playerName}`);
+                const snapshot = await get(playerRef);
+                const playerData = snapshot.val();
+                
+                if (!playerData.rubyteam[index].effects) {
+                    playerData.rubyteam[index].effects = {};
+                }
+
+                playerData.rubyteam[index].effects[effectKey] = effectLabel;
+
+                await set(playerRef, playerData);
+
+                // Consuma item
+                await consumeItem(selectedItem.name);
+                
+                selectedItem = null;
+                selectedPokemon = null;
+                
+                alert(`${effectLabel} applicato con successo!`);
+                
+            } catch (error) {
+                console.error('Errore applicazione effetto:', error);
+                alert('Errore durante l\'applicazione dell\'effetto');
+            }
+        }
+
+        async function toggleAbility(index, pokemon) {
+            try {
+                const playerRef = ref(database, `players/${playerName}`);
+                const snapshot = await get(playerRef);
+                const playerData = snapshot.val();
+
+                const abilities = [pokemon.abilities_0, pokemon.abilities_1].filter(a => a && a.trim() !== '');
+                
+                if (abilities.length < 2) {
+                    alert('Questo Pokémon ha solo un\'abilità disponibile!');
+                    selectedItem = null;
+                    selectedPokemon = null;
+                    return;
+                }
+
+                // Toggle tra abilities_0 e abilities_1
+                const currentAbility = playerData.rubyteam[index].ability;
+                const newAbility = currentAbility === pokemon.abilities_0 ? pokemon.abilities_1 : pokemon.abilities_0;
+                
+                playerData.rubyteam[index].ability = newAbility;
+
+                await set(playerRef, playerData);
+
+                // Consuma item
+                await consumeItem(selectedItem.name);
+                
+                selectedItem = null;
+                selectedPokemon = null;
+                
+                alert(`Abilità cambiata in: ${newAbility}`);
+
+            } catch (error) {
+                console.error('Errore cambio abilità:', error);
+                alert('Errore durante il cambio di abilità');
+            }
+        }
+
+        async function consumeItem(itemName) {
+            const currentQuantity = playerInventory.itemconsumabili[itemName] || 0;
+            if (currentQuantity > 0) {
+                await update(ref(database), {
+                    [`players/${playerName}/inventory/itemconsumabili/${itemName}`]: currentQuantity - 1
+                });
+                await loadPlayerInventory();
+            }
+        }
+
+        function renderMTs(mts) {
+            const mtsBarGrid = document.getElementById('mtsBarGrid');
+            document.getElementById('mtsCount').textContent = `(${mts.length})`;
+
+            if (mts.length === 0) {
+                mtsBarGrid.innerHTML = '<div style="text-align: center; color: #888; padding: 10px; width: 100%;">Nessuna MT posseduta</div>';
+                return;
+            }
+
+            mtsBarGrid.innerHTML = mts.map(mt => `
+                <div class="mt-slot">
+                    <img src="https://raw.githubusercontent.com/lucaremix/roulette-run-challenge/main/MT.png" 
+                         alt="${mt.nome}"
+                         onerror="this.style.display='none'">
+                    <div class="mt-tooltip">
+                        <div style="font-weight: bold; color: #fff;">${mt.nome}</div>
+                        <div style="color: #888; font-size: 0.85em;">Potenza: ${mt.potenza}</div>
+                        <div style="color: #888; font-size: 0.85em;">Precisione: ${mt.precisione}</div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function loadEvents() {
+            const eventsRef = ref(database, 'events');
+            
+            onValue(eventsRef, (snapshot) => {
+                const events = snapshot.val();
+                renderEvents(events || {});
+            });
+        }
+
+        function renderEvents(events) {
+            const eventsGrid = document.getElementById('eventsGrid');
+            
+            const eventsList = Object.entries(events).map(([id, event]) => ({
+                id,
+                ...event
+            }));
+
+            if (eventsList.length === 0) {
+                eventsGrid.innerHTML = '<div style="text-align: center; color: #888; padding: 40px;">Nessun evento disponibile</div>';
+                return;
+            }
+
+            eventsGrid.innerHTML = eventsList.map(event => {
+                const players = event.players || {};
+                const playersList = Object.keys(players);
+                const isJoined = playersList.includes(playerName);
+
+                return `
+                    <div class="event-card ${isJoined ? 'joined' : ''}" onclick="toggleJoinEvent('${event.id}', ${isJoined})">
+                        <img src="${event.image}" 
+                             alt="${event.name}" 
+                             class="trainer-img"
+                             onerror="this.src='https://via.placeholder.com/128?text=${event.name}'">
+                        <div class="event-info">
+                            <div class="event-name">${event.name}</div>
+                            <div class="player-list">
+                                ${playersList.length > 0 
+                                    ? playersList.map(p => `
+                                        <div class="player-item ${p === playerName ? 'current-user' : ''}">
+                                            ${p === playerName ? '👤 ' : ''}${p}
+                                        </div>
+                                    `).join('')
+                                    : '<div class="no-players">Nessun giocatore</div>'
+                                }
+                            </div>
+                            <div class="join-status ${isJoined ? 'joined' : ''}">
+                                ${isJoined ? '✓ Partecipante' : 'Clicca per partecipare'}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        window.toggleJoinEvent = async function(eventId, isJoined) {
+            if (!playerName) {
+                alert('Imposta prima il tuo nome!');
+                return;
+            }
+
+            const eventPlayerRef = ref(database, `events/${eventId}/players/${playerName}`);
+
+            try {
+                if (isJoined) {
+                    await remove(eventPlayerRef);
+                } else {
+                    await set(eventPlayerRef, true);
+                }
+            } catch (error) {
+                console.error('Errore:', error);
+                alert('Errore durante l\'operazione');
+            }
+        };
+
+        window.resetAllData = async function() {
+            if (!confirm('Sei sicuro di voler resettare TUTTI i dati? Questa azione è irreversibile!')) {
+                return;
+            }
+
+            if (!confirm('ULTIMA CONFERMA: Tutti i dati verranno eliminati definitivamente!')) {
+                return;
+            }
+
+            try {
+                await set(ref(database, `players/${playerName}`), null);
+                localStorage.removeItem('playerName');
+                alert('Dati resettati con successo!');
+                window.location.reload();
+            } catch (error) {
+                console.error('Errore:', error);
+                alert('Errore durante il reset');
+            }
+        };
+
+        init();
+    </script>
+</body>
+</html>
