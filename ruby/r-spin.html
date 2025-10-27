@@ -814,7 +814,16 @@
                 tierToLoad = tierMap[selectedTier];
             }
 
-            const poolName = `tier${tierToLoad}`;
+            // Mappa tier al nome corretto del pool in Firebase
+            const tierToPoolMap = {
+                'C': 'c_tier',
+                'B': 'b_tier',
+                'A': 'a_tier',
+                'S': 's_tier',
+                'L': 'legendary'
+            };
+
+            const poolName = tierToPoolMap[tierToLoad];
             const poolRef = ref(database, `pools/${poolName}`);
             
             onValue(poolRef, (snapshot) => {
@@ -998,7 +1007,17 @@
                 const tierMap = { 'C': 'B', 'B': 'A', 'A': 'S', 'S': 'S', 'L': 'L' };
                 tierToSave = tierMap[selectedTier];
             }
-            const pool = `tier${tierToSave}`;
+            
+            // Mappa tier al nome corretto del pool in Firebase
+            const tierToPoolMap = {
+                'C': 'c_tier',
+                'B': 'b_tier',
+                'A': 'a_tier',
+                'S': 's_tier',
+                'L': 'legendary'
+            };
+            
+            const pool = tierToPoolMap[tierToSave];
 
             if (!wonPokemon) return;
 
