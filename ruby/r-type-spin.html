@@ -781,34 +781,58 @@
             const pools = ['c_tier', 'b_tier', 'a_tier', 's_tier'];
             let allPokemon = [];
 
+            console.log('Caricamento pool per tipo:', selectedType);
+
             try {
                 for (const poolName of pools) {
                     const poolRef = ref(database, `pools/${poolName}`);
                     const snapshot = await get(poolRef);
                     
+                    console.log(`Pool ${poolName}:`, snapshot.exists() ? 'Trovato' : 'Non trovato');
+                    
                     if (snapshot.exists()) {
                         const data = snapshot.val();
+                        console.log(`Dati ${poolName}:`, Object.keys(data).length, 'pokemon');
+                        
                         const pokemonList = Object.entries(data).map(([key, value]) => ({
                             key: key,
                             tier: poolName,
                             ...value
                         }));
                         
-                        // Filtra per tipo
-                        const filtered = pokemonList.filter(p => 
-                            p.primary_type === selectedType || p.secondary_type === selectedType
-                        );
+                        // Debug: mostra alcuni tipi
+                        if (pokemonList.length > 0) {
+                            console.log(`Esempio tipi in ${poolName}:`, 
+                                pokemonList[0].primary_type, 
+                                pokemonList[0].secondary_type);
+                        }
                         
+                        // Filtra per tipo (case-insensitive)
+                        const filtered = pokemonList.filter(p => {
+                            const primary = (p.primary_type || '').toLowerCase();
+                            const secondary = (p.secondary_type || '').toLowerCase();
+                            const targetType = selectedType.toLowerCase();
+                            
+                            return primary === targetType || secondary === targetType;
+                        });
+                        
+                        console.log(`Filtrati ${filtered.length} pokemon ${selectedType} da ${poolName}`);
                         allPokemon = allPokemon.concat(filtered);
                     }
                 }
 
+                console.log('Totale pokemon trovati:', allPokemon.length);
+
                 // Filtra per Type Avoider se attivo
                 if (activeItems.typeAvoider) {
                     allPokemon = allPokemon.filter(pokemon => {
-                        return pokemon.primary_type !== activeItems.typeAvoider && 
-                               pokemon.secondary_type !== activeItems.typeAvoider;
+                        const primary = (pokemon.primary_type || '').toLowerCase();
+                        const secondary = (pokemon.secondary_type || '').toLowerCase();
+                        const avoiderType = activeItems.typeAvoider.toLowerCase();
+                        
+                        return primary !== avoiderType && secondary !== avoiderType;
                     });
+                    console.log('Dopo Type Avoider:', allPokemon.length);
                 }
 
                 currentPool = allPokemon;
