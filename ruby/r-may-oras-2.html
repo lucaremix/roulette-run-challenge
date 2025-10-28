@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>May - Route 110</title>
+    <title>May (ORAS) - Reward Selection</title>
     <style>
         * {
             margin: 0;
@@ -13,7 +13,7 @@
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-image: url('https://raw.githubusercontent.com/lucaremix/roulette-run-challenge/main/background/r-route110_background.png');
+            background-image: url('https://raw.githubusercontent.com/lucaremix/roulette-run-challenge/main/background/May_ORAS_background.png');
             background-size: cover;
             background-position: center;
             background-attachment: fixed;
@@ -486,11 +486,11 @@
         <a href="index.html" class="back-btn">← Torna alla Home</a>
 
         <div class="event-header">
-            <img src="https://img.nuzlocke.app//leaders/rs-may-oras.png" 
+            <img src="https://raw.githubusercontent.com/lucaremix/roulette-run-challenge/main/trainers/May_ORAS.png" 
                  alt="May ORAS" 
                  class="event-trainer-img">
             <div class="event-info">
-                <h1 class="event-title">May - Route 110</h1>
+                <h1 class="event-title">May (ORAS) - Reward Selection</h1>
                 <div class="event-status">
                     <span class="status-badge" id="statusBadge">Non Unito</span>
                     <button class="join-leave-btn join-btn" id="joinLeaveBtn" onclick="toggleJoin()">
@@ -598,10 +598,12 @@
             const playerData = snapshot.val();
             
             playerTeam = playerData?.rubyteam || [];
+            console.log('Player team loaded:', playerTeam);
             return playerTeam;
         }
 
         window.selectChoice = async function(choiceNum) {
+            console.log('Selected choice:', choiceNum);
             selectedChoice = choiceNum;
             selectedPokemon = null;
             
@@ -611,47 +613,70 @@
             
             const pokemonSelection = document.getElementById('pokemonSelection');
             const confirmBtn = document.getElementById('confirmBtn');
+            
+            console.log('Pokemon selection element:', pokemonSelection);
 
             if (choiceNum === 2) {
                 // Carica il team del giocatore
                 await loadPlayerTeam();
+                console.log('Team length:', playerTeam.length);
+                console.log('Full team data:', playerTeam);
                 
                 if (playerTeam.length === 0) {
                     alert('Non hai Pokémon nella tua squadra! Devi scegliere l\'altra opzione.');
                     document.getElementById('choice2').classList.add('disabled');
                     document.getElementById('choice2').classList.remove('selected');
                     selectedChoice = null;
+                    pokemonSelection.classList.remove('show');
+                    confirmBtn.disabled = true;
                     return;
                 }
                 
-                // Mostra la selezione Pokémon
+                // Mostra la selezione Pokémon e disabilita il pulsante finché non viene selezionato un Pokémon
+                console.log('Adding show class to pokemon selection');
                 pokemonSelection.classList.add('show');
+                console.log('Pokemon selection classes:', pokemonSelection.className);
+                console.log('Pokemon selection display:', window.getComputedStyle(pokemonSelection).display);
+                
                 renderPokemonGrid();
-                confirmBtn.disabled = true;
+                confirmBtn.disabled = true; // Importante: disabilitato finché non si seleziona un Pokémon
             } else {
                 // Nascondi la selezione Pokémon
                 pokemonSelection.classList.remove('show');
-                confirmBtn.disabled = false;
+                confirmBtn.disabled = false; // Abilita subito per opzione 1
             }
         };
 
         function renderPokemonGrid() {
             const grid = document.getElementById('pokemonGrid');
+            console.log('Rendering pokemon grid, team:', playerTeam);
+            
+            if (!grid) {
+                console.error('Pokemon grid element not found!');
+                return;
+            }
             
             if (playerTeam.length === 0) {
                 grid.innerHTML = '<div class="no-pokemon">Nessun Pokémon disponibile nella squadra</div>';
                 return;
             }
 
-            grid.innerHTML = playerTeam.map((pokemon, index) => {
-                const imgUrl = `https://www.pokemon.com/static-assets/content-assets/cms2/img/pokedex/full/${padNumber(pokemon.national_number)}.png`;
+            const cardsHtml = playerTeam.map((pokemon, index) => {
+                // Gestisci diversi formati di numero nazionale
+                const nationalNumber = pokemon.national_number || pokemon.nationalNumber || pokemon.id || 1;
+                const pokemonName = pokemon.name || pokemon.english_name || 'Unknown';
+                const imgUrl = `https://www.pokemon.com/static-assets/content-assets/cms2/img/pokedex/full/${padNumber(nationalNumber)}.png`;
+                console.log(`Creating card for ${pokemonName} (${nationalNumber}) at index ${index}`);
                 return `
                     <div class="pokemon-card" id="poke-${index}" onclick="selectPokemon(${index})">
-                        <img src="${imgUrl}" alt="${pokemon.name}">
-                        <div class="pokemon-card-name">${pokemon.name}</div>
+                        <img src="${imgUrl}" alt="${pokemonName}" onerror="this.src='https://via.placeholder.com/80?text=${pokemonName}'">
+                        <div class="pokemon-card-name">${pokemonName}</div>
                     </div>
                 `;
             }).join('');
+            
+            grid.innerHTML = cardsHtml;
+            console.log('Grid HTML updated, innerHTML length:', grid.innerHTML.length);
         }
 
         window.selectPokemon = function(index) {
