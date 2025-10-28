@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>May - Route 110</title>
+    <title>May (ORAS) - Reward Selection</title>
     <style>
         * {
             margin: 0;
@@ -13,7 +13,7 @@
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-image: url('https://raw.githubusercontent.com/lucaremix/roulette-run-challenge/main/r-route110.png');
+            background-image: url('https://raw.githubusercontent.com/lucaremix/roulette-run-challenge/main/background/May_ORAS_background.png');
             background-size: cover;
             background-position: center;
             background-attachment: fixed;
@@ -486,11 +486,11 @@
         <a href="index.html" class="back-btn">← Torna alla Home</a>
 
         <div class="event-header">
-            <img src="https://img.nuzlocke.app//leaders/rs-may-oras.png" 
+            <img src="https://raw.githubusercontent.com/lucaremix/roulette-run-challenge/main/trainers/May_ORAS.png" 
                  alt="May ORAS" 
                  class="event-trainer-img">
             <div class="event-info">
-                <h1 class="event-title">May - Route 110</h1>
+                <h1 class="event-title">May (ORAS) - Reward Selection</h1>
                 <div class="event-status">
                     <span class="status-badge" id="statusBadge">Non Unito</span>
                     <button class="join-leave-btn join-btn" id="joinLeaveBtn" onclick="toggleJoin()">
@@ -593,12 +593,24 @@
 
         async function loadPlayerTeam() {
             const currentPlayer = getCurrentPlayer();
-            const playerRef = ref(database, `players/${currentPlayer}`);
-            const snapshot = await get(playerRef);
-            const playerData = snapshot.val();
+            console.log('Loading team for player:', currentPlayer);
             
-            playerTeam = playerData?.rubyteam || [];
-            console.log('Player team loaded:', playerTeam);
+            // Il percorso corretto è players/${player}/rubyteam
+            const playerRef = ref(database, `players/${currentPlayer}/rubyteam`);
+            const snapshot = await get(playerRef);
+            const teamData = snapshot.val();
+            
+            console.log('Raw team data from Firebase:', teamData);
+            
+            // Il team è un oggetto con chiavi numeriche, lo convertiamo in array
+            if (teamData && typeof teamData === 'object') {
+                playerTeam = Object.values(teamData);
+            } else {
+                playerTeam = [];
+            }
+            
+            console.log('Player team loaded (converted to array):', playerTeam);
+            console.log('Team length:', playerTeam.length);
             return playerTeam;
         }
 
@@ -685,9 +697,9 @@
             const cardsHtml = playerTeam.map((pokemon, index) => {
                 console.log(`Processing pokemon ${index}:`, pokemon);
                 
-                // Gestisci diversi formati di numero nazionale
-                const nationalNumber = pokemon.national_number || pokemon.nationalNumber || pokemon.pokedex_number || pokemon.id || 1;
-                const pokemonName = pokemon.name || pokemon.english_name || pokemon.species || 'Unknown';
+                // I campi corretti sono english_name e national_number
+                const nationalNumber = pokemon.national_number || pokemon.nationalNumber || 1;
+                const pokemonName = pokemon.english_name || pokemon.name || 'Unknown';
                 const imgUrl = `https://www.pokemon.com/static-assets/content-assets/cms2/img/pokedex/full/${padNumber(nationalNumber)}.png`;
                 
                 console.log(`  - Name: ${pokemonName}, Number: ${nationalNumber}`);
@@ -833,9 +845,10 @@
             const players = Object.values(state.players);
 
             for (const player of players) {
+                // Percorso corretto: players/${player}/
                 const playerRef = ref(database, `players/${player.name}`);
                 const playerSnap = await get(playerRef);
-                let playerData = playerSnap.val() || { coins: 0, rubyteam: [] };
+                let playerData = playerSnap.val() || { coins: 0, rubyteam: {} };
 
                 const hasAmulet = playerData?.inventory?.itempermanenti?.['Amulet Coin'] === true;
 
@@ -850,8 +863,17 @@
                     playerData.pendingSpin = { pool: 'b-tier', from: 'may-oras-2' };
                     
                     // Rimuovi il Pokémon sacrificato dal rubyteam
+                    // Il rubyteam è un oggetto con chiavi numeriche
                     if (playerData.rubyteam && player.sacrificedPokemonIndex !== undefined) {
-                        playerData.rubyteam.splice(player.sacrificedPokemonIndex, 1);
+                        // Converti in array, rimuovi l'elemento, riconverti in oggetto
+                        const teamArray = Object.values(playerData.rubyteam);
+                        teamArray.splice(player.sacrificedPokemonIndex, 1);
+                        
+                        // Ricostruisci l'oggetto rubyteam con nuove chiavi
+                        playerData.rubyteam = {};
+                        teamArray.forEach((pokemon, index) => {
+                            playerData.rubyteam[index] = pokemon;
+                        });
                     }
                 }
 
@@ -884,7 +906,7 @@
                     } else {
                         const coins = 750;
                         const bonus = hasAmulet ? Math.floor(coins / 4) : 0;
-                        const sacrificed = player.sacrificedPokemon ? player.sacrificedPokemon.name : 'Pokémon';
+                        const sacrificed = player.sacrificedPokemon ? player.sacrificedPokemon.english_name || player.sacrificedPokemon.name : 'Pokémon';
                         html += `<div class="reward-item">
                             🎰 ${player.name}: ${coins}${bonus > 0 ? ` + ${bonus} (Amulet Coin)` : ''} coins + 1 Spin Tier B<br>
                             <span style="color: #ff6464; font-size: 0.9em;">⚰️ ${sacrificed} è stato sacrificato</span>
