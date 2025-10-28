@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Courtney - Silhouette Challenge</title>
+    <title>Courtney - Magma Hideout</title>
     <style>
         * {
             margin: 0;
@@ -13,7 +13,7 @@
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-image: url('https://raw.githubusercontent.com/lucaremix/roulette-run-challenge/main/background/Courtney_background.png');
+            background-image: url('https://raw.githubusercontent.com/lucaremix/roulette-run-challenge/main/background/r-magmahideout_background.png');
             background-size: cover;
             background-position: center;
             background-attachment: fixed;
@@ -501,11 +501,11 @@
 
         <div id="landingSection">
         <div class="event-header">
-            <img src="https://raw.githubusercontent.com/lucaremix/roulette-run-challenge/main/trainers/Courtney.png" 
+            <img src="https://img.nuzlocke.app/leaders/rs-courtney-oras.png" 
                  alt="Courtney" 
                  class="event-trainer-img">
             <div class="event-info">
-                <h1 class="event-title">Courtney - Silhouette Challenge</h1>
+                <h1 class="event-title">Courtney - Magma Hideout</h1>
                 <div class="event-status">
                     <div id="statusBadge" class="status-badge not-joined">Non Partecipante</div>
                     <button id="joinLeaveBtn" class="join-leave-btn join-btn" onclick="toggleJoin()">Unisciti</button>
@@ -939,8 +939,12 @@
             let winnerData = winnerSnap.val() || { coins: 0, team: [] };
             let loserData = loserSnap.val() || { coins: 0, team: [] };
 
-            winnerData.coins = (winnerData.coins || 0) + 1500;
-            loserData.coins = (loserData.coins || 0) + 1000;
+            const hasAmuletWinner = winnerData?.inventory?.itempermanenti?.['Amulet Coin'] === true;
+            winnerData.coins = (winnerData.coins || 0) + 1500 + (hasAmuletWinner ? 375 : 0);
+            
+            const hasAmuletLoser = loserData?.inventory?.itempermanenti?.['Amulet Coin'] === true;
+            loserData.coins = (loserData.coins || 0) + 1000 + (hasAmuletLoser ? 250 : 0);
+
 
             await set(winnerRef, winnerData);
             await set(loserRef, loserData);
