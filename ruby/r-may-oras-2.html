@@ -531,7 +531,7 @@
 
     <script type="module">
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js';
-        import { getDatabase, ref, set, get, onValue, update, remove } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js';
+        import { getDatabase, ref, set, get, onValue, update, remove, push } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js';
 
         const firebaseConfig = {
             apiKey: "AIzaSyDWbFOYlxHYw_J7frnHJO9LQBue0eqVXoM",
@@ -546,6 +546,7 @@
         const app = initializeApp(firebaseConfig);
         const database = getDatabase(app);
         const eventRef = ref(database, 'events/rs-mayor');
+        const playersRef = ref(database, 'events/rs-mayor/players');
 
         function getCurrentPlayer() {
             return localStorage.getItem('playerName');
@@ -567,93 +568,142 @@
             }
         }
 
-        async function renderLanding() {
+        function renderLanding() {
             const currentPlayer = getCurrentPlayer();
-            const snapshot = await get(eventRef);
-            const data = snapshot.val();
 
-            const isJoined = data?.players?.includes(currentPlayer);
-            const playerCount = data?.players?.length || 0;
+            onValue(playersRef, (snapshot) => {
+                const players = [];
+                snapshot.forEach((childSnapshot) => {
+                    players.push(childSnapshot.val());
+                });
 
-            document.getElementById('statusBadge').textContent = isJoined ? 'Partecipante' : 'Non Partecipante';
-            document.getElementById('statusBadge').className = `status-badge ${isJoined ? 'joined' : 'not-joined'}`;
+                const isJoined = players.includes(currentPlayer);
 
-            const joinBtn = document.getElementById('joinBtn');
-            if (isJoined) {
-                joinBtn.textContent = 'Abbandona';
-                joinBtn.className = 'join-leave-btn leave-btn';
-            } else {
-                joinBtn.textContent = 'Unisciti';
-                joinBtn.className = 'join-leave-btn join-btn';
-            }
+                document.getElementById('statusBadge').textContent = isJoined ? 'Partecipante' : 'Non Partecipante';
+                document.getElementById('statusBadge').className = `status-badge ${isJoined ? 'joined' : 'not-joined'}`;
 
-            document.getElementById('playerCount').textContent = `${playerCount}/2`;
-
-            const playersList = document.getElementById('playersList');
-            if (playerCount === 0) {
-                playersList.innerHTML = '<div class="no-players">Nessun giocatore nella lobby</div>';
-            } else {
-                playersList.innerHTML = data.players.map(player => `
-                    <div class="player-card ${player === currentPlayer ? 'current-user' : ''}">
-                        <span class="player-name">${player}</span>
-                        ${player === currentPlayer ? '<span class="you-badge">Tu</span>' : ''}
-                    </div>
-                `).join('');
-            }
-
-            // Mostra la schermata appropriata
-            if (data?.started && isJoined) {
-                document.getElementById('introScreen').classList.remove('show');
-                
-                if (data.choices && data.choices[currentPlayer]) {
-                    // Ho già fatto la mia scelta
-                    const bothChosen = Object.keys(data.choices).length === 2;
-                    if (bothChosen) {
-                        showFinalScreen(data);
-                    } else {
-                        document.getElementById('waitingScreen').classList.add('show');
-                    }
+                const joinBtn = document.getElementById('joinBtn');
+                if (isJoined) {
+                    joinBtn.textContent = 'Abbandona';
+                    joinBtn.className = 'join-leave-btn leave-btn';
                 } else {
-                    // Devo ancora scegliere
-                    document.getElementById('choiceScreen').classList.add('show');
+                    joinBtn.textContent = 'Unisciti';
+                    joinBtn.className = 'join-leave-btn join-btn';
                 }
-            } else if (playerCount === 2 && !data?.started) {
-                document.getElementById('introScreen').classList.add('show');
-            }
+
+                document.getElementById('playerCount').textContent = `${players.length}/2`;
+
+                const playersList = document.getElementById('playersList');
+                if (players.length === 0) {
+                    playersList.innerHTML = '<div class="no-players">Nessun giocatore nella lobby</div>';
+                } else {
+                    playersList.innerHTML = players.map(player => `
+                        <div class="player-card ${player === currentPlayer ? 'current-user' : ''}">
+                            <span class="player-name">${player}</span>
+                            ${player === currentPlayer ? '<span class="you-badge">Tu</span>' : ''}
+                        </div>
+                    `).join('');
+                }
+
+                // Mostra intro screen se ci sono 2 giocatori
+                if (players.length === 2) {
+                    document.getElementById('introScreen').classList.add('show');
+                } else {
+                    document.getElementById('introScreen').classList.remove('show');
+                }
+            });
+
+            // Listener per lo stato del gioco
+            onValue(eventRef, (snapshot) => {
+                const data = snapshot.val();
+                if (!data) return;
+
+                const currentPlayer = getCurrentPlayer();
+
+                // Se il gioco è iniziato e sono nel gioco
+                if (data.started && data.players) {
+                    const playersArray = [];
+                    if (data.players) {
+                        Object.values(data.players).forEach(p => playersArray.push(p));
+                    }
+                    
+                    if (!playersArray.includes(currentPlayer)) return;
+
+                    document.getElementById('introScreen').classList.remove('show');
+                    
+                    if (data.choices && data.choices[currentPlayer]) {
+                        // Ho già fatto la mia scelta
+                        const bothChosen = Object.keys(data.choices).length === 2;
+                        if (bothChosen && data.completed) {
+                            showFinalScreen(data);
+                        } else {
+                            document.getElementById('choiceScreen').classList.remove('show');
+                            document.getElementById('waitingScreen').classList.add('show');
+                        }
+                    } else {
+                        // Devo ancora scegliere
+                        document.getElementById('waitingScreen').classList.remove('show');
+                        document.getElementById('choiceScreen').classList.add('show');
+                    }
+                }
+            });
         }
 
         window.toggleJoin = async function() {
-            const currentPlayer = getCurrentPlayer();
-            const snapshot = await get(eventRef);
-            let data = snapshot.val() || { players: [] };
+            const playerName = getCurrentPlayer();
+            if (!playerName) {
+                alert('Devi impostare il tuo nome dalla home page!');
+                window.location.href = 'index.html';
+                return;
+            }
 
-            const isJoined = data.players?.includes(currentPlayer);
+            const snapshot = await new Promise((resolve) => {
+                onValue(playersRef, (snap) => resolve(snap), { onlyOnce: true });
+            });
 
-            if (isJoined) {
-                data.players = data.players.filter(p => p !== currentPlayer);
-                if (data.players.length === 0) {
-                    await remove(eventRef);
-                } else {
-                    await set(eventRef, data);
+            let isInEvent = false;
+            let playerNodeKey = null;
+
+            snapshot.forEach((childSnapshot) => {
+                if (childSnapshot.val() === playerName) {
+                    isInEvent = true;
+                    playerNodeKey = childSnapshot.key;
                 }
+            });
+
+            if (isInEvent && playerNodeKey) {
+                await remove(ref(database, `events/rs-mayor/players/${playerNodeKey}`));
             } else {
-                if (data.players.length >= 2) {
+                // Controlla se ci sono già 2 giocatori
+                const playerCount = snapshot.size;
+                if (playerCount >= 2) {
                     alert('La lobby è piena!');
                     return;
                 }
-                data.players = [...(data.players || []), currentPlayer];
-                await set(eventRef, data);
+                const newPlayerRef = push(playersRef);
+                await set(newPlayerRef, playerName);
             }
         };
 
         window.startChallenge = async function() {
-            const snapshot = await get(eventRef);
-            const data = snapshot.val();
+            const playersSnapshot = await get(playersRef);
+            const players = [];
+            playersSnapshot.forEach((childSnapshot) => {
+                players.push(childSnapshot.val());
+            });
 
-            data.started = true;
-            data.choices = {};
-            await set(eventRef, data);
+            if (players.length !== 2) {
+                alert('Servono esattamente 2 giocatori per iniziare!');
+                return;
+            }
+
+            const data = {
+                started: true,
+                players: players,
+                choices: {}
+            };
             
+            await set(eventRef, data);
             await loadPlayerTeam();
         };
 
@@ -780,8 +830,12 @@
                 await set(playerRef, playerData);
             }
 
-            state.completed = true;
-            await set(eventRef, state);
+            // Aggiorna lo stato dell'evento
+            const updatedState = {
+                ...state,
+                completed: true
+            };
+            await set(eventRef, updatedState);
         }
 
         function showFinalScreen(data) {
@@ -826,10 +880,6 @@
         window.goToSpin = function() {
             window.location.href = 'pokemon-spin.html';
         };
-
-        onValue(eventRef, (snapshot) => {
-            renderLanding();
-        });
 
         if (!getCurrentPlayer()) {
             alert('Devi impostare il tuo nome dalla home page!');
