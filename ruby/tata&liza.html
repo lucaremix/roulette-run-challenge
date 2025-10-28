@@ -1,0 +1,777 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tate & Liza - Mossdeep City</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-image: url('https://raw.githubusercontent.com/lucaremix/roulette-run-challenge/main/background/r-tate&liza_background.png');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            color: #e0e0e0;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            background: #1a1a1a;
+            border: 1px solid #2a2a2a;
+            border-radius: 8px;
+            color: #e0e0e0;
+            text-decoration: none;
+            font-size: 1em;
+            transition: all 0.3s ease;
+            margin-bottom: 30px;
+        }
+
+        .back-btn:hover {
+            background: #252525;
+        }
+
+        .event-header {
+            background: #1a1a1a;
+            border: 1px solid #2a2a2a;
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .event-title {
+            font-size: 2.5em;
+            color: #ffd700;
+            margin-bottom: 10px;
+        }
+
+        .event-subtitle {
+            font-size: 1.2em;
+            color: #888;
+            margin-bottom: 20px;
+        }
+
+        .event-status {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .status-badge {
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 1.1em;
+        }
+
+        .status-badge.joined {
+            background: #2d4a2d;
+            color: #7fff7f;
+        }
+
+        .status-badge.not-joined {
+            background: #2a2a2a;
+            color: #888;
+        }
+
+        .join-leave-btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+
+        .join-btn {
+            background: #2a7a2a;
+            color: white;
+        }
+
+        .join-btn:hover {
+            background: #357a35;
+        }
+
+        .leave-btn {
+            background: #7a2a2a;
+            color: white;
+        }
+
+        .leave-btn:hover {
+            background: #8a3535;
+        }
+
+        .players-section {
+            background: #1a1a1a;
+            border: 1px solid #2a2a2a;
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 30px;
+        }
+
+        .players-title {
+            font-size: 1.8em;
+            color: #ffffff;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .player-count-badge {
+            background: #2a2a2a;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.7em;
+            color: #888;
+        }
+
+        .players-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .player-card {
+            background: #0a0a0a;
+            border: 1px solid #2a2a2a;
+            border-radius: 8px;
+            padding: 15px 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .player-card.current-user {
+            border-color: #4a4a4a;
+            background: #1f1f1f;
+        }
+
+        .player-name {
+            font-size: 1.1em;
+            color: #e0e0e0;
+        }
+
+        .player-card.current-user .player-name {
+            color: #ffffff;
+            font-weight: 600;
+        }
+
+        .you-badge {
+            background: #2a7a2a;
+            color: white;
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 0.8em;
+            font-weight: 600;
+        }
+
+        .no-players {
+            text-align: center;
+            color: #555;
+            font-style: italic;
+            padding: 30px;
+        }
+
+        .start-challenge-btn {
+            display: block;
+            margin: 30px auto;
+            padding: 20px 60px;
+            background: #ffd700;
+            color: #1a1a1a;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.3em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .start-challenge-btn:hover {
+            background: #ffed4e;
+            transform: scale(1.05);
+        }
+
+        .start-challenge-btn:disabled {
+            background: #555;
+            color: #888;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Game Screen */
+        .game-screen {
+            display: none;
+        }
+
+        .game-screen.show {
+            display: block;
+        }
+
+        .game-header {
+            background: #1a1a1a;
+            border: 1px solid #2a2a2a;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+        }
+
+        .player-info {
+            text-align: center;
+        }
+
+        .player-info h3 {
+            font-size: 1.5em;
+            color: #ffd700;
+            margin-bottom: 10px;
+        }
+
+        .player-info .status {
+            font-size: 1.1em;
+            color: #888;
+        }
+
+        .bingo-board {
+            background: #1a1a1a;
+            border: 1px solid #2a2a2a;
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 30px;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            max-width: 800px;
+            margin: 0 auto 30px;
+        }
+
+        .bingo-cell {
+            background: #0a0a0a;
+            border: 2px solid #2a2a2a;
+            border-radius: 8px;
+            padding: 20px;
+            min-height: 120px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            font-size: 0.95em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .bingo-cell:hover {
+            border-color: #4a4a4a;
+            background: #1a1a1a;
+        }
+
+        .bingo-cell.crossed {
+            background: #2d4a2d;
+            border-color: #4a7a4a;
+            color: #7fff7f;
+        }
+
+        .bingo-cell.crossed::after {
+            content: '✓';
+            position: absolute;
+            font-size: 3em;
+            color: #7fff7f;
+            opacity: 0.3;
+        }
+
+        .final-result {
+            display: none;
+            background: #1a1a1a;
+            border: 1px solid #2a2a2a;
+            border-radius: 12px;
+            padding: 50px;
+            text-align: center;
+            max-width: 600px;
+            margin: 50px auto;
+        }
+
+        .final-result.show {
+            display: block;
+        }
+
+        .winner-badge {
+            font-size: 5em;
+            margin-bottom: 20px;
+        }
+
+        .final-result h2 {
+            font-size: 2.5em;
+            color: #ffd700;
+            margin-bottom: 30px;
+        }
+
+        .rewards {
+            background: #0a0a0a;
+            border: 1px solid #2a2a2a;
+            border-radius: 8px;
+            padding: 30px;
+            margin-bottom: 30px;
+        }
+
+        .reward-item {
+            font-size: 1.2em;
+            padding: 15px;
+            margin: 10px 0;
+            background: #1a1a1a;
+            border-radius: 8px;
+        }
+
+        .continue-btn {
+            padding: 20px 60px;
+            background: #ffd700;
+            color: #1a1a1a;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.3em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .continue-btn:hover {
+            background: #ffed4e;
+            transform: scale(1.05);
+        }
+
+        @media (max-width: 768px) {
+            .bingo-board {
+                gap: 10px;
+                padding: 20px;
+            }
+
+            .bingo-cell {
+                padding: 15px;
+                min-height: 100px;
+                font-size: 0.85em;
+            }
+
+            .event-title {
+                font-size: 2em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Landing Screen -->
+        <div id="landingScreen">
+            <a href="index.html" class="back-btn">← Torna alla Home</a>
+            
+            <div class="event-header">
+                <h1 class="event-title">Tate & Liza - Mossdeep City</h1>
+                <p class="event-subtitle">Completa per primo una riga o colonna per vincere!</p>
+                
+                <div class="event-status">
+                    <div class="status-badge" id="statusBadge">Non Iscritto</div>
+                    <button class="join-leave-btn join-btn" id="joinLeaveBtn" onclick="toggleJoin()">
+                        Partecipa
+                    </button>
+                </div>
+            </div>
+
+            <div class="players-section">
+                <div class="players-title">
+                    Giocatori
+                    <span class="player-count-badge" id="playerCount">0/2</span>
+                </div>
+                <div class="players-list" id="playersList">
+                    <div class="no-players">Nessun giocatore iscritto</div>
+                </div>
+            </div>
+
+            <button class="start-challenge-btn" id="startBtn" onclick="startGame()" disabled>
+                Inizia la Challenge
+            </button>
+        </div>
+
+        <!-- Game Screen -->
+        <div class="game-screen" id="gameScreen">
+            <a href="index.html" class="back-btn">← Torna alla Home</a>
+            
+            <div class="game-header">
+                <div class="player-info">
+                    <h3 id="player1Name">Giocatore 1</h3>
+                    <div class="status" id="player1Status">In attesa...</div>
+                </div>
+                <div style="font-size: 2em; color: #ffd700;">VS</div>
+                <div class="player-info">
+                    <h3 id="player2Name">Giocatore 2</h3>
+                    <div class="status" id="player2Status">In attesa...</div>
+                </div>
+            </div>
+
+            <div class="bingo-board" id="bingoBoard">
+                <!-- Cells generated by JS -->
+            </div>
+
+            <div class="final-result" id="finalResult">
+                <div class="winner-badge">🏆</div>
+                <h2 id="winnerText">Vincitore!</h2>
+                <div class="rewards" id="rewardsDiv"></div>
+                <button class="continue-btn" onclick="goToSpin()">Vai agli Spin</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+        import { getDatabase, ref, set, onValue, get, remove, push } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js';
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDNuD9wViLLxteHMCEBlvfdONwcZbAjAvo",
+            authDomain: "roulette-run-challenge.firebaseapp.com",
+            databaseURL: "https://roulette-run-challenge-default-rtdb.europe-west1.firebasedatabase.app",
+            projectId: "roulette-run-challenge",
+            storageBucket: "roulette-run-challenge.firebasestorage.app",
+            messagingSenderId: "994019156093",
+            appId: "1:994019156093:web:9792bdce75c486f589d114"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app);
+
+        const challenges = [
+            '🛡️ Vinci una lotta senza subire danni',
+            '✨ Cattura un Pokémon e fallo evolvere (max 5 Caramelle Rare)',
+            '💥 Effettua un OHKO contro un allenatore',
+            '🌿🔥💧 Cattura un Pokémon Erba, uno Fuoco e uno Acqua',
+            '🚫 Subisci una mossa che non ha effetto',
+            '😵 Usa Struggle in battaglia',
+            '📈 Maxa una statistica durante una lotta contro un allenatore',
+            '⚡ Usa una mossa x4 Superefficace',
+            '🎯 Metti a segno 3 colpi critici',
+            '⚔️ Vinci una lotta senza STAB e senza mosse superefficaci',
+            '💔 Perdi una lotta e torna al Centro Pokémon',
+            '💪 Usa una mossa da 90 di potenza o più (STAB compreso)',
+            '❤️ Vinci una lotta con 1 HP rimanente',
+            '🏠 Torna dalla mamma a piedi',
+            '🤯 Fai sì che un Pokémon si colpisca da solo',
+            '⚡ Rimani paralizzato per 2 turni di fila'
+        ];
+
+        let gameState = null;
+
+        function getCurrentPlayer() {
+            return localStorage.getItem('playerName') || '';
+        }
+
+        async function toggleJoin() {
+            const playerName = getCurrentPlayer();
+            if (!playerName) {
+                alert('Devi impostare il tuo nome dalla home page!');
+                window.location.href = 'index.html';
+                return;
+            }
+
+            const eventRef = ref(database, `events/ccc/players`);
+            
+            const snapshot = await new Promise((resolve) => {
+                onValue(eventRef, (snap) => resolve(snap), { onlyOnce: true });
+            });
+
+            let isInEvent = false;
+            let playerNodeKey = null;
+
+            snapshot.forEach((childSnapshot) => {
+                if (childSnapshot.val() === playerName) {
+                    isInEvent = true;
+                    playerNodeKey = childSnapshot.key;
+                }
+            });
+
+            if (isInEvent && playerNodeKey) {
+                await remove(ref(database, `events/ccc/players/${playerNodeKey}`));
+            } else {
+                const newPlayerRef = push(ref(database, `events/ccc/players`));
+                await set(newPlayerRef, playerName);
+            }
+        }
+
+        function renderLanding() {
+            const currentPlayer = getCurrentPlayer();
+            const eventRef = ref(database, `events/ccc/players`);
+
+            onValue(eventRef, (snapshot) => {
+                const players = [];
+                snapshot.forEach((childSnapshot) => {
+                    players.push(childSnapshot.val());
+                });
+
+                const isJoined = players.includes(currentPlayer);
+
+                const statusBadge = document.getElementById('statusBadge');
+                const joinLeaveBtn = document.getElementById('joinLeaveBtn');
+
+                if (isJoined) {
+                    statusBadge.textContent = 'Iscritto';
+                    statusBadge.className = 'status-badge joined';
+                    joinLeaveBtn.textContent = 'Abbandona';
+                    joinLeaveBtn.className = 'join-leave-btn leave-btn';
+                } else {
+                    statusBadge.textContent = 'Non Iscritto';
+                    statusBadge.className = 'status-badge not-joined';
+                    joinLeaveBtn.textContent = 'Partecipa';
+                    joinLeaveBtn.className = 'join-leave-btn join-btn';
+                }
+
+                document.getElementById('playerCount').textContent = `${players.length}/2`;
+
+                const playersList = document.getElementById('playersList');
+                if (players.length === 0) {
+                    playersList.innerHTML = '<div class="no-players">Nessun giocatore iscritto</div>';
+                } else {
+                    playersList.innerHTML = players.map(p => {
+                        const isCurrent = p === currentPlayer;
+                        return `
+                            <div class="player-card ${isCurrent ? 'current-user' : ''}">
+                                <div class="player-name">${p}</div>
+                                ${isCurrent ? '<span class="you-badge">Tu</span>' : ''}
+                            </div>
+                        `;
+                    }).join('');
+                }
+
+                const startBtn = document.getElementById('startBtn');
+                if (players.length === 2 && isJoined) {
+                    startBtn.disabled = false;
+                } else {
+                    startBtn.disabled = true;
+                }
+            });
+        }
+
+        window.startGame = async function() {
+            const playersSnapshot = await get(ref(database, 'events/ccc/players'));
+            const players = [];
+            playersSnapshot.forEach(child => {
+                players.push(child.val());
+            });
+            
+            if (players.length !== 2) {
+                alert('Servono esattamente 2 giocatori per iniziare!');
+                return;
+            }
+            
+            const eventRef = ref(database, 'events/ccc/game');
+            const snapshot = await get(eventRef);
+            
+            // Shuffle challenges for random board
+            const shuffledChallenges = [...challenges].sort(() => Math.random() - 0.5);
+            
+            if (!snapshot.exists()) {
+                gameState = {
+                    player1: { 
+                        name: players[0], 
+                        board: Array(16).fill(false),
+                        hasWon: false
+                    },
+                    player2: { 
+                        name: players[1], 
+                        board: Array(16).fill(false),
+                        hasWon: false
+                    },
+                    challenges: shuffledChallenges,
+                    isGameOver: false,
+                    winner: null
+                };
+                await set(eventRef, gameState);
+            } else {
+                gameState = snapshot.val();
+            }
+
+            document.getElementById('landingScreen').style.display = 'none';
+            document.getElementById('gameScreen').classList.add('show');
+            
+            setupGameScreen();
+            
+            // Listen for changes
+            onValue(eventRef, (snapshot) => {
+                if (snapshot.exists()) {
+                    gameState = snapshot.val();
+                    updateGameUI();
+                }
+            });
+        };
+
+        function setupGameScreen() {
+            document.getElementById('player1Name').textContent = gameState.player1.name;
+            document.getElementById('player2Name').textContent = gameState.player2.name;
+            
+            const bingoBoard = document.getElementById('bingoBoard');
+            bingoBoard.innerHTML = '';
+            
+            gameState.challenges.forEach((challenge, index) => {
+                const cell = document.createElement('div');
+                cell.className = 'bingo-cell';
+                cell.textContent = challenge;
+                cell.dataset.index = index;
+                cell.onclick = () => toggleCell(index);
+                bingoBoard.appendChild(cell);
+            });
+            
+            updateGameUI();
+        }
+
+        function updateGameUI() {
+            const currentPlayer = getCurrentPlayer();
+            const isPlayer1 = currentPlayer === gameState.player1.name;
+            const myBoard = isPlayer1 ? gameState.player1.board : gameState.player2.board;
+            const otherBoard = isPlayer1 ? gameState.player2.board : gameState.player1.board;
+            
+            // Update cells
+            document.querySelectorAll('.bingo-cell').forEach((cell, index) => {
+                if (myBoard[index]) {
+                    cell.classList.add('crossed');
+                } else {
+                    cell.classList.remove('crossed');
+                }
+            });
+            
+            // Update status
+            const p1Status = document.getElementById('player1Status');
+            const p2Status = document.getElementById('player2Status');
+            
+            const p1Crossed = gameState.player1.board.filter(b => b).length;
+            const p2Crossed = gameState.player2.board.filter(b => b).length;
+            
+            p1Status.textContent = `${p1Crossed}/16 completate`;
+            p2Status.textContent = `${p2Crossed}/16 completate`;
+            
+            // Check if game is over
+            if (gameState.isGameOver) {
+                showFinalResult();
+            }
+        }
+
+        async function toggleCell(index) {
+            if (gameState.isGameOver) return;
+            
+            const currentPlayer = getCurrentPlayer();
+            const isPlayer1 = currentPlayer === gameState.player1.name;
+            
+            if (!isPlayer1 && currentPlayer !== gameState.player2.name) {
+                return; // Not a player in this game
+            }
+            
+            const eventRef = ref(database, 'events/ccc/game');
+            
+            if (isPlayer1) {
+                gameState.player1.board[index] = !gameState.player1.board[index];
+            } else {
+                gameState.player2.board[index] = !gameState.player2.board[index];
+            }
+            
+            // Check for win
+            const board = isPlayer1 ? gameState.player1.board : gameState.player2.board;
+            if (checkWin(board)) {
+                gameState.isGameOver = true;
+                gameState.winner = currentPlayer;
+                await giveRewards(gameState);
+            }
+            
+            await set(eventRef, gameState);
+        }
+
+        function checkWin(board) {
+            // Check rows
+            for (let i = 0; i < 4; i++) {
+                if (board[i*4] && board[i*4+1] && board[i*4+2] && board[i*4+3]) {
+                    return true;
+                }
+            }
+            
+            // Check columns
+            for (let i = 0; i < 4; i++) {
+                if (board[i] && board[i+4] && board[i+8] && board[i+12]) {
+                    return true;
+                }
+            }
+            
+            return false;
+        }
+
+        function showFinalResult() {
+            document.getElementById('bingoBoard').style.display = 'none';
+            
+            const finalDiv = document.getElementById('finalResult');
+            finalDiv.classList.add('show');
+
+            const winner = gameState.winner;
+            const loser = winner === gameState.player1.name ? gameState.player2.name : gameState.player1.name;
+
+            document.getElementById('winnerText').textContent = `${winner} ha vinto!`;
+            
+            const rewardsDiv = document.getElementById('rewardsDiv');
+            rewardsDiv.innerHTML = `
+                <h3 style="color: #ffd700; margin-bottom: 15px;">Ricompense</h3>
+                <div class="reward-item">🏆 ${winner}: 1 Spin Pool S + 500 Coins</div>
+                <div class="reward-item">💪 ${loser}: 1 Spin Pool A + 250 Coins</div>
+            `;
+        }
+
+        window.goToSpin = function() {
+            window.location.href = 'pokemon-spin.html';
+        };
+
+        async function giveRewards(state) {
+            const winner = state.winner;
+            const loser = winner === state.player1.name ? state.player2.name : state.player1.name;
+
+            const winnerRef = ref(database, `players/${winner}`);
+            const loserRef = ref(database, `players/${loser}`);
+
+            const winnerSnap = await get(winnerRef);
+            const loserSnap = await get(loserRef);
+
+            let winnerData = winnerSnap.val() || { coins: 0, team: [] };
+            let loserData = loserSnap.val() || { coins: 0, team: [] };
+
+            const hasAmulet = winnerData?.inventory?.itempermanenti?.['Amulet Coin'] === true;
+            winnerData.coins = (winnerData.coins || 0) + 1500 + (hasAmulet ? 375 : 0);
+
+
+            const hasAmulet = loserData?.inventory?.itempermanenti?.['Amulet Coin'] === true;
+            loserData.coins = (loserData.coins || 0) + 1000 + (hasAmulet ? 250 : 0);
+
+
+            await set(winnerRef, winnerData);
+            await set(loserRef, loserData);
+        }
+
+        window.toggleJoin = toggleJoin;
+
+        if (!getCurrentPlayer()) {
+            alert('Devi impostare il tuo nome dalla home page!');
+            window.location.href = 'index.html';
+        } else {
+            renderLanding();
+        }
+    </script>
+</body>
+</html>
