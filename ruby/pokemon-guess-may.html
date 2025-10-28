@@ -640,14 +640,13 @@
 
             // Determine nature and ability
             const nature = rewards.includes('Natura Perfetta') ? 'Natura Perfetta' : 'Hardy'; // Example
-            const ability = rewards.includes('Abilità Hidden') ? myPokemon.abilities_hidden : 
-                           rewards.includes('Abilità Scelta') ? 'Abilità scelta' : myPokemon.abilities_0
+            const ability = rewards.includes('Abilità Hidden') && myPokemon.abilities_hidden ? myPokemon.abilities_hidden : rewards.includes('Abilità Scelta') ? 'Abilità scelta' : myPokemon.abilities_0;
 
             const newPokemon = {
                 ...myPokemon,
                 nature: nature,
                 ability: ability,
-                shiny: rewards.includes('Shiny')
+                shiny: rewards.includes('Shiny'),
                 effects: {}
             };
             
@@ -658,12 +657,8 @@
             
             playerData.rubyteam.push(newPokemon);
           
-            if (playerData.inventory.itempermanenti['Amulet Coin'] === true) {
-                playerData.coins = (playerData.coins || 0) + coins + (coins / 4);
-            } else {
-                playerData.coins = (playerData.coins || 0) + coins;
-            }
-
+            const hasAmulet = playerData?.inventory?.itempermanenti?.['Amulet Coin'] === true;
+            playerData.coins = (playerData.coins || 0) + coins + (hasAmulet ? coins / 4 : 0);
 
             await set(playerRef, playerData);
 
