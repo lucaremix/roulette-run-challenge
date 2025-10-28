@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Regolamento - Pokémon Roulette Run Challenge</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #0a0a0a;
+            color: #e0e0e0;
+            background-image: url('https://raw.githubusercontent.com/lucaremix/roulette-run-challenge/main/background/r-rules_background.png');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            min-height: 100vh;
+            line-height: 1.7;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 40px 20px;
+            background: rgba(10, 10, 10, 0.8);
+            border: 1px solid #2a2a2a;
+            border-radius: 12px;
+            margin-top: 40px;
+        }
+
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            background: #1a1a1a;
+            border: 1px solid #2a2a2a;
+            border-radius: 8px;
+            color: #e0e0e0;
+            text-decoration: none;
+            font-size: 1em;
+            transition: all 0.3s ease;
+            margin-bottom: 40px;
+        }
+
+        .back-btn:hover {
+            background: #252525;
+        }
+
+        h1 {
+            color: #ffa500;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+        }
+
+        h2 {
+            color: #ffa500;
+            margin-top: 40px;
+            margin-bottom: 15px;
+            font-size: 1.8em;
+            border-bottom: 1px solid #2a2a2a;
+            padding-bottom: 5px;
+        }
+
+        h3 {
+            color: #ffb733;
+            margin-top: 25px;
+            margin-bottom: 10px;
+        }
+
+        ul {
+            margin-left: 25px;
+            margin-top: 10px;
+        }
+
+        li {
+            margin-bottom: 8px;
+        }
+
+        .event {
+            background: #1a1a1a;
+            border: 1px solid #2a2a2a;
+            border-radius: 10px;
+            padding: 25px 30px;
+            margin-top: 25px;
+        }
+
+        .event h3 {
+            color: #ffa500;
+            margin-bottom: 10px;
+        }
+
+        .event p {
+            margin-bottom: 10px;
+        }
+
+        .bonus {
+            color: #7fff7f;
+            font-weight: 600;
+        }
+
+        .coins {
+            color: #ffb733;
+            font-weight: 600;
+        }
+
+        a {
+            color: #ffa500;
+        }
+
+        footer {
+            text-align: center;
+            color: #777;
+            font-size: 0.9em;
+            margin-top: 50px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Basato sul layout del file esistente: rules (1).html :contentReference[oaicite:0]{index=0} -->
+    <div class="container">
+        <a href="index.html" class="back-btn">← Torna alla Home</a>
+
+        <h1>🎲 Pokémon Roulette Run Challenge</h1>
+        <p style="text-align:center;">
+            🔗 <a href="https://lucaremix.github.io/roulette-run-challenge/" target="_blank">
+                https://lucaremix.github.io/roulette-run-challenge/
+            </a>
+        </p>
+
+        <h2>🌟 Introduzione</h2>
+        <p>
+            La <strong>Pokémon Roulette Run Challenge</strong> è una modalità competitiva per
+            <em>Pokémon Blaze Black / Volt White</em> dove, dopo specifiche <strong>boss battle</strong>,
+            i giocatori aprono la pagina dell’evento e lo avviano <strong>in contemporanea</strong>.
+            Ogni evento può assegnare <strong>Pokémon</strong>, <strong>Coins</strong> o
+            <strong>effetti speciali</strong> che modificano la progressione.
+        </p>
+        <p>
+            I Pokémon degli spin sono suddivisi in <em>pool</em> per garantire bilanciamento:
+        </p>
+        <ul>
+            <li>🕊️ <strong>Legendary Tier</strong></li>
+            <li>🌌 <strong>S Tier</strong></li>
+            <li>💎 <strong>A Tier</strong></li>
+            <li>⚔️ <strong>B Tier</strong></li>
+            <li>🍃 <strong>C Tier</strong></li>
+        </ul>
+        <p>
+            💡 <em>Nota:</em> la run non segue le regole di una run classica. Sono consentiti
+            <strong>999 Caramelle Rare</strong> e <strong>999 Repellenti</strong>.
+        </p>
+
+        <!-- === HOENN RUN – EVENTI UFFICIALI === -->
+
+        <h2>🌀 Evento 1 – Starters</h2>
+        <p>
+            Ogni giocatore riceve <strong>5 spin</strong> per determinare lo starter.
+            Dopo ogni spin si può <strong>tenere</strong> o <strong>respinnare</strong> (max 5 tentativi totali).
+            Una volta scelto, lo starter <strong>non è più modificabile</strong>.
+        </p>
+        <p class="coins">💰 Si parte con <strong>2000 Coins</strong> a testa.</p>
+
+        <h2>🌸 Evento 2 – May (Guess del Pokémon – Pool B)</h2>
+        <p>
+            A ciascun giocatore è assegnato un <strong>Pokémon nascosto del Pool B</strong>.
+            Obiettivo: indovinarlo entro <strong>5 tentativi</strong> con indizi progressivi
+            (gli indizi si <em>accumulano</em> tra i turni).
+        </p>
+        <h3>🔎 Indizi & Bonus per turno</h3>
+        <ul>
+            <li><strong>Turno 1</strong>: mostra <strong>2 statistiche</strong> (tra HP/ATK/DEF/SpA/SpD/Spe).<br>
+                <span class="bonus">🎁 Bonus:</span> IV Perfette · Abilità Scelta · <span class="coins">+1000 Coins</span> · Shiny · Natura Perfetta
+            </li>
+            <li><strong>Turno 2</strong>: +<strong>2 statistiche</strong> e <strong>1 debolezza</strong> casuale.<br>
+                <span class="bonus">🎁 Bonus:</span> IV Perfette · <em>Abilità Nascosta</em> · <span class="coins">+1000 Coins</span> · Natura Perfetta
+            </li>
+            <li><strong>Turno 3</strong>: ultime <strong>2 statistiche</strong> + <strong>generazione</strong>.<br>
+                <span class="bonus">🎁 Bonus:</span> <span class="coins">+500 Coins</span> · Natura Perfetta
+            </li>
+            <li><strong>Turno 4</strong>: rivela <strong>tipo</strong> (entrambi se doppio tipo).<br>
+                <span class="bonus">🎁 Bonus:</span> <span class="coins">+500 Coins</span>
+            </li>
+            <li><strong>Turno 5</strong>: mostra <strong>immagine ufficiale</strong> del Pokémon.<br>
+                <span class="bonus">🎁 Bonus:</span> <span class="coins">+100 Coins</span>
+            </li>
+        </ul>
+
+        <h2>🕶️ Evento 3 – Grunt (Selezione segreta, Pool B)</h2>
+        <p>
+            Entrambi visualizzano due Pokémon del <strong>Pool B</strong> (possono differire tra i giocatori)
+            e ne selezionano uno <strong>in segreto</strong>.
+        </p>
+        <ul>
+            <li>Se entrambi scelgono lo <strong>stesso</strong> Pokémon → ❌ nessuno ottiene nulla</li>
+            <li>Se scelgono Pokémon <strong>diversi</strong> → ✅ ognuno ottiene il proprio</li>
+        </ul>
+        <p>⚠️ Silenzio obbligatorio durante la selezione (niente hint).</p>
+
+        <h2>🪨 Evento 4 – Roxanne (Taboo cooperativo)</h2>
+        <p>
+            Giocatore A vede la <strong>carta Pokémon</strong> con <strong>parole vietate</strong>;
+            Giocatore B deve indovinare. <strong>Tempo totale: 120s</strong>. Skip illimitati.
+        </p>
+        <p class="coins">
+            🏆 <strong>10+</strong> indovinati → 1 Spin <strong>A Tier</strong> + <strong>1500 Coins</strong><br>
+            🏆 <strong>5+</strong> indovinati → 1 Spin <strong>B Tier</strong> + <strong>1000 Coins</strong><br>
+            🏆 <strong>1+</strong> indovinato → 1 Spin <strong>A Tier</strong> + <strong>500 Coins</strong>
+        </p>
+
+        <h2>🥊 Evento 5 – Brawly (Duello BST)</h2>
+        <p>
+            Si mostra un <strong>BST</strong> (Base Stat Total) casuale; i giocatori dicono a chi appartiene.
+            Vince il round chi <strong>indovina</strong> o chi è <strong>più vicino</strong>. Primo a 5 round vinti, vince l’evento.
+        </p>
+        <p class="coins">
+            🏆 Vincitore → 1 Spin <strong>A Tier</strong> + <strong>1500 Coins</strong><br>
+            💀 Perdente → 1 Spin <strong>C Tier</strong> + <strong>750 Coins</strong>
+        </p>
+
+        <h2>⚡ Evento 6 – May (Route 110 – Scelta)</h2>
+        <p>
+            Scegli <strong>una</strong> delle due: <strong>1500 Coins</strong> <em>oppure</em>
+            <strong>750 Coins</strong> + <strong>scambia</strong> un tuo Pokémon per <strong>1 Spin Tier B</strong>.
+        </p>
+        <p><em>Lo scambio è definitivo.</em></p>
+
+        <h2>🔌 Evento 7 – May (Wattson – Descrizioni Pokédex)</h2>
+        <p>
+            Sfida 1v1: viene mostrata una <strong>descrizione Pokédex</strong>; a turni alterni si tenta l’indovinare (1 tentativo a testa).
+            Primo a <strong>5 risposte corrette</strong> vince.
+        </p>
+        <p class="coins">
+            🏆 Vincitore → 1 Spin <strong>A Tier</strong> + <strong>1500 Coins</strong><br>
+            💀 Perdente → 1 Spin <strong>B Tier</strong> + <strong>750 Coins</strong>
+        </p>
+
+        <h2>🌋 Evento 8 – Maxie (Mt. Chimney – Split or Steal)</h2>
+        <p>
+            Mini-gioco a scelta simultanea con <strong>3000 Coins</strong> in palio: <strong>Split</strong> o <strong>Steal</strong>.
+        </p>
+        <ul>
+            <li><strong>Steal / Steal</strong> → ❌ 0 a entrambi</li>
+            <li><strong>Steal / Split</strong> → 🏴‍☠️ chi ha Steal prende <strong>3000 Coins</strong></li>
+            <li><strong>Split / Split</strong> → 🤝 <strong>1500 Coins</strong> ciascuno</li>
+        </ul>
+
+        <h2>🔥 Evento 9 – Flannery (Indovina Chi? – Pokémon)</h2>
+        <p>
+            Si mostrano <strong>36 Pokémon</strong> in griglia. Ogni giocatore sceglie
+            <strong>in segreto</strong> il proprio; a turni si fanno domande sì/no per escludere finché si indovina.
+        </p>
+        <p class="coins">
+            🏆 Vincitore → 1 Spin <strong>A Tier</strong> + <strong>1500 Coins</strong><br>
+            💀 Sconfitto → 1 Spin <strong>B Tier</strong> + <strong>750 Coins</strong>
+        </p>
+
+        <h2>🧱 Evento 10 – Norman (Battaglia Navale Pokémon)</h2>
+        <p>
+            Ogni giocatore posiziona le proprie “navi” Pokémon sulla griglia:
+        </p>
+        <ul>
+            <li>🌌 1 × <strong>S Tier</strong> → occupa <strong>3×3</strong></li>
+            <li>💎 1 × <strong>A Tier</strong> → occupa <strong>2×2</strong></li>
+            <li>⚔️ 1 × <strong>B Tier</strong> → occupa <strong>1×1</strong></li>
+        </ul>
+        <p>
+            Si alternano i colpi per colpire le celle avversarie; una “nave” affonda quando tutte le sue celle sono colpite.
+        </p>
+        <p class="coins">
+            🏆 Vincitore → mantiene i Pokémon <strong>non affondati</strong> + <strong>1500 Coins</strong><br>
+            💀 Sconfitto → <strong>750 Coins</strong>
+        </p>
+
+        <h2>🔁 Evento 11 – Tabitha (Wonder Trade – Scelta)</h2>
+        <p>
+            Decidi se convertire un tuo Pokémon in spin di alto valore:
+        </p>
+        <ul>
+            <li><strong>Offri</strong> un Pokémon → 1 Spin da <strong>Pool casuale (A o S)</strong> + <span class="coins">750 Coins</span></li>
+            <li><strong>Rifiuta</strong> → tieni il Pokémon + <span class="coins">1500 Coins</span></li>
+        </ul>
+
+        <h2>🕊️ Evento 12 – Winona (Ordinamento statistiche)</h2>
+        <p>
+            Vengono mostrati <strong>5 Pokémon</strong> e una <strong>stat</strong> (HP/ATK/DEF/SpA/Spe).
+            Ordinali dal più alto al più basso. Punto per ogni posizione corretta. Primo a 5 round vinti, vince.
+        </p>
+        <p class="coins">
+            🏆 Vincitore → 1 Spin <strong>A Tier</strong> + <strong>1500 Coins</strong><br>
+            💀 Perdente → 1 Spin <strong>B Tier</strong> + <strong>1000 Coins</strong>
+        </p>
+
+        <h2>🔮 Evento 13 – Courtney (Who’s That Pokémon?)</h2>
+        <p>
+            Indovina il Pokémon dalla <strong>silhouette</strong>. I giocatori si alternano; il primo errore fa perdere chi è di turno.
+        </p>
+        <p class="coins">
+            🏆 Vincitore → <strong>1500 Coins</strong><br>
+            💀 Perdente → <strong>1000 Coins</strong>
+        </p>
+
+        <h2>🌈 Evento 14 – Tate &amp; Liza (Bingo Pokémon!)</h2>
+        <p>
+            Ogni giocatore riceve una <strong>scheda 4×4</strong> con 16 missioni. Le missioni si completano nella stessa run,
+            senza salti temporali. Vale ogni strategia lecita della challenge (Repellenti, Caramelle Rare, MT, ecc.).
+            Vince chi completa per primo una <strong>riga</strong>, <strong>colonna</strong> o <strong>diagonale</strong>.
+        </p>
+        <h3>✅ Missioni aggiornate (con dettaglio operativo)</h3>
+        <ul>
+            <li>🏠 <strong>Torna dalla mamma a piedi</strong> — raggiungi la casa iniziale senza usare Volo/teletrasporti.</li>
+            <li>🌿🏕️ <strong>Crea una Base Segreta sul Percorso 110</strong> — individua un punto idoneo e attiva la base.</li>
+            <li>🧱💥 <strong>Resistere a una x4 di un allenatore</strong> — subisci una mossa x4 e sopravvivi al turno.</li>
+            <li>🎯🎀 <strong>Catturare un Erba, un Fuoco e un Acqua con una Cura Ball</strong> — tutte e tre le catture devono avvenire con Cura Ball.</li>
+            <li>🎯🎯🎯 <strong>Metti a segno 3 colpi critici nella stessa lotta</strong> — contro un allenatore.</li>
+            <li>🤯 <strong>Fai sì che un Pokémon si colpisca da solo</strong> — indotto da confusione o effetto analogo.</li>
+            <li>⚡😴 <strong>Rimani paralizzato/addormentato per 2 turni di fila</strong> — nella stessa battaglia.</li>
+            <li>📈📈 <strong>Maxa 2 statistiche in una lotta contro un allenatore</strong> — porta due stat dello stesso Pokémon a +6.</li>
+            <li>❤️‍🩹 <strong>Vinci una lotta con 1 HP rimanente contro un allenatore</strong> — Focus Sash ammesso.</li>
+            <li>🛡️ <strong>Vinci una lotta senza subire danni contro un allenatore</strong> — no danni diretti o residuali.</li>
+            <li>🗺️⚔️ <strong>Fullclear del Percorso 127 (11 allenatori)</strong> — sconfiggili tutti.</li>
+            <li>💥150 <strong>OHKO con una mossa da almeno 150 di potenza</strong> — potenza effettiva ≥150 (STAB compreso).</li>
+            <li>💎🪨 <strong>Cattura un Pokémon che si evolve con una pietra ed evolvilo a Porto Selcepoli</strong> — completa l’evoluzione lì.</li>
+            <li>🧭🔐 <strong>Raggiungi Ciclamare (nord P.108) e apri il magazzino</strong> — suggerimento: vai a sud di Porto Selcepoli.</li>
+            <li>🌊🧊 <strong>Raggiungi la Cavità Ghiacciata della Grotta Ondosa e cattura Snorunt</strong> — bassa marea: 03:00–09:00 / 15:00–21:00.</li>
+            <li>⛰️🔔 <strong>Raggiungi la cima del Mt. Pira e cattura Bronzor</strong> — prepara scorte e repellenti.</li>
+        </ul>
+        <p class="coins">
+            🏆 Vincitore → 1 Spin <strong>Pool S</strong> + <strong>1500 Coins</strong><br>
+            💀 Sconfitto → 1 Spin <strong>Pool A</strong> + <strong>1000 Coins</strong>
+        </p>
+
+        <h2>🌊 Evento 15 – Maxie (Seafloor Cavern – Wonder Trade tra giocatori)</h2>
+        <p>
+            Scambia un Pokémon con l’altro giocatore e ottieni <span class="coins">+750 Coins</span>, oppure rifiuta lo scambio e ottieni
+            <span class="coins">+1500 Coins</span> mantenendo i tuoi Pokémon.
+        </p>
+
+        <h2>💎 Evento 16 – Wallace (Box Rossa/Blu)</h2>
+        <p>
+            Il Giocatore 1 vede due box (<strong>🔴 Rossa</strong> e <strong>🔵 Blu</strong>): in una c’è un <strong>Pokémon A Tier</strong>,
+            nell’altra un <strong>Legendary</strong>. Solo G1 conosce i contenuti. Dopo breve discussione, il Giocatore 2 sceglie una box:
+            ottiene il Pokémon contenuto; l’altro riceve quello rimasto.
+        </p>
+        <p class="coins">💰 <strong>+1500 Coins</strong> a entrambi.</p>
+
+        <!-- === MERCATI === -->
+
+        <h2>💰 Mercati</h2>
+
+        <h3>🕶️ Black Market</h3>
+        <p>
+            Accessibile dalla Home. Consente l’acquisto di <strong>Pokémon</strong>, <strong>Spin</strong> e <strong>Spin di Tipo</strong>.
+            Si aggiorna ogni <strong>24 ore</strong> con <strong>5 Pokémon</strong> casuali
+            (<em>10% di chance</em> per un <strong>6° leggendario</strong>).
+            Con il <strong>Credit Voucher</strong> hai <strong>−10%</strong> su tutti i prezzi.
+        </p>
+
+        <h3>💿 MT Market</h3>
+        <p>
+            Identico al Black Market ma dedicato alle <strong>MT (Mosse Tecniche)</strong>:
+            <strong>5 MT</strong> disponibili, refresh ogni <strong>24h</strong>.
+        </p>
+
+        <h3>🌱 Campo di Bacche</h3>
+        <p>Acquisti disponibili:</p>
+        <ul>
+            <li>🍋 Lum Berry — 50c</li>
+            <li>🍊 Sitrus Berry — 50c</li>
+            <li>🍒 Leppa Berry — 50c</li>
+            <li>🌿 White Herb — 50c</li>
+            <li>🍃 Power Herb — 50c</li>
+            <li>🍯 Honey — 50c</li>
+        </ul>
+        <p>
+            Sono presenti <strong>3 stazioni di coltivazione</strong> che <strong>triplicano</strong> una singola Bacca/Erba in <strong>12h</strong>.
+            Con lo <strong>Spray Duck</strong> il tempo è <strong>dimezzato</strong>.
+        </p>
+
+        <footer>
+            <p>Pokémon Roulette Run Challenge © 2025 | Progetto di <strong>lucaremix &amp; CrMagno</strong></p>
+        </footer>
+    </div>
+</body>
+</html>
