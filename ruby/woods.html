@@ -1,0 +1,1028 @@
+
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Grunt - Petalburg Woods</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-image: url('https://raw.githubusercontent.com/lucaremix/roulette-run-challenge/main/background/r-petalburgwoods_background.png');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            color: #e0e0e0;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            background: #1a1a1a;
+            border: 1px solid #2a2a2a;
+            border-radius: 8px;
+            color: #e0e0e0;
+            text-decoration: none;
+            font-size: 1em;
+            transition: all 0.3s ease;
+            margin-bottom: 30px;
+        }
+
+        .back-btn:hover {
+            background: #252525;
+            border-color: #3a3a3a;
+        }
+
+        .event-header {
+            background: #1a1a1a;
+            border: 1px solid #2a2a2a;
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 30px;
+            display: flex;
+            align-items: center;
+            gap: 30px;
+        }
+
+        .event-trainer-img {
+            width: 160px;
+            height: 160px;
+            object-fit: contain;
+            border: none;
+            flex-shrink: 0;
+            image-rendering: pixelated;
+        }
+
+        .event-info {
+            flex: 1;
+        }
+
+        .event-title {
+            font-size: 2.5em;
+            color: #ffffff;
+            margin-bottom: 15px;
+        }
+
+        .event-status {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .status-badge {
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 1.1em;
+        }
+
+        .status-badge.joined {
+            background: #2d4a2d;
+            color: #7fff7f;
+        }
+
+        .status-badge.not-joined {
+            background: #2a2a2a;
+            color: #888;
+        }
+
+        .join-leave-btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+
+        .join-btn {
+            background: #2a7a2a;
+            color: white;
+        }
+
+        .join-btn:hover {
+            background: #357a35;
+        }
+
+        .leave-btn {
+            background: #7a2a2a;
+            color: white;
+        }
+
+        .leave-btn:hover {
+            background: #8a3535;
+        }
+
+        .players-section {
+            background: #1a1a1a;
+            border: 1px solid #2a2a2a;
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 30px;
+        }
+
+        .players-title {
+            font-size: 1.8em;
+            color: #ffffff;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .player-count-badge {
+            background: #2a2a2a;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.7em;
+            color: #888;
+        }
+
+        .players-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .player-card {
+            background: #0a0a0a;
+            border: 1px solid #2a2a2a;
+            border-radius: 8px;
+            padding: 15px 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .player-card.current-user {
+            border-color: #4a4a4a;
+            background: #1f1f1f;
+        }
+
+        .player-name {
+            font-size: 1.1em;
+            color: #e0e0e0;
+        }
+
+        .player-card.current-user .player-name {
+            color: #ffffff;
+            font-weight: 600;
+        }
+
+        .you-badge {
+            background: #2a7a2a;
+            color: white;
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 0.8em;
+            font-weight: 600;
+        }
+
+        .no-players {
+            text-align: center;
+            color: #555;
+            font-style: italic;
+            padding: 30px;
+        }
+
+        .intro-screen {
+            background: #1a1a1a;
+            border: 1px solid #2a2a2a;
+            border-radius: 12px;
+            padding: 40px;
+            display: none;
+        }
+
+        .intro-screen.show {
+            display: block;
+        }
+
+        .intro-content {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .intro-text h2 {
+            font-size: 2em;
+            color: #4a7a4a;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .intro-text p {
+            font-size: 1.2em;
+            line-height: 1.8;
+            color: #e0e0e0;
+            margin-bottom: 15px;
+        }
+
+        .intro-text .warning {
+            color: #ff6b6b;
+            font-weight: bold;
+            text-align: center;
+            font-size: 1.3em;
+            margin: 20px 0;
+        }
+
+        .start-btn {
+            display: block;
+            margin: 30px auto 0;
+            padding: 20px 60px;
+            background: #4a7a4a;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.5em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .start-btn:hover {
+            background: #5a8a5a;
+            transform: scale(1.05);
+        }
+
+        .selection-screen {
+            display: none;
+        }
+
+        .selection-screen.show {
+            display: block;
+        }
+
+        .selection-header {
+            background: #1a1a1a;
+            border: 1px solid #2a2a2a;
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .selection-header h2 {
+            font-size: 2em;
+            color: #4a7a4a;
+            margin-bottom: 10px;
+        }
+
+        .selection-header p {
+            font-size: 1.2em;
+            color: #888;
+        }
+
+        .pokemon-selection {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .pokemon-option {
+            background: #1a1a1a;
+            border: 3px solid #2a2a2a;
+            border-radius: 12px;
+            padding: 30px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .pokemon-option:hover {
+            border-color: #3a3a3a;
+            transform: translateY(-5px);
+        }
+
+        .pokemon-option.selected {
+            border-color: #4a7a4a;
+            background: #1a2a1a;
+            box-shadow: 0 0 30px rgba(74, 122, 74, 0.3);
+        }
+
+        .pokemon-option img {
+            width: 200px;
+            height: 200px;
+            margin-bottom: 20px;
+        }
+
+        .pokemon-option-name {
+            font-size: 1.8em;
+            color: #fff;
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+
+        .pokemon-option-stats {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .pokemon-option-stat {
+            background: #0a0a0a;
+            padding: 10px;
+            border-radius: 6px;
+        }
+
+        .stat-label {
+            color: #888;
+            font-size: 0.9em;
+        }
+
+        .stat-value {
+            color: #fff;
+            font-weight: bold;
+            font-size: 1.2em;
+        }
+
+        .confirm-btn {
+            display: block;
+            margin: 0 auto;
+            padding: 20px 80px;
+            background: #4a7a4a;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.5em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .confirm-btn:hover:not(:disabled) {
+            background: #5a8a5a;
+            transform: scale(1.05);
+        }
+
+        .confirm-btn:disabled {
+            background: #2a2a2a;
+            cursor: not-allowed;
+            opacity: 0.5;
+        }
+
+        .waiting-screen {
+            background: #1a1a1a;
+            border: 1px solid #2a2a2a;
+            border-radius: 12px;
+            padding: 60px;
+            text-align: center;
+            display: none;
+        }
+
+        .waiting-screen.show {
+            display: block;
+        }
+
+        .waiting-screen h2 {
+            font-size: 2em;
+            color: #fff;
+            margin-bottom: 20px;
+        }
+
+        .waiting-spinner {
+            width: 60px;
+            height: 60px;
+            border: 5px solid #2a2a2a;
+            border-top-color: #4a7a4a;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 30px auto;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .results-screen {
+            background: #1a1a1a;
+            border: 1px solid #2a2a2a;
+            border-radius: 12px;
+            padding: 40px;
+            display: none;
+        }
+
+        .results-screen.show {
+            display: block;
+        }
+
+        .results-title {
+            font-size: 2.5em;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .results-title.success {
+            color: #7fff7f;
+        }
+
+        .results-title.failure {
+            color: #ff6b6b;
+        }
+
+        .results-content {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .result-message {
+            font-size: 1.3em;
+            color: #e0e0e0;
+            text-align: center;
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+
+        .pokemon-result {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 40px;
+            margin: 30px 0;
+        }
+
+        .pokemon-result img {
+            width: 200px;
+            height: 200px;
+        }
+
+        .pokemon-result-info {
+            text-align: left;
+        }
+
+        .pokemon-result-name {
+            font-size: 2em;
+            color: #fff;
+            margin-bottom: 10px;
+        }
+
+        .home-btn {
+            display: block;
+            margin: 30px auto 0;
+            padding: 15px 50px;
+            background: #2a7a2a;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.2em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .home-btn:hover {
+            background: #357a35;
+        }
+
+        @media (max-width: 768px) {
+            .event-header {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .pokemon-selection {
+                grid-template-columns: 1fr;
+            }
+
+            .pokemon-result {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="index.html" class="back-btn">
+            <span>←</span>
+            <span>Torna alla Home</span>
+        </a>
+
+        <div id="landingScreen">
+            <div class="event-header">
+                <img src="https://img.nuzlocke.app/leaders/blwh-cheren.png" 
+                     alt="Cheren" 
+                     class="event-trainer-img"
+                     onerror="this.src='https://via.placeholder.com/160x160/1a1a1a/888?text=Cheren'">
+                <div class="event-info">
+                    <h1 class="event-title">Grunt - Petalburg Woods</h1>
+                    <div class="event-status">
+                        <div class="status-badge" id="statusBadge">Non sei nell'evento</div>
+                        <button class="join-leave-btn join-btn" id="joinLeaveBtn" onclick="toggleJoin()">
+                            Entra nell'Evento
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="players-section">
+                <h2 class="players-title">
+                    Giocatori nell'evento
+                    <span class="player-count-badge" id="playerCountBadge">0</span>
+                </h2>
+                <div class="players-list" id="playersList">
+                    <div class="no-players">Nessun giocatore nell'evento</div>
+                </div>
+            </div>
+
+            <div class="intro-screen" id="introScreen">
+                <div class="intro-content">
+                    <div class="intro-text">
+                        <h2>🌳 Grunt - Petalburg Woods 🌳</h2>
+                        <p>
+                            GRunt vi sfida con un dilemma! Ogni giocatore vedrà gli STESSI DUE Pokémon 
+                            del Pool B e dovrà sceglierne UNO in segreto.
+                        </p>
+                        <p>
+                            Ma attenzione: se entrambi i giocatori scelgono lo STESSO Pokémon, 
+                            nessuno otterrà nulla!
+                        </p>
+                        <p class="warning">
+                            🤫 Il SILENZIO è OBBLIGATORIO durante la selezione!
+                        </p>
+                        <p>
+                            Se invece scegliete Pokémon diversi, ognuno riceverà il proprio Pokémon selezionato.
+                        </p>
+                        <p style="text-align: center; margin-top: 30px; color: #888;">
+                            Fate la vostra scelta con saggezza... e senza comunicare!
+                        </p>
+                    </div>
+
+                    <button class="start-btn" onclick="startSelection()">
+                        🎯 Inizia la Selezione
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="selection-screen" id="selectionScreen">
+            <div class="selection-header">
+                <h2>Scegli il tuo Pokémon</h2>
+                <p>Seleziona UNO dei due Pokémon (in silenzio!)</p>
+            </div>
+
+            <div class="pokemon-selection" id="pokemonSelection"></div>
+
+            <button class="confirm-btn" id="confirmBtn" onclick="confirmSelection()" disabled>
+                ✅ Conferma Scelta
+            </button>
+        </div>
+
+        <div class="waiting-screen" id="waitingScreen">
+            <h2>In attesa dell'altro giocatore...</h2>
+            <div class="waiting-spinner"></div>
+            <p style="color: #888; margin-top: 20px;">
+                Attendere che entrambi i giocatori confermino la scelta
+            </p>
+        </div>
+
+        <div class="results-screen" id="resultsScreen">
+            <h2 class="results-title" id="resultsTitle">Risultato</h2>
+            <div class="results-content" id="resultsContent"></div>
+            <button class="home-btn" onclick="goHome()">🏠 Torna alla Home</button>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+        import { getDatabase, ref, set, onValue, remove, push, get } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js';
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDNuD9wViLLxteHMCEBlvfdONwcZbAjAvo",
+            authDomain: "roulette-run-challenge.firebaseapp.com",
+            databaseURL: "https://roulette-run-challenge-default-rtdb.europe-west1.firebasedatabase.app",
+            projectId: "roulette-run-challenge",
+            storageBucket: "roulette-run-challenge.firebasestorage.app",
+            messagingSenderId: "994019156093",
+            appId: "1:994019156093:web:9792bdce75c486f589d114"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app);
+
+        let myPokemon = [];
+        let selectedPokemonIndex = null;
+        let resultsProcessed = false;
+
+        function getCurrentPlayer() {
+            return localStorage.getItem('playerName') || '';
+        }
+
+        function padNumber(num) {
+            return String(num).padStart(3, '0');
+        }
+
+        function getPokemonImageUrl(nationalNumber) {
+            return `https://www.pokemon.com/static-assets/content-assets/cms2/img/pokedex/full/${padNumber(nationalNumber)}.png`;
+        }
+
+        async function toggleJoin() {
+            const playerName = getCurrentPlayer();
+            if (!playerName) {
+                alert('Devi impostare il tuo nome dalla home page!');
+                window.location.href = 'index.html';
+                return;
+            }
+
+            const eventRef = ref(database, `events/proton/players`);
+            
+            const snapshot = await new Promise((resolve) => {
+                onValue(eventRef, (snap) => resolve(snap), { onlyOnce: true });
+            });
+
+            let isInEvent = false;
+            let playerNodeKey = null;
+
+            snapshot.forEach((childSnapshot) => {
+                if (childSnapshot.val() === playerName) {
+                    isInEvent = true;
+                    playerNodeKey = childSnapshot.key;
+                }
+            });
+
+            if (isInEvent && playerNodeKey) {
+                await remove(ref(database, `events/proton/players/${playerNodeKey}`));
+            } else {
+                const newPlayerRef = push(ref(database, `events/proton/players`));
+                await set(newPlayerRef, playerName);
+            }
+        }
+
+        function render() {
+            const currentPlayer = getCurrentPlayer();
+            const eventRef = ref(database, `events/proton/players`);
+
+            onValue(eventRef, (snapshot) => {
+                const players = [];
+                snapshot.forEach((childSnapshot) => {
+                    players.push(childSnapshot.val());
+                });
+
+                const isJoined = players.includes(currentPlayer);
+
+                const statusBadge = document.getElementById('statusBadge');
+                const joinLeaveBtn = document.getElementById('joinLeaveBtn');
+
+                if (statusBadge && joinLeaveBtn) {
+                    if (isJoined) {
+                        statusBadge.textContent = 'Sei nell\'evento';
+                        statusBadge.className = 'status-badge joined';
+                        joinLeaveBtn.textContent = 'Esci dall\'Evento';
+                        joinLeaveBtn.className = 'join-leave-btn leave-btn';
+                    } else {
+                        statusBadge.textContent = 'Non sei nell\'evento';
+                        statusBadge.className = 'status-badge not-joined';
+                        joinLeaveBtn.textContent = 'Entra nell\'Evento';
+                        joinLeaveBtn.className = 'join-leave-btn join-btn';
+                    }
+                }
+
+                const countBadge = document.getElementById('playerCountBadge');
+                if (countBadge) {
+                    countBadge.textContent = players.length;
+                }
+
+                const playersList = document.getElementById('playersList');
+                
+                if (playersList) {
+                    if (players.length === 0) {
+                        playersList.innerHTML = '<div class="no-players">Nessun giocatore nell\'evento</div>';
+                    } else {
+                        playersList.innerHTML = players.map(player => {
+                            const isCurrentUser = player === currentPlayer;
+                            return `
+                                <div class="player-card ${isCurrentUser ? 'current-user' : ''}">
+                                    <span class="player-name">${player}</span>
+                                    ${isCurrentUser ? '<span class="you-badge">TU</span>' : ''}
+                                </div>
+                            `;
+                        }).join('');
+                    }
+                }
+
+                if (players.length === 2) {
+                    document.getElementById('introScreen').classList.add('show');
+                    generatePokemonForGame();
+                } else {
+                    document.getElementById('introScreen').classList.remove('show');
+                }
+            });
+        }
+
+        async function generatePokemonForGame() {
+            const gameRef = ref(database, `events/proton/game`);
+            const gameSnapshot = await get(gameRef);
+            
+            if (gameSnapshot.exists()) return;
+            
+            const bTierRef = ref(database, 'pools/b_tier');
+            const snapshot = await get(bTierRef);
+            
+            const allPokemon = [];
+            snapshot.forEach((childSnapshot) => {
+                allPokemon.push({ key: childSnapshot.key, ...childSnapshot.val() });
+            });
+
+            if (allPokemon.length < 2) {
+                alert('Pool B non ha abbastanza Pokémon!');
+                return;
+            }
+
+            const shuffled = allPokemon.sort(() => Math.random() - 0.5);
+            const selected2 = shuffled.slice(0, 2);
+
+            await set(gameRef, {
+                pokemon: selected2.map(p => ({ key: p.key, ...p })),
+                players: {},
+                processed: false
+            });
+        }
+
+        window.toggleJoin = toggleJoin;
+
+        window.startSelection = async function() {
+            document.getElementById('landingScreen').style.display = 'none';
+            document.getElementById('selectionScreen').classList.add('show');
+            
+            const gameRef = ref(database, `events/proton/game`);
+            const gameSnapshot = await get(gameRef);
+            const gameData = gameSnapshot.val();
+            
+            if (!gameData || !gameData.pokemon) {
+                alert('Errore: Pokémon non ancora generati!');
+                return;
+            }
+
+            myPokemon = gameData.pokemon;
+            showSelectionScreen();
+        };
+
+        function showSelectionScreen() {
+            const container = document.getElementById('pokemonSelection');
+            container.innerHTML = myPokemon.map((pokemon, index) => {
+                const types = [pokemon.primary_type];
+                if (pokemon.secondary_type) types.push(pokemon.secondary_type);
+
+                return `
+                    <div class="pokemon-option" onclick="selectPokemon(${index})">
+                        <img src="${getPokemonImageUrl(pokemon.national_number)}" alt="${pokemon.english_name}">
+                        <div class="pokemon-option-name">${pokemon.english_name}</div>
+                        <div class="pokemon-option-stats">
+                            <div class="pokemon-option-stat">
+                                <div class="stat-label">Numero</div>
+                                <div class="stat-value">#${padNumber(pokemon.national_number)}</div>
+                            </div>
+                            <div class="pokemon-option-stat">
+                                <div class="stat-label">BST</div>
+                                <div class="stat-value">${pokemon.bst}</div>
+                            </div>
+                            <div class="pokemon-option-stat" style="grid-column: 1/-1;">
+                                <div class="stat-label">Tipo</div>
+                                <div class="stat-value">${types.join(' / ')}</div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        window.selectPokemon = function(index) {
+            selectedPokemonIndex = index;
+            
+            document.querySelectorAll('.pokemon-option').forEach((el, i) => {
+                if (i === index) {
+                    el.classList.add('selected');
+                } else {
+                    el.classList.remove('selected');
+                }
+            });
+
+            document.getElementById('confirmBtn').disabled = false;
+        };
+
+        window.confirmSelection = async function() {
+            if (selectedPokemonIndex === null) return;
+
+            const playerName = getCurrentPlayer();
+            const selectedPokemon = myPokemon[selectedPokemonIndex];
+
+            const gameRef = ref(database, `events/proton/game/players/${playerName}`);
+            await set(gameRef, {
+                choice: selectedPokemon.key,
+                pokemon: selectedPokemon
+            });
+
+            document.getElementById('selectionScreen').classList.remove('show');
+            document.getElementById('waitingScreen').classList.add('show');
+
+            const allPlayersRef = ref(database, `events/proton/game`);
+            onValue(allPlayersRef, async (snapshot) => {
+                const gameData = snapshot.val();
+                if (!gameData || !gameData.players) return;
+
+                const playerNames = Object.keys(gameData.players);
+                if (playerNames.length === 2 && !gameData.processed) {
+                    await processResults(gameData.players, playerNames);
+                }
+            });
+        };
+
+        async function processResults(choices, playerNames) {
+            if (resultsProcessed) return;
+            resultsProcessed = true;
+
+            // Mark as processed IMMEDIATELY to prevent race condition
+            const gameRef = ref(database, `events/proton/game`);
+            const processedRef = ref(database, `events/proton/game/processed`);
+            
+            // Try to claim processing rights
+            const processedSnapshot = await get(processedRef);
+            if (processedSnapshot.exists() && processedSnapshot.val() === true) {
+                // Another client already processed, just show results
+                await showResultsOnly(choices, playerNames);
+                return;
+            }
+            
+            // Claim processing rights
+            await set(processedRef, true);
+
+            const player1Choice = choices[playerNames[0]].choice;
+            const player2Choice = choices[playerNames[1]].choice;
+
+            const currentPlayer = getCurrentPlayer();
+            const myChoice = choices[currentPlayer];
+
+            document.getElementById('waitingScreen').classList.remove('show');
+            document.getElementById('resultsScreen').classList.add('show');
+
+            const resultsTitle = document.getElementById('resultsTitle');
+            const resultsContent = document.getElementById('resultsContent');
+
+            if (player1Choice === player2Choice) {
+                resultsTitle.textContent = '❌ Scelta Identica!';
+                resultsTitle.classList.add('failure');
+
+                resultsContent.innerHTML = `
+                    <div class="result-message">
+                        Entrambi i giocatori hanno scelto lo stesso Pokémon!<br>
+                        Nessuno riceve nulla. 😔
+                    </div>
+                    <div class="pokemon-result">
+                        <img src="${getPokemonImageUrl(myChoice.pokemon.national_number)}" alt="${myChoice.pokemon.english_name}">
+                        <div class="pokemon-result-info">
+                            <div class="pokemon-result-name">${myChoice.pokemon.english_name}</div>
+                            <div style="color: #888; font-size: 1.1em;">Scelto da entrambi</div>
+                        </div>
+                    </div>
+                `;
+
+                await cleanupEvent();
+            } else {
+                resultsTitle.textContent = '✅ Successo!';
+                resultsTitle.classList.add('success');
+
+                resultsContent.innerHTML = `
+                    <div class="result-message">
+                        Avete scelto Pokémon diversi!<br>
+                        Entrambi ricevete il vostro Pokémon! 🎉
+                    </div>
+                    <div class="pokemon-result">
+                        <img src="${getPokemonImageUrl(myChoice.pokemon.national_number)}" alt="${myChoice.pokemon.english_name}">
+                        <div class="pokemon-result-info">
+                            <div class="pokemon-result-name">${myChoice.pokemon.english_name}</div>
+                            <div style="color: #7fff7f; font-size: 1.1em;">Aggiunto al tuo team!</div>
+                        </div>
+                    </div>
+                `;
+
+                // Add pokemon to teams - ONLY ONCE
+                for (const playerName of playerNames) {
+                    const playerChoice = choices[playerName];
+                    const chosenPokemonKey = playerChoice.choice;
+                    
+                    const playerRef = ref(database, `players/${playerName}`);
+                    const playerSnapshot = await get(playerRef);
+                    const playerData = playerSnapshot.val() || { coins: 0, rubyteam: [] };
+
+                    if (!playerData.rubyteam) playerData.rubyteam = [];
+
+                    const natures = ["Hardy", "Lonely", "Brave", "Adamant", "Naughty", "Bold", "Docile", "Relaxed", "Impish", "Lax", "Timid", "Hasty", "Serious", "Jolly", "Naive", "Modest", "Mild", "Quiet", "Bashful", "Rash", "Calm", "Gentle", "Sassy", "Careful", "Quirky"];
+                    const randomNature = natures[Math.floor(Math.random() * natures.length)];
+                    
+                    const abilities = [
+                        playerChoice.pokemon.abilities_0,
+                        playerChoice.pokemon.abilities_1,
+                        playerChoice.pokemon.abilities_2
+                    ].filter(a => a && a.trim() !== '');
+                    const randomAbility = abilities.length > 0 ? abilities[Math.floor(Math.random() * abilities.length)] : 'Unknown';
+
+                    playerData.rubyteam.push({
+                        ...playerChoice.pokemon,
+                        nature: randomNature,
+                        ability: randomAbility,
+                        won_from: 'cheren',
+                        won_at: Date.now()
+                    });
+
+                    await set(playerRef, playerData);
+                }
+
+                // Remove from pool
+                const poolRef1 = ref(database, `pools/b_tier/${choices[playerNames[0]].choice}`);
+                const poolRef2 = ref(database, `pools/b_tier/${choices[playerNames[1]].choice}`);
+                
+                await remove(poolRef1);
+                if (choices[playerNames[0]].choice !== choices[playerNames[1]].choice) {
+                    await remove(poolRef2);
+                }
+
+                await cleanupEvent();
+            }
+        }
+
+        async function showResultsOnly(choices, playerNames) {
+            const player1Choice = choices[playerNames[0]].choice;
+            const player2Choice = choices[playerNames[1]].choice;
+
+            const currentPlayer = getCurrentPlayer();
+            const myChoice = choices[currentPlayer];
+
+            document.getElementById('waitingScreen').classList.remove('show');
+            document.getElementById('resultsScreen').classList.add('show');
+
+            const resultsTitle = document.getElementById('resultsTitle');
+            const resultsContent = document.getElementById('resultsContent');
+
+            if (player1Choice === player2Choice) {
+                resultsTitle.textContent = '❌ Scelta Identica!';
+                resultsTitle.classList.add('failure');
+
+                resultsContent.innerHTML = `
+                    <div class="result-message">
+                        Entrambi i giocatori hanno scelto lo stesso Pokémon!<br>
+                        Nessuno riceve nulla. 😔
+                    </div>
+                    <div class="pokemon-result">
+                        <img src="${getPokemonImageUrl(myChoice.pokemon.national_number)}" alt="${myChoice.pokemon.english_name}">
+                        <div class="pokemon-result-info">
+                            <div class="pokemon-result-name">${myChoice.pokemon.english_name}</div>
+                            <div style="color: #888; font-size: 1.1em;">Scelto da entrambi</div>
+                        </div>
+                    </div>
+                `;
+            } else {
+                resultsTitle.textContent = '✅ Successo!';
+                resultsTitle.classList.add('success');
+
+                resultsContent.innerHTML = `
+                    <div class="result-message">
+                        Avete scelto Pokémon diversi!<br>
+                        Entrambi ricevete il vostro Pokémon! 🎉
+                    </div>
+                    <div class="pokemon-result">
+                        <img src="${getPokemonImageUrl(myChoice.pokemon.national_number)}" alt="${myChoice.pokemon.english_name}">
+                        <div class="pokemon-result-info">
+                            <div class="pokemon-result-name">${myChoice.pokemon.english_name}</div>
+                            <div style="color: #7fff7f; font-size: 1.1em;">Aggiunto al tuo team!</div>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        async function cleanupEvent() {
+            const gameRef = ref(database, `events/proton/game`);
+            await remove(gameRef);
+
+            const eventPlayersRef = ref(database, `events/proton/players`);
+            await remove(eventPlayersRef);
+        }
+
+        window.goHome = function() {
+            window.location.href = 'index.html';
+        };
+
+        const playerName = getCurrentPlayer();
+        if (!playerName) {
+            alert('Devi impostare il tuo nome dalla home page!');
+            window.location.href = 'index.html';
+        } else {
+            render();
+        }
+    </script>
+</body>
+</html>
