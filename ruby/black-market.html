@@ -276,7 +276,7 @@
         .tier-badge {
             position: absolute;
             top: 15px;
-            right: 15px;
+            left: 15px;
             padding: 5px 12px;
             border-radius: 15px;
             font-size: 0.8em;
@@ -435,13 +435,13 @@
                 <div class="spin-badge s-tier">S TIER</div>
                 <div class="spin-price">
                     <div style="display: flex; flex-direction: column; align-items: center; gap: 5px;">
-                        <span class="original-price" id="originalPriceS" style="display: none;">200</span>
+                        <span class="original-price" id="originalPriceS" style="display: none;">2000</span>
                         <div style="display: flex; align-items: center; gap: 10px;">
                             <img src="https://raw.githubusercontent.com/lucaremix/roulette-run-challenge/main/pixel-art-red-chinese-gold-coin-png.png" 
                                  alt="Coins" 
                                  class="coin-img"
                                  onerror="this.style.display='none'">
-                            <span id="priceS">200</span>
+                            <span id="priceS">2000</span>
                         </div>
                     </div>
                 </div>
@@ -455,13 +455,13 @@
                 <div class="spin-badge a-tier">A TIER</div>
                 <div class="spin-price">
                     <div style="display: flex; flex-direction: column; align-items: center; gap: 5px;">
-                        <span class="original-price" id="originalPriceA" style="display: none;">150</span>
+                        <span class="original-price" id="originalPriceA" style="display: none;">1500</span>
                         <div style="display: flex; align-items: center; gap: 10px;">
                             <img src="https://raw.githubusercontent.com/lucaremix/roulette-run-challenge/main/pixel-art-red-chinese-gold-coin-png.png" 
                                  alt="Coins" 
                                  class="coin-img"
                                  onerror="this.style.display='none'">
-                            <span id="priceA">150</span>
+                            <span id="priceA">1500</span>
                         </div>
                     </div>
                 </div>
@@ -475,18 +475,38 @@
                 <div class="spin-badge b-tier">B TIER</div>
                 <div class="spin-price">
                     <div style="display: flex; flex-direction: column; align-items: center; gap: 5px;">
-                        <span class="original-price" id="originalPriceB" style="display: none;">100</span>
+                        <span class="original-price" id="originalPriceB" style="display: none;">750</span>
                         <div style="display: flex; align-items: center; gap: 10px;">
                             <img src="https://raw.githubusercontent.com/lucaremix/roulette-run-challenge/main/pixel-art-red-chinese-gold-coin-png.png" 
                                  alt="Coins" 
                                  class="coin-img"
                                  onerror="this.style.display='none'">
-                            <span id="priceB">100</span>
+                            <span id="priceB">750</span>
                         </div>
                     </div>
                 </div>
                 <button class="buy-spin-btn" onclick="buySpin('b_tier', 'b')">
                     🎰 Acquista Spin B
+                </button>
+            </div>
+
+            <div class="spin-card" style="border-color: #9b59b6; box-shadow: 0 0 20px rgba(155, 89, 182, 0.3);">
+                <div class="discount-label" id="discountTYPE" style="display: none;">-10%</div>
+                <div class="spin-badge" style="background: #9b59b6; color: white;">TYPE SPIN</div>
+                <div class="spin-price">
+                    <div style="display: flex; flex-direction: column; align-items: center; gap: 5px;">
+                        <span class="original-price" id="originalPriceTYPE" style="display: none;">3000</span>
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <img src="https://raw.githubusercontent.com/lucaremix/roulette-run-challenge/main/pixel-art-red-chinese-gold-coin-png.png" 
+                                 alt="Coins" 
+                                 class="coin-img"
+                                 onerror="this.style.display='none'">
+                            <span id="priceTYPE">3000</span>
+                        </div>
+                    </div>
+                </div>
+                <button class="buy-spin-btn" onclick="buyTypeSpin()">
+                    🎰 Acquista Type Spin
                 </button>
             </div>
         </div>
@@ -514,12 +534,13 @@
         const database = getDatabase(app);
 
         const BASE_PRICES = {
-            s_tier_spin: 200,
-            a_tier_spin: 150,
-            b_tier_spin: 100,
-            s_tier: 250,
-            a_tier: 200,
-            b_tier: 150,
+            s_tier_spin: 2000,
+            a_tier_spin: 1500,
+            b_tier_spin: 750,
+            type_spin: 3000,
+            s_tier: 2500,
+            a_tier: 2000,
+            b_tier: 1000,
             legendary: 400
         };
 
@@ -559,19 +580,30 @@
             const spinPrices = {
                 's': BASE_PRICES.s_tier_spin,
                 'a': BASE_PRICES.a_tier_spin,
-                'b': BASE_PRICES.b_tier_spin
+                'b': BASE_PRICES.b_tier_spin,
+                'type': BASE_PRICES.type_spin
             };
 
             Object.keys(spinPrices).forEach(tier => {
                 const basePrice = spinPrices[tier];
                 const discountedPrice = applyDiscount(basePrice);
                 
-                document.getElementById(`price${tier.toUpperCase()}`).textContent = discountedPrice;
+                const priceElement = document.getElementById(`price${tier.toUpperCase()}`);
+                if (priceElement) {
+                    priceElement.textContent = discountedPrice;
+                }
                 
                 if (hasCreditVoucher) {
-                    document.getElementById(`originalPrice${tier.toUpperCase()}`).textContent = basePrice;
-                    document.getElementById(`originalPrice${tier.toUpperCase()}`).style.display = 'block';
-                    document.getElementById(`discount${tier.toUpperCase()}`).style.display = 'block';
+                    const originalPriceElement = document.getElementById(`originalPrice${tier.toUpperCase()}`);
+                    const discountElement = document.getElementById(`discount${tier.toUpperCase()}`);
+                    
+                    if (originalPriceElement) {
+                        originalPriceElement.textContent = basePrice;
+                        originalPriceElement.style.display = 'block';
+                    }
+                    if (discountElement) {
+                        discountElement.style.display = 'block';
+                    }
                 }
             });
         }
@@ -637,10 +669,12 @@
 
             const selectedPokemon = [];
 
-            // 1 S Tier
-            if (sTierPokemon.length > 0) {
-                const randomIndex = Math.floor(Math.random() * sTierPokemon.length);
-                selectedPokemon.push(sTierPokemon[randomIndex]);
+            // 2 S Tier
+            for (let i = 0; i < 2; i++) {
+                if (sTierPokemon.length > 0) {
+                    const randomIndex = Math.floor(Math.random() * sTierPokemon.length);
+                    selectedPokemon.push(sTierPokemon.splice(randomIndex, 1)[0]);
+                }
             }
 
             // 2 A Tier
@@ -793,6 +827,35 @@
             }
         };
 
+        window.buyTypeSpin = async function() {
+            const player = getCurrentPlayer();
+            if (!player) {
+                alert('Devi impostare il tuo nome dalla home page!');
+                window.location.href = 'index.html';
+                return;
+            }
+
+            const baseCost = BASE_PRICES.type_spin;
+            const cost = applyDiscount(baseCost);
+
+            const playerRef = ref(database, `players/${player}`);
+            const playerSnapshot = await get(playerRef);
+            const playerData = playerSnapshot.val() || { coins: 0 };
+
+            if ((playerData.coins || 0) < cost) {
+                alert('Non hai abbastanza Coins!');
+                return;
+            }
+
+            const discountText = hasCreditVoucher ? ` (scontato del 10% da ${baseCost})` : '';
+            if (confirm(`Vuoi acquistare un Type Spin per ${cost} Coins${discountText}?`)) {
+                playerData.coins = (playerData.coins || 0) - cost;
+                await set(playerRef, playerData);
+
+                window.location.href = 'r-type-spin.html';
+            }
+        };
+
         window.buyPokemon = async function(index) {
             const player = getCurrentPlayer();
             if (!player) {
@@ -816,7 +879,7 @@
 
             const playerRef = ref(database, `players/${player}`);
             const playerSnapshot = await get(playerRef);
-            const playerData = playerSnapshot.val() || { coins: 0, team: [] };
+            const playerData = playerSnapshot.val() || { coins: 0, rubytea: [] };
 
             if ((playerData.coins || 0) < price) {
                 alert('Non hai abbastanza Coins!');
@@ -828,8 +891,8 @@
                 // Deduct coins
                 playerData.coins = (playerData.coins || 0) - price;
 
-                // Add to team
-                if (!playerData.team) playerData.team = [];
+                // Add to rubytea
+                if (!playerData.rubytea) playerData.rubytea = [];
                 
                 const natures = ["Hardy", "Lonely", "Brave", "Adamant", "Naughty", "Bold", "Docile", "Relaxed", "Impish", "Lax", "Timid", "Hasty", "Serious", "Jolly", "Naive", "Modest", "Mild", "Quiet", "Bashful", "Rash", "Calm", "Gentle", "Sassy", "Careful", "Quirky"];
                 const randomNature = natures[Math.floor(Math.random() * natures.length)];
@@ -837,7 +900,7 @@
                 const abilities = [pokemon.abilities_0, pokemon.abilities_1, pokemon.abilities_2].filter(a => a && a.trim() !== '');
                 const randomAbility = abilities.length > 0 ? abilities[Math.floor(Math.random() * abilities.length)] : 'Unknown';
 
-                playerData.team.push({
+                playerData.rubytea.push({
                     ...pokemon,
                     nature: randomNature,
                     ability: randomAbility,
