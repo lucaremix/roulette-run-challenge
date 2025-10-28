@@ -1,0 +1,938 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Berry Farm - Roulette Run Challenge</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-image: url('https://raw.githubusercontent.com/lucaremix/roulette-run-challenge/main/background/r-berries_background.png');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            min-height: 100vh;
+            color: #2c2c2c;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 24px;
+            background: rgba(139, 69, 19, 0.9);
+            border: 2px solid #654321;
+            border-radius: 12px;
+            color: #fff;
+            text-decoration: none;
+            font-size: 1em;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+            align-self: flex-start;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        .back-btn:hover {
+            background: rgba(139, 69, 19, 1);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4);
+        }
+
+        .coin-display {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(139, 69, 19, 0.95);
+            border: 2px solid #654321;
+            border-radius: 12px;
+            padding: 12px 24px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        .coin-img {
+            width: 32px;
+            height: 32px;
+            image-rendering: auto;
+        }
+
+        .coin-amount {
+            font-size: 1.4em;
+            font-weight: bold;
+            color: #ffd700;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+        }
+
+        /* BERRY SHOP SECTION */
+        .shop-section {
+            background: rgba(255, 255, 255, 0.95);
+            border: 3px solid #8b4513;
+            border-radius: 20px;
+            padding: 30px;
+            margin-top: 80px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+            max-width: 900px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .shop-header {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 3px solid #8b4513;
+        }
+
+        .vendor-img {
+            width: 120px;
+            height: 120px;
+            object-fit: cover;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .shop-title {
+            flex: 1;
+        }
+
+        .shop-title h2 {
+            font-size: 2.2em;
+            color: #2c5e2e;
+            margin-bottom: 5px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .shop-subtitle {
+            font-size: 1.1em;
+            color: #666;
+            font-style: italic;
+        }
+
+        .berry-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .berry-card {
+            background: linear-gradient(135deg, #f0f8f0 0%, #e8f5e8 100%);
+            border: 3px solid #8b4513;
+            border-radius: 16px;
+            padding: 20px;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .berry-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #2c5e2e, #4a8f4d, #2c5e2e);
+        }
+
+        .berry-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+            border-color: #654321;
+        }
+
+        .berry-img {
+            width: 80px;
+            height: 80px;
+            margin-bottom: 10px;
+            image-rendering: pixelated;
+            filter: drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.2));
+        }
+
+        .berry-name {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #2c5e2e;
+            margin-bottom: 10px;
+        }
+
+        .berry-price {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            font-size: 1.3em;
+            font-weight: bold;
+            color: #8b4513;
+            margin-bottom: 15px;
+        }
+
+        .berry-price .coin-img {
+            width: 24px;
+            height: 24px;
+        }
+
+        .buy-btn {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #4a8f4d 0%, #2c5e2e 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .buy-btn:hover:not(:disabled) {
+            background: linear-gradient(135deg, #5aa05d 0%, #3a6e3c 100%);
+            transform: scale(1.05);
+        }
+
+        .buy-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+
+        /* FARM SECTION */
+        .farm-section {
+            margin-top: 60px;
+            margin-bottom: 40px;
+        }
+
+        .farm-title {
+            text-align: center;
+            font-size: 2.5em;
+            color: #fff;
+            margin-bottom: 30px;
+            text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.7);
+            background: rgba(139, 69, 19, 0.8);
+            padding: 15px;
+            border-radius: 16px;
+            border: 3px solid #654321;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .plots-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 40px;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .plot {
+            background: rgba(139, 90, 43, 0.95);
+            border: 4px solid #654321;
+            border-radius: 20px;
+            padding: 30px;
+            text-align: center;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
+            transition: all 0.3s ease;
+            position: relative;
+            min-height: 380px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .plot:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.6);
+        }
+
+        .plot-header {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #fff;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+            padding-bottom: 15px;
+            border-bottom: 2px solid #8b6f47;
+        }
+
+        .plot-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .empty-plot {
+            color: #c9a875;
+            font-size: 1.1em;
+            margin-bottom: 20px;
+            font-style: italic;
+        }
+
+        .planted-berry {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+            width: 100%;
+        }
+
+        .planted-berry-img {
+            width: 100px;
+            height: 100px;
+            image-rendering: pixelated;
+            filter: drop-shadow(3px 3px 6px rgba(0, 0, 0, 0.4));
+            animation: grow 2s ease-in-out infinite;
+        }
+
+        @keyframes grow {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .planted-berry-name {
+            font-size: 1.3em;
+            font-weight: bold;
+            color: #fff;
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
+        }
+
+        .timer-display {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 15px 25px;
+            border-radius: 12px;
+            margin: 15px 0;
+            border: 2px solid #8b6f47;
+        }
+
+        .timer-label {
+            color: #c9a875;
+            font-size: 0.9em;
+            margin-bottom: 5px;
+        }
+
+        .timer-value {
+            font-size: 1.8em;
+            font-weight: bold;
+            color: #ffd700;
+            font-family: 'Courier New', monospace;
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
+        }
+
+        .reward-display {
+            background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
+            color: #2c2c2c;
+            padding: 12px 20px;
+            border-radius: 10px;
+            font-weight: bold;
+            font-size: 1.1em;
+            margin: 10px 0;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        .plant-btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #4a8f4d 0%, #2c5e2e 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.2em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            margin-top: auto;
+        }
+
+        .plant-btn:hover:not(:disabled) {
+            background: linear-gradient(135deg, #5aa05d 0%, #3a6e3c 100%);
+            transform: scale(1.02);
+        }
+
+        .plant-btn:disabled {
+            background: #666;
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+
+        .harvest-btn {
+            background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%);
+        }
+
+        .harvest-btn:hover:not(:disabled) {
+            background: linear-gradient(135deg, #ff7c46 0%, #ffa42f 100%);
+        }
+
+        /* INVENTORY MODAL */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            animation: fadeIn 0.3s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .modal-content {
+            background: linear-gradient(135deg, #f0f8f0 0%, #e0efe0 100%);
+            margin: 5% auto;
+            padding: 30px;
+            border: 4px solid #8b4513;
+            border-radius: 20px;
+            width: 90%;
+            max-width: 600px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            animation: slideDown 0.3s;
+        }
+
+        @keyframes slideDown {
+            from { transform: translateY(-50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .close {
+            color: #8b4513;
+            float: right;
+            font-size: 35px;
+            font-weight: bold;
+            cursor: pointer;
+            line-height: 1;
+            transition: all 0.3s;
+        }
+
+        .close:hover {
+            color: #654321;
+            transform: scale(1.2);
+        }
+
+        .modal-title {
+            font-size: 2em;
+            color: #2c5e2e;
+            margin-bottom: 20px;
+            text-align: center;
+            padding-bottom: 15px;
+            border-bottom: 3px solid #8b4513;
+        }
+
+        .inventory-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .inventory-item {
+            background: white;
+            border: 3px solid #8b4513;
+            border-radius: 12px;
+            padding: 15px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .inventory-item:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+            border-color: #654321;
+        }
+
+        .inventory-item.selected {
+            background: linear-gradient(135deg, #d4f1d4 0%, #c0e8c0 100%);
+            border-color: #2c5e2e;
+            box-shadow: 0 0 20px rgba(44, 94, 46, 0.4);
+        }
+
+        .inventory-item img {
+            width: 60px;
+            height: 60px;
+            margin-bottom: 8px;
+            image-rendering: pixelated;
+        }
+
+        .inventory-item-name {
+            font-size: 0.95em;
+            font-weight: bold;
+            color: #2c5e2e;
+            margin-bottom: 5px;
+        }
+
+        .inventory-item-qty {
+            font-size: 0.85em;
+            color: #666;
+        }
+
+        .select-berry-btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #4a8f4d 0%, #2c5e2e 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.2em;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: all 0.3s;
+        }
+
+        .select-berry-btn:hover:not(:disabled) {
+            background: linear-gradient(135deg, #5aa05d 0%, #3a6e3c 100%);
+            transform: scale(1.02);
+        }
+
+        .select-berry-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+
+        @media (max-width: 768px) {
+            .shop-header {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .berry-grid {
+                grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            }
+
+            .plots-container {
+                grid-template-columns: 1fr;
+            }
+
+            .coin-display {
+                position: static;
+                margin-bottom: 20px;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="index.html" class="back-btn">⬅ Torna alla Home</a>
+
+        <div class="coin-display">
+            <img src="https://raw.githubusercontent.com/lucaremix/roulette-run-challenge/main/pixel-art-red-chinese-gold-coin-png.png" 
+                 alt="Coins" 
+                 class="coin-img"
+                 onerror="this.style.display='none'">
+            <span class="coin-amount" id="playerCoins">0</span>
+        </div>
+
+        <!-- BERRY SHOP -->
+        <div class="shop-section">
+            <div class="shop-header">
+                <img src="https://img.nuzlocke.app//leaders/swsh-milo.png" 
+                     alt="Milo" 
+                     class="vendor-img">
+                <div class="shop-title">
+                    <h2>🌱 Berry Market 🌱</h2>
+                    <p class="shop-subtitle">Coltiva e moltiplica le tue bacche!</p>
+                </div>
+            </div>
+
+            <div class="berry-grid">
+                <div class="berry-card" onclick="buyBerry('Lum Berry')">
+                    <img src="https://www.serebii.net/itemdex/sprites/sv/lumberry.png" alt="Lum Berry" class="berry-img">
+                    <div class="berry-name">Lum Berry</div>
+                    <div class="berry-price">
+                        <img src="https://raw.githubusercontent.com/lucaremix/roulette-run-challenge/main/pixel-art-red-chinese-gold-coin-png.png" 
+                             alt="Coins" 
+                             class="coin-img">
+                        <span>50</span>
+                    </div>
+                    <button class="buy-btn">Acquista</button>
+                </div>
+
+                <div class="berry-card" onclick="buyBerry('Sitrus Berry')">
+                    <img src="https://www.serebii.net/itemdex/sprites/sv/sitrusberry.png" alt="Sitrus Berry" class="berry-img">
+                    <div class="berry-name">Sitrus Berry</div>
+                    <div class="berry-price">
+                        <img src="https://raw.githubusercontent.com/lucaremix/roulette-run-challenge/main/pixel-art-red-chinese-gold-coin-png.png" 
+                             alt="Coins" 
+                             class="coin-img">
+                        <span>50</span>
+                    </div>
+                    <button class="buy-btn">Acquista</button>
+                </div>
+
+                <div class="berry-card" onclick="buyBerry('White Herb')">
+                    <img src="https://www.serebii.net/itemdex/sprites/sv/whiteherb.png" alt="White Herb" class="berry-img">
+                    <div class="berry-name">White Herb</div>
+                    <div class="berry-price">
+                        <img src="https://raw.githubusercontent.com/lucaremix/roulette-run-challenge/main/pixel-art-red-chinese-gold-coin-png.png" 
+                             alt="Coins" 
+                             class="coin-img">
+                        <span>50</span>
+                    </div>
+                    <button class="buy-btn">Acquista</button>
+                </div>
+
+                <div class="berry-card" onclick="buyBerry('Power Herb')">
+                    <img src="https://www.serebii.net/itemdex/sprites/sv/powerherb.png" alt="Power Herb" class="berry-img">
+                    <div class="berry-name">Power Herb</div>
+                    <div class="berry-price">
+                        <img src="https://raw.githubusercontent.com/lucaremix/roulette-run-challenge/main/pixel-art-red-chinese-gold-coin-png.png" 
+                             alt="Coins" 
+                             class="coin-img">
+                        <span>50</span>
+                    </div>
+                    <button class="buy-btn">Acquista</button>
+                </div>
+
+                <div class="berry-card" onclick="buyBerry('Honey')">
+                    <img src="https://www.serebii.net/itemdex/sprites/sv/honey.png" alt="Honey" class="berry-img">
+                    <div class="berry-name">Honey</div>
+                    <div class="berry-price">
+                        <img src="https://raw.githubusercontent.com/lucaremix/roulette-run-challenge/main/pixel-art-red-chinese-gold-coin-png.png" 
+                             alt="Coins" 
+                             class="coin-img">
+                        <span>50</span>
+                    </div>
+                    <button class="buy-btn">Acquista</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- FARM PLOTS -->
+        <div class="farm-section">
+            <h2 class="farm-title">🌾 Il Tuo Campo 🌾</h2>
+            <div class="plots-container">
+                <div class="plot">
+                    <div class="plot-header">Zolla 1</div>
+                    <div class="plot-content" id="plot1Content">
+                        <div class="empty-plot">Vuota</div>
+                        <button class="plant-btn" onclick="openPlantModal(1)">🌱 Pianta una Bacca</button>
+                    </div>
+                </div>
+
+                <div class="plot">
+                    <div class="plot-header">Zolla 2</div>
+                    <div class="plot-content" id="plot2Content">
+                        <div class="empty-plot">Vuota</div>
+                        <button class="plant-btn" onclick="openPlantModal(2)">🌱 Pianta una Bacca</button>
+                    </div>
+                </div>
+
+                <div class="plot">
+                    <div class="plot-header">Zolla 3</div>
+                    <div class="plot-content" id="plot3Content">
+                        <div class="empty-plot">Vuota</div>
+                        <button class="plant-btn" onclick="openPlantModal(3)">🌱 Pianta una Bacca</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- PLANT MODAL -->
+    <div id="plantModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closePlantModal()">&times;</span>
+            <h2 class="modal-title">Scegli una Bacca da Piantare</h2>
+            <div id="inventoryGrid" class="inventory-grid"></div>
+            <button class="select-berry-btn" id="confirmPlantBtn" onclick="confirmPlant()" disabled>
+                Pianta Bacca Selezionata
+            </button>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js';
+        import { getDatabase, ref, get, set, onValue, update } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js';
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyC-st4NCarh76yY0MyZpIsXvnxXMst10GA",
+            authDomain: "roulette-run-challenge.firebaseapp.com",
+            databaseURL: "https://roulette-run-challenge-default-rtdb.europe-west1.firebasedatabase.app",
+            projectId: "roulette-run-challenge",
+            storageBucket: "roulette-run-challenge.firebasestorage.app",
+            messagingSenderId: "587858652652",
+            appId: "1:587858652652:web:4aa99c2c5ba0586e39bcbb"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app);
+
+        function getCurrentPlayer() {
+            return localStorage.getItem('playerName');
+        }
+
+        const playerName = getCurrentPlayer();
+        if (!playerName) {
+            alert('Devi impostare il tuo nome dalla home page!');
+            window.location.href = 'index.html';
+        }
+
+        let selectedBerry = null;
+        let currentPlot = null;
+        let playerInventory = {};
+
+        const BERRY_EMOJIS = {
+            'Lum Berry': 'https://www.serebii.net/itemdex/sprites/sv/lumberry.png',
+            'Sitrus Berry': 'https://www.serebii.net/itemdex/sprites/sv/sitrusberry.png',
+            'White Herb': 'https://www.serebii.net/itemdex/sprites/sv/whiteherb.png',
+            'Power Herb': 'https://www.serebii.net/itemdex/sprites/sv/powerherb.png',
+            'Honey': 'https://www.serebii.net/itemdex/sprites/sv/honey.png'
+        };
+
+        // Update coins display
+        const playerRef = ref(database, `players/${playerName}`);
+        onValue(ref(database, `players/${playerName}/coins`), (snapshot) => {
+            document.getElementById('playerCoins').textContent = snapshot.val() || 0;
+        });
+
+        // Buy berry function
+        window.buyBerry = async function(berryName) {
+            const playerSnapshot = await get(playerRef);
+            const playerData = playerSnapshot.val() || { coins: 0 };
+
+            if ((playerData.coins || 0) < 50) {
+                alert('Non hai abbastanza Coins!');
+                return;
+            }
+
+            if (confirm(`Vuoi acquistare ${berryName} per 50 Coins?`)) {
+                playerData.coins = (playerData.coins || 0) - 50;
+                
+                if (!playerData.inventory) playerData.inventory = {};
+                if (!playerData.inventory.itemconsumabili) playerData.inventory.itemconsumabili = {};
+                
+                const currentQty = playerData.inventory.itemconsumabili[berryName] || 0;
+                playerData.inventory.itemconsumabili[berryName] = currentQty + 1;
+
+                await set(playerRef, playerData);
+                alert(`${berryName} acquistata con successo!`);
+            }
+        };
+
+        // Load and render plots
+        async function loadPlots() {
+            const plotsRef = ref(database, `players/${playerName}/berryPlots`);
+            const snapshot = await get(plotsRef);
+            const plots = snapshot.val() || {};
+
+            for (let i = 1; i <= 3; i++) {
+                renderPlot(i, plots[`plot${i}`]);
+            }
+
+            // Start timer updates
+            setInterval(updateTimers, 1000);
+        }
+
+        function renderPlot(plotNumber, plotData) {
+            const contentDiv = document.getElementById(`plot${plotNumber}Content`);
+
+            if (!plotData || !plotData.berry) {
+                contentDiv.innerHTML = `
+                    <div class="empty-plot">Vuota</div>
+                    <button class="plant-btn" onclick="openPlantModal(${plotNumber})">🌱 Pianta una Bacca</button>
+                `;
+            } else {
+                const timeLeft = plotData.harvestTime - Date.now();
+                const canHarvest = timeLeft <= 0;
+
+                if (canHarvest) {
+                    contentDiv.innerHTML = `
+                        <div class="planted-berry">
+                            <img src="${BERRY_EMOJIS[plotData.berry] || 'https://www.serebii.net/itemdex/sprites/sv/sitrusberry.png'}" alt="${plotData.berry}" class="planted-berry-img">
+                            <div class="planted-berry-name">${plotData.berry}</div>
+                            <div class="reward-display">✨ Pronto per il raccolto! ✨</div>
+                            <div class="reward-display">Otterrai: x3 ${plotData.berry}</div>
+                        </div>
+                        <button class="plant-btn harvest-btn" onclick="harvestBerry(${plotNumber})">🎁 Raccogli</button>
+                    `;
+                } else {
+                    contentDiv.innerHTML = `
+                        <div class="planted-berry">
+                            <img src="${BERRY_EMOJIS[plotData.berry] || 'https://www.serebii.net/itemdex/sprites/sv/sitrusberry.png'}" alt="${plotData.berry}" class="planted-berry-img">
+                            <div class="planted-berry-name">${plotData.berry}</div>
+                            <div class="timer-display">
+                                <div class="timer-label">Tempo rimanente:</div>
+                                <div class="timer-value" id="timer${plotNumber}">--:--:--</div>
+                            </div>
+                            <div class="reward-display">Ricompensa: x3 ${plotData.berry}</div>
+                        </div>
+                    `;
+                }
+            }
+        }
+
+        function updateTimers() {
+            for (let i = 1; i <= 3; i++) {
+                const timerElement = document.getElementById(`timer${i}`);
+                if (!timerElement) continue;
+
+                get(ref(database, `players/${playerName}/berryPlots/plot${i}`)).then((snapshot) => {
+                    const plotData = snapshot.val();
+                    if (!plotData || !plotData.harvestTime) return;
+
+                    const timeLeft = plotData.harvestTime - Date.now();
+
+                    if (timeLeft <= 0) {
+                        loadPlots(); // Refresh to show harvest button
+                    } else {
+                        const hours = Math.floor(timeLeft / (1000 * 60 * 60));
+                        const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
+                        const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
+
+                        timerElement.textContent = 
+                            `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+                    }
+                });
+            }
+        }
+
+        // Open plant modal
+        window.openPlantModal = async function(plotNumber) {
+            currentPlot = plotNumber;
+            selectedBerry = null;
+
+            const inventoryRef = ref(database, `players/${playerName}/inventory/itemconsumabili`);
+            const snapshot = await get(inventoryRef);
+            playerInventory = snapshot.val() || {};
+
+            const plantableBerries = ['Lum Berry', 'Sitrus Berry', 'White Herb', 'Power Herb'];
+            const availableBerries = Object.entries(playerInventory)
+                .filter(([name, qty]) => plantableBerries.includes(name) && qty > 0);
+
+            const inventoryGrid = document.getElementById('inventoryGrid');
+
+            if (availableBerries.length === 0) {
+                inventoryGrid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; color: #666; padding: 20px;">Nessuna bacca disponibile nell\'inventario</div>';
+            } else {
+                inventoryGrid.innerHTML = availableBerries.map(([name, qty]) => `
+                    <div class="inventory-item" onclick="selectBerry('${name}')">
+                        <img src="${BERRY_EMOJIS[name] || 'https://www.serebii.net/itemdex/sprites/sv/sitrusberry.png'}" alt="${name}" style="width: 50px; height: 50px; image-rendering: pixelated;">
+                        <div class="inventory-item-name">${name}</div>
+                        <div class="inventory-item-qty">x${qty}</div>
+                    </div>
+                `).join('');
+            }
+
+            document.getElementById('plantModal').style.display = 'block';
+            document.getElementById('confirmPlantBtn').disabled = true;
+        };
+
+        window.selectBerry = function(berryName) {
+            selectedBerry = berryName;
+
+            document.querySelectorAll('.inventory-item').forEach(item => {
+                item.classList.remove('selected');
+            });
+
+            event.currentTarget.classList.add('selected');
+            document.getElementById('confirmPlantBtn').disabled = false;
+        };
+
+        window.closePlantModal = function() {
+            document.getElementById('plantModal').style.display = 'none';
+            selectedBerry = null;
+            currentPlot = null;
+        };
+
+        window.confirmPlant = async function() {
+            if (!selectedBerry || !currentPlot) return;
+
+            const playerSnapshot = await get(playerRef);
+            const playerData = playerSnapshot.val();
+
+            if (!playerData.inventory.itemconsumabili[selectedBerry] || 
+                playerData.inventory.itemconsumabili[selectedBerry] <= 0) {
+                alert('Non hai questa bacca!');
+                return;
+            }
+
+            // Remove berry from inventory
+            playerData.inventory.itemconsumabili[selectedBerry]--;
+
+            // Add to plot
+            if (!playerData.berryPlots) playerData.berryPlots = {};
+            playerData.berryPlots[`plot${currentPlot}`] = {
+                berry: selectedBerry,
+                plantedAt: Date.now(),
+                harvestTime: Date.now() + (12 * 60 * 60 * 1000) // 12 hours
+            };
+
+            await set(playerRef, playerData);
+            
+            closePlantModal();
+            loadPlots();
+            alert(`${selectedBerry} piantata con successo!`);
+        };
+
+        window.harvestBerry = async function(plotNumber) {
+            const playerSnapshot = await get(playerRef);
+            const playerData = playerSnapshot.val();
+
+            const plotData = playerData.berryPlots[`plot${plotNumber}`];
+            if (!plotData) return;
+
+            const timeLeft = plotData.harvestTime - Date.now();
+            if (timeLeft > 0) {
+                alert('La bacca non è ancora pronta!');
+                return;
+            }
+
+            // Add 3x berries to inventory
+            const berryName = plotData.berry;
+            const currentQty = playerData.inventory.itemconsumabili[berryName] || 0;
+            playerData.inventory.itemconsumabili[berryName] = currentQty + 3;
+
+            // Clear plot
+            delete playerData.berryPlots[`plot${plotNumber}`];
+
+            await set(playerRef, playerData);
+            
+            loadPlots();
+            alert(`Raccolte 3x ${berryName}!`);
+        };
+
+        // Initialize
+        loadPlots();
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('plantModal');
+            if (event.target == modal) {
+                closePlantModal();
+            }
+        };
+    </script>
+</body>
+</html>
