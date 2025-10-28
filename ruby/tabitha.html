@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tabitha - Challenge</title>
+    <title>Tabitha - Weather Institute</title>
     <style>
         * {
             margin: 0;
@@ -553,18 +553,20 @@
                     </div>
 
                     <!-- Opzione 2: Coins + Trade + Card -->
-                    <div class="choice-option" id="option2" onclick="selectOption(2)">
-                        <div class="choice-title">🎴 750 Coins + Trade + Carta Misteriosa</div>
-                        <div class="choice-description">Ricevi 750 coins, scambia un Pokémon e scegli una carta per la rarità dello spin</div>
+                    <div class="choice-option" id="option2">
+                        <div onclick="selectOption(2)">
+                            <div class="choice-title">🎴 750 Coins + Trade + Carta Misteriosa</div>
+                            <div class="choice-description">Ricevi 750 coins, scambia un Pokémon e scegli una carta per la rarità dello spin</div>
+                        </div>
                         
-                        <div class="pokemon-selector" id="pokemonSelector" style="display: none;">
+                        <div class="pokemon-selector" id="pokemonSelector" style="display: none;" onclick="event.stopPropagation()">
                             <p style="color: #aaa; margin-bottom: 10px;">
                                 <strong>Passo 1:</strong> Seleziona un Pokémon da scambiare
                             </p>
                             <div class="pokemon-grid" id="pokemonGrid"></div>
                         </div>
 
-                        <div class="card-selector" id="cardSelector" style="display: none;">
+                        <div class="card-selector" id="cardSelector" style="display: none;" onclick="event.stopPropagation()">
                             <p style="color: #aaa; margin-bottom: 10px;">
                                 <strong>Passo 2:</strong> Scegli una carta (una contiene Pool A, una Pool S)
                             </p>
@@ -843,7 +845,7 @@
             grid.innerHTML = myTeam.map((poke, index) => {
                 const imgUrl = `https://www.pokemon.com/static-assets/content-assets/cms2/img/pokedex/full/${String(poke.national_number).padStart(3, '0')}.png`;
                 return `
-                    <div class="pokemon-item" onclick="selectPokemonForTrade(${index})">
+                    <div class="pokemon-item" onclick="selectPokemonForTrade(${index}, event)">
                         <img src="${imgUrl}" alt="${poke.name}">
                         <div class="pokemon-name">${poke.name}</div>
                     </div>
@@ -851,7 +853,9 @@
             }).join('');
         }
 
-        window.selectPokemonForTrade = function(index) {
+        window.selectPokemonForTrade = function(index, event) {
+            if (event) event.stopPropagation();
+            
             selectedPokemon = myTeam[index];
             console.log('Pokemon selezionato:', selectedPokemon);
             
@@ -865,7 +869,9 @@
             });
 
             // Mostra il card selector
-            document.getElementById('cardSelector').style.display = 'block';
+            const cardSelector = document.getElementById('cardSelector');
+            cardSelector.style.display = 'block';
+            console.log('Card selector mostrato');
             
             // Reset card selection
             selectedCard = null;
