@@ -108,7 +108,7 @@
             width: 120px;
             height: 120px;
             object-fit: cover;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            image-rendering: pixelated;
         }
 
         .shop-title {
@@ -591,6 +591,18 @@
                     <button class="buy-btn">Acquista</button>
                 </div>
 
+                <div class="berry-card" onclick="buyBerry('Leppa Berry')">
+                    <img src="https://www.serebii.net/itemdex/sprites/sv/leppaberry.png" alt="Leppa Berry" class="berry-img">
+                    <div class="berry-name">Leppa Berry</div>
+                    <div class="berry-price">
+                        <img src="https://raw.githubusercontent.com/lucaremix/roulette-run-challenge/main/pixel-art-red-chinese-gold-coin-png.png" 
+                             alt="Coins" 
+                             class="coin-img">
+                        <span>50</span>
+                    </div>
+                    <button class="buy-btn">Acquista</button>
+                </div>
+
                 <div class="berry-card" onclick="buyBerry('White Herb')">
                     <img src="https://www.serebii.net/itemdex/sprites/sv/whiteherb.png" alt="White Herb" class="berry-img">
                     <div class="berry-name">White Herb</div>
@@ -702,10 +714,12 @@
         let selectedBerry = null;
         let currentPlot = null;
         let playerInventory = {};
+        let hasSprayDuck = false;
 
         const BERRY_EMOJIS = {
             'Lum Berry': 'https://www.serebii.net/itemdex/sprites/sv/lumberry.png',
             'Sitrus Berry': 'https://www.serebii.net/itemdex/sprites/sv/sitrusberry.png',
+            'Leppa Berry': 'https://www.serebii.net/itemdex/sprites/sv/leppaberry.png',
             'White Herb': 'https://www.serebii.net/itemdex/sprites/sv/whiteherb.png',
             'Power Herb': 'https://www.serebii.net/itemdex/sprites/sv/powerherb.png',
             'Honey': 'https://www.serebii.net/itemdex/sprites/sv/honey.png'
@@ -716,6 +730,17 @@
         onValue(ref(database, `players/${playerName}/coins`), (snapshot) => {
             document.getElementById('playerCoins').textContent = snapshot.val() || 0;
         });
+
+        // Check for Spray Duck item
+        async function checkSprayDuck() {
+            const inventoryRef = ref(database, `players/${playerName}/inventory/itempermanenti`);
+            const snapshot = await get(inventoryRef);
+            const permanentItems = snapshot.val() || {};
+            hasSprayDuck = permanentItems['Spray Duck'] === true;
+        }
+
+        // Initialize Spray Duck check
+        checkSprayDuck();
 
         // Buy berry function
         window.buyBerry = async function(berryName) {
@@ -827,7 +852,7 @@
             const snapshot = await get(inventoryRef);
             playerInventory = snapshot.val() || {};
 
-            const plantableBerries = ['Lum Berry', 'Sitrus Berry', 'White Herb', 'Power Herb'];
+            const plantableBerries = ['Lum Berry', 'Sitrus Berry', 'Leppa Berry', 'White Herb', 'Power Herb'];
             const availableBerries = Object.entries(playerInventory)
                 .filter(([name, qty]) => plantableBerries.includes(name) && qty > 0);
 
@@ -881,19 +906,23 @@
             // Remove berry from inventory
             playerData.inventory.itemconsumabili[selectedBerry]--;
 
+            // Calculate harvest time: 6 hours with Spray Duck, 12 hours without
+            const hoursToHarvest = hasSprayDuck ? 6 : 12;
+            const harvestTime = Date.now() + (hoursToHarvest * 60 * 60 * 1000);
+
             // Add to plot
             if (!playerData.berryPlots) playerData.berryPlots = {};
             playerData.berryPlots[`plot${currentPlot}`] = {
                 berry: selectedBerry,
                 plantedAt: Date.now(),
-                harvestTime: Date.now() + (12 * 60 * 60 * 1000) // 12 hours
+                harvestTime: harvestTime
             };
 
             await set(playerRef, playerData);
             
             closePlantModal();
             loadPlots();
-            alert(`${selectedBerry} piantata con successo!`);
+            alert(`${selectedBerry} piantata con successo! ${hasSprayDuck ? '(Spray Duck attivo: 6 ore)' : 'Tempo di crescita: 12 ore'}`);
         };
 
         window.harvestBerry = async function(plotNumber) {
