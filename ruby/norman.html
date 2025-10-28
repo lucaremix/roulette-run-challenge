@@ -1,0 +1,1824 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Norman - Petalburg City</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-image: url('https://raw.githubusercontent.com/lucaremix/roulette-run-challenge/main/background/r-norman_background.png');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            color: #e0e0e0;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            background: #1a1a1a;
+            border: 1px solid #2a2a2a;
+            border-radius: 8px;
+            color: #e0e0e0;
+            text-decoration: none;
+            font-size: 1em;
+            transition: all 0.3s ease;
+            margin-bottom: 30px;
+        }
+
+        .back-btn:hover {
+            background: #252525;
+        }
+
+        .event-header {
+            background: #1a1a1a;
+            border: 1px solid #2a2a2a;
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 30px;
+            display: flex;
+            align-items: center;
+            gap: 30px;
+        }
+
+        .event-trainer-img {
+            width: 160px;
+            height: 160px;
+            object-fit: contain;
+            border: none;
+            flex-shrink: 0;
+            image-rendering: pixelated;
+        }
+
+        .event-info {
+            flex: 1;
+        }
+
+        .event-title {
+            font-size: 2.5em;
+            color: #ffffff;
+            margin-bottom: 15px;
+        }
+
+        .event-description {
+            font-size: 1.1em;
+            color: #888;
+            line-height: 1.6;
+        }
+
+        .event-status {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .status-badge {
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 1.1em;
+        }
+
+        .status-badge.connected {
+            background: #2d4a2d;
+            color: #7fff7f;
+        }
+
+        .status-badge.disconnected {
+            background: #4a2d2d;
+            color: #ff7f7f;
+        }
+
+        .join-leave-btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+
+        .join-btn {
+            background: #2a7a2a;
+            color: white;
+        }
+
+        .join-btn:hover {
+            background: #357a35;
+        }
+
+        .leave-btn {
+            background: #7a2a2a;
+            color: white;
+        }
+
+        .leave-btn:hover {
+            background: #8a3535;
+        }
+
+        .players-section {
+            background: #1a1a1a;
+            border: 1px solid #2a2a2a;
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 30px;
+        }
+
+        .players-title {
+            font-size: 1.8em;
+            color: #ffffff;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .player-count-badge {
+            background: #2a2a2a;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.7em;
+            color: #888;
+        }
+
+        .players-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .player-card {
+            background: #0a0a0a;
+            border: 1px solid #2a2a2a;
+            border-radius: 8px;
+            padding: 15px 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .player-card.current-user {
+            border-color: #4a4a4a;
+            background: #1f1f1f;
+        }
+
+        .player-name {
+            font-size: 1.1em;
+            color: #e0e0e0;
+        }
+
+        .player-card.current-user .player-name {
+            color: #ffffff;
+            font-weight: 600;
+        }
+
+        .you-badge {
+            background: #2a7a2a;
+            color: white;
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 0.8em;
+            font-weight: 600;
+        }
+
+        .no-players {
+            text-align: center;
+            color: #555;
+            font-style: italic;
+            padding: 30px;
+        }
+
+        .intro-screen {
+            background: #1a1a1a;
+            border: 1px solid #2a2a2a;
+            border-radius: 12px;
+            padding: 40px;
+            display: none;
+        }
+
+        .intro-content {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .intro-text h2 {
+            font-size: 2em;
+            color: #ffa500;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .intro-text p {
+            font-size: 1.2em;
+            line-height: 1.8;
+            color: #e0e0e0;
+            margin-bottom: 15px;
+        }
+
+        .intro-text .highlight {
+            color: #ffa500;
+            font-weight: bold;
+        }
+
+        .start-btn {
+            display: block;
+            margin: 30px auto 0;
+            padding: 20px 60px;
+            background: #ffa500;
+            color: #1a1a1a;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.3em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .start-btn:hover {
+            background: #ffb733;
+            transform: scale(1.05);
+        }
+
+        /* Join Room Screen - REMOVED */
+
+        /* Spin Phase */
+        .spin-phase {
+            display: none;
+        }
+
+        .spin-phase.active {
+            display: block;
+        }
+
+        .spin-controls {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        .spin-button {
+            padding: 20px 40px;
+            background: #1a1a1a;
+            border: 2px solid #2a2a2a;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+            min-width: 200px;
+        }
+
+        .spin-button:hover:not(.disabled) {
+            border-color: #ffa500;
+            transform: translateY(-2px);
+        }
+
+        .spin-button.disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .spin-button.s-tier {
+            border-color: #ff6b6b;
+        }
+
+        .spin-button.a-tier {
+            border-color: #ffd700;
+        }
+
+        .spin-button.b-tier {
+            border-color: #7fb3ff;
+        }
+
+        .spin-button h3 {
+            font-size: 1.5em;
+            margin-bottom: 10px;
+        }
+
+        .spin-button.s-tier h3 { color: #ff6b6b; }
+        .spin-button.a-tier h3 { color: #ffd700; }
+        .spin-button.b-tier h3 { color: #7fb3ff; }
+
+        .pokemon-preview {
+            display: none;
+            background: #1a1a1a;
+            border: 1px solid #2a2a2a;
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+
+        .pokemon-preview.show {
+            display: block;
+        }
+
+        .pokemon-cards {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .pokemon-card {
+            background: #0a0a0a;
+            border: 2px solid #2a2a2a;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            width: 200px;
+        }
+
+        .pokemon-card.s-tier { border-color: #ff6b6b; }
+        .pokemon-card.a-tier { border-color: #ffd700; }
+        .pokemon-card.b-tier { border-color: #7fb3ff; }
+
+        .pokemon-card img {
+            width: 120px;
+            height: 120px;
+            object-fit: contain;
+        }
+
+        .pokemon-card h4 {
+            font-size: 1.2em;
+            margin: 10px 0;
+            color: #fff;
+        }
+
+        .pokemon-card .tier-badge {
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 0.9em;
+        }
+
+        .tier-badge.s-tier {
+            background: #ff6b6b;
+            color: white;
+        }
+
+        .tier-badge.a-tier {
+            background: #ffd700;
+            color: #1a1a1a;
+        }
+
+        .tier-badge.b-tier {
+            background: #7fb3ff;
+            color: white;
+        }
+
+        /* Placement Phase */
+        .placement-phase {
+            display: none;
+        }
+
+        .placement-phase.active {
+            display: block;
+        }
+
+        .placement-instructions {
+            background: #1a1a1a;
+            border: 1px solid #2a2a2a;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .placement-instructions h3 {
+            color: #ffa500;
+            margin-bottom: 10px;
+        }
+
+        .grid-container {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .grid-wrapper {
+            background: #1a1a1a;
+            border: 1px solid #2a2a2a;
+            border-radius: 12px;
+            padding: 20px;
+        }
+
+        .grid-title {
+            text-align: center;
+            color: #ffa500;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+        }
+
+        .grid-with-coords {
+            display: flex;
+            gap: 5px;
+        }
+
+        .row-labels {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            padding-top: 30px;
+        }
+
+        .row-label {
+            width: 30px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #888;
+            font-weight: bold;
+            font-size: 0.9em;
+        }
+
+        .grid-content {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .col-labels {
+            display: flex;
+            gap: 2px;
+            margin-bottom: 5px;
+            padding-left: 10px;
+        }
+
+        .col-label {
+            width: 40px;
+            height: 25px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #888;
+            font-weight: bold;
+            font-size: 0.9em;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(10, 40px);
+            grid-template-rows: repeat(10, 40px);
+            gap: 2px;
+            background: #0a0a0a;
+            padding: 10px;
+            border-radius: 8px;
+        }
+
+        .cell {
+            width: 40px;
+            height: 40px;
+            background: #2a2a2a;
+            border: 1px solid #1a1a1a;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .cell:hover:not(.placed):not(.hit):not(.miss) {
+            background: #3a3a3a;
+        }
+
+        .cell.placed {
+            background: #4a4a4a;
+        }
+
+        .cell.ship-s { background: #ff6b6b; }
+        .cell.ship-a { background: #ffd700; }
+        .cell.ship-b { background: #7fb3ff; }
+
+        .cell.hit {
+            background: #ff4444;
+            position: relative;
+        }
+
+        .cell.hit::after {
+            content: '✕';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-size: 1.5em;
+            font-weight: bold;
+        }
+
+        .cell.sunk {
+            background: #aa2222 !important;
+        }
+
+        .cell.sunk::after {
+            content: '✕';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #ffff00;
+            font-size: 1.5em;
+            font-weight: bold;
+        }
+
+        .cell.miss {
+            background: #4a4a4a;
+            position: relative;
+        }
+
+        .cell.miss::after {
+            content: '○';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #7fb3ff;
+            font-size: 1.2em;
+        }
+
+        .placement-ship-selector {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        .ship-selector-btn {
+            padding: 15px 30px;
+            border: 2px solid #2a2a2a;
+            background: #1a1a1a;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            color: #888;
+        }
+
+        .ship-selector-btn.active {
+            border-color: #ffa500;
+            color: #ffa500;
+            background: #2a2a2a;
+        }
+
+        .ship-selector-btn.placed {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .ready-btn {
+            display: block;
+            margin: 20px auto;
+            padding: 15px 60px;
+            background: #2a7a2a;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.2em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .ready-btn:hover:not(:disabled) {
+            background: #357a35;
+        }
+
+        .ready-btn:disabled {
+            background: #2a2a2a;
+            cursor: not-allowed;
+            opacity: 0.5;
+        }
+
+        /* Battle Phase */
+        .battle-phase {
+            display: none;
+        }
+
+        .battle-phase.active {
+            display: block;
+        }
+
+        .battle-info {
+            background: #1a1a1a;
+            border: 1px solid #2a2a2a;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .battle-grids {
+            display: flex;
+            gap: 30px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .ship-status {
+            background: #1a1a1a;
+            border: 1px solid #2a2a2a;
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+
+        .ship-status h3 {
+            color: #ffa500;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .ship-status-grid {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .ship-status-item {
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: bold;
+        }
+
+        .ship-status-item.alive {
+            background: #2d4a2d;
+            color: #7fff7f;
+        }
+
+        .ship-status-item.sunk {
+            background: #4a2d2d;
+            color: #ff7f7f;
+        }
+
+        /* Game Over */
+        .game-over-screen {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .game-over-screen.show {
+            display: flex;
+        }
+
+        .game-over-content {
+            background: #1a1a1a;
+            border: 2px solid #ffa500;
+            border-radius: 12px;
+            padding: 40px;
+            text-align: center;
+            max-width: 600px;
+        }
+
+        .game-over-content h2 {
+            font-size: 2.5em;
+            color: #ffa500;
+            margin-bottom: 20px;
+        }
+
+        .game-over-content .winner-name {
+            font-size: 1.8em;
+            color: #7fff7f;
+            margin-bottom: 30px;
+        }
+
+        .rewards-list {
+            text-align: left;
+            margin: 20px 0;
+        }
+
+        .reward-item {
+            background: #0a0a0a;
+            border: 1px solid #2a2a2a;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 10px 0;
+            font-size: 1.1em;
+        }
+
+        .home-btn {
+            display: block;
+            margin: 30px auto 0;
+            padding: 15px 50px;
+            background: #2a7a2a;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.2em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+        }
+
+        .home-btn:hover {
+            background: #357a35;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(42, 122, 42, 0.4);
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        @media (max-width: 768px) {
+            .grid {
+                grid-template-columns: repeat(10, 30px);
+                grid-template-rows: repeat(10, 30px);
+            }
+
+            .cell {
+                width: 30px;
+                height: 30px;
+            }
+
+            .row-label {
+                width: 25px;
+                height: 30px;
+                font-size: 0.8em;
+            }
+
+            .col-label {
+                width: 30px;
+                height: 20px;
+                font-size: 0.8em;
+            }
+
+            .battle-grids {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="index.html" class="back-btn">← Torna alla Home</a>
+
+        <div class="event-header">
+            <img src="https://img.nuzlocke.app/leaders/rs-norman-oras.png" 
+                 alt="Norman" 
+                 class="event-trainer-img">
+            <div class="event-info">
+                <h1 class="event-title">Norman - Petalburg City</h1>
+                <p class="event-description">
+                    Sfida un avversario in una battaglia navale Pokémon! Ogni giocatore gira 3 Pokémon (S, A, B),
+                    li posiziona come navi su una griglia 10x10, e cerca di affondare le navi dell'avversario chiamando le coordinate a voce.
+                </p>
+                <div class="event-status">
+                    <div class="status-badge not-joined" id="joinStatus">Non partecipante</div>
+                    <button class="join-leave-btn join-btn" id="joinBtn" onclick="toggleJoin()">
+                        Unisciti all'evento
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Landing Section -->
+        <div id="landingSection">
+            <div class="players-section">
+                <h2 class="players-title">
+                    Giocatori
+                    <span class="player-count-badge" id="playerCount">0/2</span>
+                </h2>
+                <div class="players-list" id="playersList">
+                    <div class="no-players">Nessun giocatore nell'evento</div>
+                </div>
+            </div>
+
+            <div class="intro-screen">
+                <div class="intro-content">
+                    <div class="intro-text">
+                        <h2>🎮 Come Giocare</h2>
+                        <p>Quando entrambi i giocatori sono pronti, inizierà automaticamente la fase di spin.</p>
+                        <p><span class="highlight">1. Spin:</span> Gira 3 Pokémon (uno per tier: S, A, B)</p>
+                        <p><span class="highlight">2. Posizionamento:</span> Piazza i tuoi Pokémon come navi sulla griglia (S=3×3, A=2×2, B=1×1)</p>
+                        <p><span class="highlight">3. Battaglia:</span> Chiama le coordinate a voce e clicca sulla griglia avversaria per segnare i colpi</p>
+                        <p><span class="highlight">Vittoria:</span> Chi affonda tutte le navi avversarie vince e mantiene i suoi Pokémon non affondati!</p>
+                    </div>
+                    <button class="start-btn" onclick="startGame()">Inizia Partita</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Spin Phase -->
+        <div class="spin-phase" id="spinPhase">
+            <div class="pokemon-preview" id="pokemonPreview">
+                <h3 style="text-align: center; color: #ffa500; margin-bottom: 20px;">I tuoi Pokémon</h3>
+                <div class="pokemon-cards" id="pokemonCards"></div>
+                <button class="ready-btn" onclick="startPlacement()" id="continueToPlacementBtn" disabled>
+                    Continua al Posizionamento
+                </button>
+            </div>
+            <div class="spin-controls">
+                <div class="spin-button s-tier" onclick="spinPokemon('S')" id="spinS">
+                    <h3>S Tier</h3>
+                    <p>Nave 3×3</p>
+                </div>
+                <div class="spin-button a-tier" onclick="spinPokemon('A')" id="spinA">
+                    <h3>A Tier</h3>
+                    <p>Nave 2×2</p>
+                </div>
+                <div class="spin-button b-tier" onclick="spinPokemon('B')" id="spinB">
+                    <h3>B Tier</h3>
+                    <p>Nave 1×1</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Placement Phase -->
+        <div class="placement-phase" id="placementPhase">
+            <div class="placement-instructions">
+                <h3>📍 Posiziona le tue Navi</h3>
+                <p>Clicca sulle celle della griglia per posizionare i tuoi Pokémon. Le dimensioni sono: S=3×3, A=2×2, B=1×1</p>
+            </div>
+
+            <div class="placement-ship-selector">
+                <button class="ship-selector-btn" data-ship="S" onclick="selectShipToPlace('S')">
+                    S Tier (3×3)
+                </button>
+                <button class="ship-selector-btn" data-ship="A" onclick="selectShipToPlace('A')">
+                    A Tier (2×2)
+                </button>
+                <button class="ship-selector-btn" data-ship="B" onclick="selectShipToPlace('B')">
+                    B Tier (1×1)
+                </button>
+            </div>
+
+            <div class="grid-container">
+                <div class="grid-wrapper">
+                    <!-- Grid will be generated by JavaScript -->
+                </div>
+            </div>
+
+            <button class="ready-btn" onclick="confirmPlacement()" id="confirmPlacementBtn" disabled>
+                Conferma Posizionamento
+            </button>
+        </div>
+
+        <!-- Battle Phase -->
+        <div class="battle-phase" id="battlePhase">
+            <div class="battle-info">
+                <h3>⚔️ Battaglia in Corso!</h3>
+                <p>Chiamate le coordinate a voce e cliccate sulla griglia avversaria per segnare i colpi.</p>
+            </div>
+
+            <div class="battle-grids">
+                <div class="grid-wrapper">
+                    <!-- My grid will be generated by JavaScript -->
+                </div>
+                <div class="grid-wrapper">
+                    <!-- Enemy grid will be generated by JavaScript -->
+                </div>
+            </div>
+
+            <div class="ship-status">
+                <h3>Stato Navi</h3>
+                <div class="ship-status-grid">
+                    <div class="ship-status-item alive" id="myShipS">Le tue - S: Vivo</div>
+                    <div class="ship-status-item alive" id="myShipA">Le tue - A: Vivo</div>
+                    <div class="ship-status-item alive" id="myShipB">Le tue - B: Vivo</div>
+                    <div class="ship-status-item alive" id="enemyShipS">Nemico - S: Vivo</div>
+                    <div class="ship-status-item alive" id="enemyShipA">Nemico - A: Vivo</div>
+                    <div class="ship-status-item alive" id="enemyShipB">Nemico - B: Vivo</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Game Over Screen -->
+        <div class="game-over-screen" id="gameOverScreen">
+            <div class="game-over-content">
+                <h2>🎉 Partita Terminata!</h2>
+                <div class="winner-name" id="winnerName"></div>
+                <div class="rewards-list" id="rewardsList"></div>
+                <button class="home-btn" onclick="window.location.href='index.html'">
+                    ← Torna alla Home
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+        import { getDatabase, ref, onValue, set, get, update, push, remove } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js';
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDNuD9wViLLxteHMCEBlvfdONwcZbAjAvo",
+            authDomain: "roulette-run-challenge.firebaseapp.com",
+            databaseURL: "https://roulette-run-challenge-default-rtdb.europe-west1.firebasedatabase.app",
+            projectId: "roulette-run-challenge",
+            storageBucket: "roulette-run-challenge.firebasestorage.app",
+            messagingSenderId: "994019156093",
+            appId: "1:994019156093:web:9792bdce75c486f589d114"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app);
+        const eventRef = ref(database, 'events/clay');
+
+        // Global State
+        let myPlayerNumber = null; // 'p1' or 'p2'
+        let chosenPokemon = { S: null, A: null, B: null };
+        let myBoard = {
+            S: null,
+            A: null,
+            B: null,
+            ready: false
+        };
+        let selectedShip = null;
+        let allPokemon = [];
+        let gameState = null;
+        const MAX_PLAYERS = 2;
+
+        const natures = [
+            "Hardy", "Lonely", "Brave", "Adamant", "Naughty",
+            "Bold", "Docile", "Relaxed", "Impish", "Lax",
+            "Timid", "Hasty", "Serious", "Jolly", "Naive",
+            "Modest", "Mild", "Quiet", "Bashful", "Rash",
+            "Calm", "Gentle", "Sassy", "Careful", "Quirky"
+        ];
+
+        // Helper Functions
+        function getCurrentPlayer() {
+            return localStorage.getItem('playerName');
+        }
+
+        function addNatureAndAbility(pokemon) {
+            // Random nature
+            const randomNature = natures[Math.floor(Math.random() * natures.length)];
+            
+            // Random ability (non-hidden)
+            const abilities = [
+                pokemon.abilities_0,
+                pokemon.abilities_1,
+                pokemon.abilities_2
+            ].filter(a => a && a.trim() !== '');
+            
+            const randomAbility = abilities.length > 0 
+                ? abilities[Math.floor(Math.random() * abilities.length)]
+                : 'Unknown';
+
+            return {
+                ...pokemon,
+                nature: randomNature,
+                ability: randomAbility
+            };
+        }
+
+        function padNumber(num) {
+            return String(num).padStart(3, '0');
+        }
+
+        function getPokemonImageUrl(nationalNumber) {
+            return `https://www.pokemon.com/static-assets/content-assets/cms2/img/pokedex/full/${padNumber(nationalNumber)}.png`;
+        }
+
+        // Load Pokemon Data
+        async function loadPokemonData() {
+            try {
+                const response = await fetch('pokemon.json');
+                allPokemon = await response.json();
+            } catch (error) {
+                console.error('Error loading pokemon.json:', error);
+            }
+        }
+
+        // Render Landing
+        function renderLanding() {
+            const currentPlayer = getCurrentPlayer();
+            const playersRef = ref(database, `events/clay/players`);
+
+            onValue(playersRef, (snapshot) => {
+                const players = [];
+                snapshot.forEach((childSnapshot) => {
+                    players.push(childSnapshot.val());
+                });
+
+                const isJoined = players.includes(currentPlayer);
+
+                const statusBadge = document.getElementById('joinStatus');
+                const joinLeaveBtn = document.getElementById('joinBtn');
+
+                if (statusBadge && joinLeaveBtn) {
+                    if (isJoined) {
+                        statusBadge.textContent = 'Partecipante';
+                        statusBadge.className = 'status-badge joined';
+                        joinLeaveBtn.textContent = 'Abbandona evento';
+                        joinLeaveBtn.className = 'join-leave-btn leave-btn';
+                    } else {
+                        statusBadge.textContent = 'Non partecipante';
+                        statusBadge.className = 'status-badge not-joined';
+                        joinLeaveBtn.textContent = 'Unisciti all\'evento';
+                        joinLeaveBtn.className = 'join-leave-btn join-btn';
+                    }
+                }
+
+                const countBadge = document.getElementById('playerCount');
+                if (countBadge) {
+                    countBadge.textContent = `${players.length}/2`;
+                }
+
+                const playersList = document.getElementById('playersList');
+                
+                if (playersList) {
+                    if (players.length === 0) {
+                        playersList.innerHTML = '<div class="no-players">Nessun giocatore nell\'evento</div>';
+                    } else {
+                        playersList.innerHTML = players.map(player => {
+                            const isCurrentUser = player === currentPlayer;
+                            return `
+                                <div class="player-card ${isCurrentUser ? 'current-user' : ''}">
+                                    <span class="player-name">${player}</span>
+                                    ${isCurrentUser ? '<span class="you-badge">Tu</span>' : ''}
+                                </div>
+                            `;
+                        }).join('');
+                    }
+                }
+
+                // Show intro screen if 2 players
+                if (players.length === 2) {
+                    document.querySelector('.intro-screen').style.display = 'block';
+                } else {
+                    document.querySelector('.intro-screen').style.display = 'none';
+                }
+            });
+
+            // Listen to game state
+            onValue(eventRef, (snapshot) => {
+                const data = snapshot.val();
+                if (!data) return;
+
+                gameState = data;
+
+                // If game started, show spin phase
+                if (data.gameStarted && !data.isGameOver) {
+                    document.getElementById('landingSection').style.display = 'none';
+                    document.getElementById('spinPhase').classList.add('active');
+                    
+                    // Determine player number
+                    if (data.player1.name === currentPlayer) {
+                        myPlayerNumber = 'p1';
+                    } else if (data.player2.name === currentPlayer) {
+                        myPlayerNumber = 'p2';
+                    }
+                }
+
+                // If game over
+                if (data.isGameOver) {
+                    showGameOver(data);
+                }
+            });
+        }
+
+        async function toggleJoin() {
+            const playerName = getCurrentPlayer();
+            if (!playerName) {
+                alert('Devi impostare il tuo nome dalla home page!');
+                window.location.href = 'index.html';
+                return;
+            }
+
+            const playersRef = ref(database, `events/clay/players`);
+            
+            const snapshot = await new Promise((resolve) => {
+                onValue(playersRef, (snap) => resolve(snap), { onlyOnce: true });
+            });
+
+            let isInEvent = false;
+            let playerNodeKey = null;
+
+            snapshot.forEach((childSnapshot) => {
+                if (childSnapshot.val() === playerName) {
+                    isInEvent = true;
+                    playerNodeKey = childSnapshot.key;
+                }
+            });
+
+            if (isInEvent && playerNodeKey) {
+                await remove(ref(database, `events/clay/players/${playerNodeKey}`));
+            } else {
+                const newPlayerRef = push(ref(database, `events/clay/players`));
+                await set(newPlayerRef, playerName);
+            }
+        }
+
+        window.toggleJoin = toggleJoin;
+
+        window.startGame = async function() {
+            const playersRef = ref(database, `events/clay/players`);
+            const snapshot = await get(playersRef);
+            
+            const players = [];
+            snapshot.forEach((childSnapshot) => {
+                players.push(childSnapshot.val());
+            });
+
+            if (players.length !== 2) {
+                alert('Servono esattamente 2 giocatori per iniziare!');
+                return;
+            }
+
+            // Initialize game
+            const newGame = {
+                gameStarted: true,
+                player1: { name: players[0] },
+                player2: { name: players[1] },
+                boards: {},
+                isGameOver: false
+            };
+
+            await set(eventRef, newGame);
+        };
+
+        // Spin Pokemon
+        window.spinPokemon = async function(tier) {
+            // Convert tier to correct pool name format
+            const poolName = `${tier.toLowerCase()}_tier`;
+            const poolRef = ref(database, `pools/${poolName}`);
+            const snapshot = await get(poolRef);
+            
+            if (!snapshot.exists()) {
+                alert('Pool vuoto!');
+                return;
+            }
+
+            const poolData = snapshot.val();
+            
+            // Check if it's an array or object
+            let pokemonList = [];
+            if (Array.isArray(poolData)) {
+                pokemonList = poolData.map((pokemon, index) => ({ key: index, ...pokemon }));
+            } else {
+                pokemonList = Object.entries(poolData).map(([key, value]) => ({ key, ...value }));
+            }
+            
+            if (pokemonList.length === 0) {
+                alert('Nessun Pokémon disponibile!');
+                return;
+            }
+
+            const randomPokemon = pokemonList[Math.floor(Math.random() * pokemonList.length)];
+            chosenPokemon[tier] = randomPokemon;
+
+            // Save chosen pokemon to Firebase for this player
+            const chosenRef = ref(database, `events/clay/chosen/${myPlayerNumber}/${tier}`);
+            await set(chosenRef, randomPokemon);
+
+            // Disable the spin button
+            document.getElementById(`spin${tier}`).classList.add('disabled');
+
+            updatePokemonPreview();
+        };
+
+        function updatePokemonPreview() {
+            const cardsContainer = document.getElementById('pokemonCards');
+            cardsContainer.innerHTML = '';
+
+            ['S', 'A', 'B'].forEach(tier => {
+                if (chosenPokemon[tier]) {
+                    const pokemon = chosenPokemon[tier];
+                    const card = document.createElement('div');
+                    card.className = `pokemon-card ${tier.toLowerCase()}-tier`;
+                    card.innerHTML = `
+                        <img src="${getPokemonImageUrl(pokemon.national_number)}" alt="${pokemon.english_name}">
+                        <h4>${pokemon.english_name}</h4>
+                        <span class="tier-badge ${tier.toLowerCase()}-tier">${tier} Tier</span>
+                    `;
+                    cardsContainer.appendChild(card);
+                }
+            });
+
+            // Show preview and check if all spins are done
+            if (chosenPokemon.S && chosenPokemon.A && chosenPokemon.B) {
+                document.getElementById('pokemonPreview').classList.add('show');
+                document.getElementById('continueToPlacementBtn').disabled = false;
+            }
+        }
+
+        // Start Placement Phase
+        window.startPlacement = function() {
+            document.getElementById('spinPhase').classList.remove('active');
+            document.getElementById('placementPhase').classList.add('active');
+            initPlacementGrid();
+        };
+
+        // Initialize Placement Grid
+        function initPlacementGrid() {
+            const gridWrapper = document.querySelector('#placementPhase .grid-wrapper');
+            gridWrapper.innerHTML = `
+                <div class="grid-title">La tua Griglia</div>
+                <div class="grid-with-coords">
+                    <div class="row-labels">
+                        ${Array.from({length: 10}, (_, i) => `<div class="row-label">${i + 1}</div>`).join('')}
+                    </div>
+                    <div class="grid-content">
+                        <div class="col-labels">
+                            ${['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'].map(l => `<div class="col-label">${l}</div>`).join('')}
+                        </div>
+                        <div class="grid" id="placementGrid"></div>
+                    </div>
+                </div>
+            `;
+
+            const grid = document.getElementById('placementGrid');
+            for (let y = 0; y < 10; y++) {
+                for (let x = 0; x < 10; x++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'cell';
+                    cell.dataset.x = x;
+                    cell.dataset.y = y;
+                    cell.onclick = () => placeShipAt(x, y);
+                    grid.appendChild(cell);
+                }
+            }
+        }
+
+        // Select Ship to Place
+        window.selectShipToPlace = function(ship) {
+            if (myBoard[ship]) return; // Already placed
+
+            selectedShip = ship;
+            document.querySelectorAll('.ship-selector-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            document.querySelector(`.ship-selector-btn[data-ship="${ship}"]`).classList.add('active');
+        };
+
+        // Place Ship
+        function placeShipAt(x, y) {
+            if (!selectedShip) {
+                alert('Seleziona prima una nave!');
+                return;
+            }
+
+            const sizes = { S: 3, A: 2, B: 1 };
+            const size = sizes[selectedShip];
+
+            // Check bounds
+            if (x + size > 10 || y + size > 10) {
+                alert('Fuori dai bordi!');
+                return;
+            }
+
+            // Check overlap
+            const grid = document.getElementById('placementGrid');
+            for (let dy = 0; dy < size; dy++) {
+                for (let dx = 0; dx < size; dx++) {
+                    const cell = grid.querySelector(`[data-x="${x + dx}"][data-y="${y + dy}"]`);
+                    if (cell.classList.contains('placed')) {
+                        alert('Sovrapposizione con altra nave!');
+                        return;
+                    }
+                }
+            }
+
+            // Place ship
+            myBoard[selectedShip] = {
+                x: x,
+                y: y,
+                w: size,
+                h: size,
+                hits: []
+            };
+
+            // Visual update
+            for (let dy = 0; dy < size; dy++) {
+                for (let dx = 0; dx < size; dx++) {
+                    const cell = grid.querySelector(`[data-x="${x + dx}"][data-y="${y + dy}"]`);
+                    cell.classList.add('placed', `ship-${selectedShip.toLowerCase()}`);
+                }
+            }
+
+            // Mark as placed
+            document.querySelector(`.ship-selector-btn[data-ship="${selectedShip}"]`).classList.add('placed');
+            selectedShip = null;
+
+            // Check if all ships placed
+            if (myBoard.S && myBoard.A && myBoard.B) {
+                document.getElementById('confirmPlacementBtn').disabled = false;
+            }
+        }
+
+        // Confirm Placement
+        window.confirmPlacement = async function() {
+            myBoard.ready = true;
+
+            const boardRef = ref(database, `events/clay/boards/${myPlayerNumber}`);
+            await set(boardRef, myBoard);
+
+            alert('In attesa dell\'avversario...');
+
+            // Listen for opponent ready
+            const unsubscribe = onValue(eventRef, async (snapshot) => {
+                const gameData = snapshot.val();
+                const opponentNumber = myPlayerNumber === 'p1' ? 'p2' : 'p1';
+                
+                if (gameData.boards && gameData.boards[opponentNumber] && gameData.boards[opponentNumber].ready) {
+                    // Both ready, start battle
+                    await update(eventRef, { status: 'playing' });
+                    startBattle();
+                    unsubscribe();
+                }
+            });
+        };
+
+        // Start Battle
+        function startBattle() {
+            document.getElementById('placementPhase').classList.remove('active');
+            document.getElementById('battlePhase').classList.add('active');
+
+            initBattleGrids();
+            listenToBattleUpdates();
+        }
+
+        // Initialize Battle Grids
+        async function initBattleGrids() {
+            // My grid
+            const myGridWrapper = document.querySelectorAll('.battle-grids .grid-wrapper')[0];
+            myGridWrapper.innerHTML = `
+                <div class="grid-title">La tua Griglia</div>
+                <div class="grid-with-coords">
+                    <div class="row-labels">
+                        ${Array.from({length: 10}, (_, i) => `<div class="row-label">${i + 1}</div>`).join('')}
+                    </div>
+                    <div class="grid-content">
+                        <div class="col-labels">
+                            ${['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'].map(l => `<div class="col-label">${l}</div>`).join('')}
+                        </div>
+                        <div class="grid" id="myBattleGrid"></div>
+                    </div>
+                </div>
+            `;
+
+            const myGrid = document.getElementById('myBattleGrid');
+            for (let y = 0; y < 10; y++) {
+                for (let x = 0; x < 10; x++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'cell';
+                    cell.dataset.x = x;
+                    cell.dataset.y = y;
+
+                    // Show my ships
+                    ['S', 'A', 'B'].forEach(ship => {
+                        const shipData = myBoard[ship];
+                        if (shipData && x >= shipData.x && x < shipData.x + shipData.w &&
+                            y >= shipData.y && y < shipData.y + shipData.h) {
+                            cell.classList.add(`ship-${ship.toLowerCase()}`);
+                        }
+                    });
+
+                    myGrid.appendChild(cell);
+                }
+            }
+
+            // Enemy grid
+            const enemyGridWrapper = document.querySelectorAll('.battle-grids .grid-wrapper')[1];
+            enemyGridWrapper.innerHTML = `
+                <div class="grid-title">Griglia Avversario</div>
+                <div class="grid-with-coords">
+                    <div class="row-labels">
+                        ${Array.from({length: 10}, (_, i) => `<div class="row-label">${i + 1}</div>`).join('')}
+                    </div>
+                    <div class="grid-content">
+                        <div class="col-labels">
+                            ${['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'].map(l => `<div class="col-label">${l}</div>`).join('')}
+                        </div>
+                        <div class="grid" id="enemyBattleGrid"></div>
+                    </div>
+                </div>
+            `;
+
+            const enemyGrid = document.getElementById('enemyBattleGrid');
+            for (let y = 0; y < 10; y++) {
+                for (let x = 0; x < 10; x++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'cell';
+                    cell.dataset.x = x;
+                    cell.dataset.y = y;
+                    cell.onclick = () => markShot(x, y);
+                    enemyGrid.appendChild(cell);
+                }
+            }
+        }
+
+        // Mark Shot
+        async function markShot(x, y) {
+            const enemyGrid = document.getElementById('enemyBattleGrid');
+            const cell = enemyGrid.querySelector(`[data-x="${x}"][data-y="${y}"]`);
+            
+            // Don't allow clicking same cell twice
+            if (!cell || cell.classList.contains('hit') || cell.classList.contains('miss')) {
+                return;
+            }
+
+            const opponentNumber = myPlayerNumber === 'p1' ? 'p2' : 'p1';
+            const opponentBoardRef = ref(database, `events/clay/boards/${opponentNumber}`);
+            const snapshot = await get(opponentBoardRef);
+            
+            if (!snapshot.exists()) return;
+
+            const opponentBoard = snapshot.val();
+            let isHit = false;
+            let hitShip = null;
+
+            // Check if this coordinate hits any ship
+            ['S', 'A', 'B'].forEach(ship => {
+                const shipData = opponentBoard[ship];
+                if (!shipData) return;
+                
+                if (x >= shipData.x && x < shipData.x + shipData.w &&
+                    y >= shipData.y && y < shipData.y + shipData.h) {
+                    isHit = true;
+                    hitShip = ship;
+                }
+            });
+
+            if (isHit) {
+                // Add hit to opponent's board
+                const shipData = opponentBoard[hitShip];
+                if (!shipData.hits) shipData.hits = [];
+                shipData.hits.push({ x, y });
+                
+                // Update Firebase
+                await update(opponentBoardRef, {
+                    [`${hitShip}/hits`]: shipData.hits
+                });
+
+                // Visual: Mark as hit
+                cell.classList.add('hit');
+
+                // Check if ship is sunk
+                const maxHits = shipData.w * shipData.h;
+                if (shipData.hits.length >= maxHits) {
+                    // Mark all hits of this ship as sunk
+                    markShipAsSunk(hitShip, shipData);
+                }
+            } else {
+                // Visual: Mark as miss
+                cell.classList.add('miss');
+            }
+
+            // Check if game over
+            setTimeout(() => checkGameOver(), 500);
+        }
+
+        // Mark all cells of a sunk ship with different color
+        function markShipAsSunk(ship, shipData) {
+            const enemyGrid = document.getElementById('enemyBattleGrid');
+            for (let dy = 0; dy < shipData.h; dy++) {
+                for (let dx = 0; dx < shipData.w; dx++) {
+                    const cell = enemyGrid.querySelector(`[data-x="${shipData.x + dx}"][data-y="${shipData.y + dy}"]`);
+                    if (cell) {
+                        cell.classList.add('sunk');
+                    }
+                }
+            }
+        }
+
+        // Listen to Battle Updates
+        function listenToBattleUpdates() {
+            const myBoardRef = ref(database, `events/clay/boards/${myPlayerNumber}`);
+            onValue(myBoardRef, (snapshot) => {
+                const boardData = snapshot.val();
+                if (!boardData) return;
+
+                // Update my grid with opponent hits
+                const myGrid = document.getElementById('myBattleGrid');
+                ['S', 'A', 'B'].forEach(ship => {
+                    const shipData = boardData[ship];
+                    if (!shipData || !shipData.hits) return;
+                    
+                    shipData.hits.forEach(hit => {
+                        const cell = myGrid.querySelector(`[data-x="${hit.x}"][data-y="${hit.y}"]`);
+                        if (cell && !cell.classList.contains('hit')) {
+                            cell.classList.add('hit');
+                        }
+                    });
+
+                    // Update ship status and check if sunk
+                    const maxHits = shipData.w * shipData.h;
+                    const statusEl = document.getElementById(`myShip${ship}`);
+                    if (statusEl && shipData.hits.length >= maxHits) {
+                        statusEl.textContent = `Le tue - ${ship}: Affondato`;
+                        statusEl.className = 'ship-status-item sunk';
+                        
+                        // Mark my ship as sunk visually
+                        for (let dy = 0; dy < shipData.h; dy++) {
+                            for (let dx = 0; dx < shipData.w; dx++) {
+                                const cell = myGrid.querySelector(`[data-x="${shipData.x + dx}"][data-y="${shipData.y + dy}"]`);
+                                if (cell) {
+                                    cell.classList.add('sunk');
+                                }
+                            }
+                        }
+                    }
+                });
+
+                // Update my board state
+                myBoard = boardData;
+                
+                // Check game over when my board changes
+                setTimeout(() => checkGameOver(), 500);
+            });
+
+            // Listen to opponent board
+            const opponentNumber = myPlayerNumber === 'p1' ? 'p2' : 'p1';
+            const opponentBoardRef = ref(database, `events/clay/boards/${opponentNumber}`);
+            onValue(opponentBoardRef, (snapshot) => {
+                const boardData = snapshot.val();
+                if (!boardData) return;
+
+                // Update enemy ship status
+                ['S', 'A', 'B'].forEach(ship => {
+                    const shipData = boardData[ship];
+                    if (!shipData || !shipData.hits) return;
+                    
+                    const maxHits = shipData.w * shipData.h;
+                    const statusEl = document.getElementById(`enemyShip${ship}`);
+                    if (statusEl && shipData.hits.length >= maxHits) {
+                        statusEl.textContent = `Nemico - ${ship}: Affondato`;
+                        statusEl.className = 'ship-status-item sunk';
+                        
+                        // Mark enemy ship as sunk on my grid
+                        markShipAsSunk(ship, shipData);
+                    }
+                });
+                
+                // Check game over when opponent board changes
+                setTimeout(() => checkGameOver(), 500);
+            });
+        }
+
+        // Check Game Over
+        async function checkGameOver() {
+            const snapshot = await get(eventRef);
+            const gameData = snapshot.val();
+
+            if (!gameData || !gameData.boards || !gameData.boards.p1 || !gameData.boards.p2) {
+                console.log('GameOver check: missing data');
+                return;
+            }
+
+            const p1Board = gameData.boards.p1;
+            const p2Board = gameData.boards.p2;
+
+            console.log('Checking game over...');
+            console.log('P1 Board:', p1Board);
+            console.log('P2 Board:', p2Board);
+
+            const isP1Defeated = ['S', 'A', 'B'].every(ship => {
+                const shipData = p1Board[ship];
+                if (!shipData) {
+                    console.log(`P1 ${ship}: missing`);
+                    return false;
+                }
+                const hits = shipData.hits || [];
+                const maxHits = shipData.w * shipData.h;
+                const defeated = hits.length >= maxHits;
+                console.log(`P1 ${ship}: ${hits.length}/${maxHits} - defeated: ${defeated}`);
+                return defeated;
+            });
+
+            const isP2Defeated = ['S', 'A', 'B'].every(ship => {
+                const shipData = p2Board[ship];
+                if (!shipData) {
+                    console.log(`P2 ${ship}: missing`);
+                    return false;
+                }
+                const hits = shipData.hits || [];
+                const maxHits = shipData.w * shipData.h;
+                const defeated = hits.length >= maxHits;
+                console.log(`P2 ${ship}: ${hits.length}/${maxHits} - defeated: ${defeated}`);
+                return defeated;
+            });
+
+            console.log('P1 Defeated:', isP1Defeated);
+            console.log('P2 Defeated:', isP2Defeated);
+
+            if (isP1Defeated || isP2Defeated) {
+                console.log('GAME OVER!');
+                const winner = isP1Defeated ? 'p2' : 'p1';
+                
+                // Prevent multiple calls
+                if (gameData.isGameOver) {
+                    console.log('Game already over, showing screen');
+                    showGameOver(gameData);
+                    return;
+                }
+                
+                await finalizeRewards(winner, gameData);
+            }
+        }
+
+        // Finalize Rewards
+        async function finalizeRewards(winnerNumber, gameData) {
+            // winnerNumber is 'p1' or 'p2', but gameData has 'player1' and 'player2'
+            const winnerKey = winnerNumber === 'p1' ? 'player1' : 'player2';
+            const loserKey = winnerNumber === 'p1' ? 'player2' : 'player1';
+            
+            const winnerId = gameData[winnerKey].name;
+            const loserNumber = winnerNumber === 'p1' ? 'p2' : 'p1';
+            const loserId = gameData[loserKey].name;
+
+            console.log('Finalizing rewards for winner:', winnerId);
+
+            // Get chosen pokemon for both players from Firebase
+            const chosenP1Ref = ref(database, `events/clay/chosen/p1`);
+            const chosenP2Ref = ref(database, `events/clay/chosen/p2`);
+            
+            const p1ChosenSnap = await get(chosenP1Ref);
+            const p2ChosenSnap = await get(chosenP2Ref);
+            
+            const p1Chosen = p1ChosenSnap.val() || {};
+            const p2Chosen = p2ChosenSnap.val() || {};
+
+            console.log('P1 Chosen:', p1Chosen);
+            console.log('P2 Chosen:', p2Chosen);
+
+            // Determine alive pokemon for winner
+            const winnerBoard = gameData.boards[winnerNumber];
+            const winnerChosen = winnerNumber === 'p1' ? p1Chosen : p2Chosen;
+            const alivePokemon = [];
+
+            ['S', 'A', 'B'].forEach(tier => {
+                const shipData = winnerBoard[tier];
+                if (!shipData) return;
+                
+                const maxHits = shipData.w * shipData.h;
+                const hits = shipData.hits || [];
+                
+                if (hits.length < maxHits) {
+                    // Ship is alive
+                    const pokemon = winnerChosen[tier];
+                    if (pokemon) {
+                        alivePokemon.push({ tier, pokemon });
+                        console.log(`Winner keeps ${tier}: ${pokemon.english_name}`);
+                    }
+                }
+            });
+
+            console.log('Alive pokemon for winner:', alivePokemon.length);
+
+            // Update coins for both
+            const winnerRef = ref(database, `players/${winnerId}`);
+            const loserRef = ref(database, `players/${loserId}`);
+
+            const winnerSnap = await get(winnerRef);
+            const loserSnap = await get(loserRef);
+
+            let winnerData = winnerSnap.val() || { coins: 0, rubyteam: [] };
+            let loserData = loserSnap.val() || { coins: 0, rubyteam: [] };
+
+            const hasAmulet = winnerData?.inventory?.itempermanenti?.['Amulet Coin'] === true;
+            winnerData.coins = (winnerData.coins || 0) + 1500 + (hasAmulet ? 375 : 0);
+          
+            const hasAmulet = loserData?.inventory?.itempermanenti?.['Amulet Coin'] === true;
+            loserData.coins = (loserData.coins || 0) + 750 + (hasAmulet ? 188 : 0);
+
+            // Add alive pokemon to winner inventory
+            if (!winnerData.rubyteam) winnerData.rubyteam = [];
+            alivePokemon.forEach(({ tier, pokemon }) => {
+                const pokemonWithStats = addNatureAndAbility(pokemon);
+                winnerData.rubyteam.push({
+                    ...pokemonWithStats,
+                    won_from: 'clay',
+                    won_at: Date.now()
+                });
+            });
+
+            await set(winnerRef, winnerData);
+            await set(loserRef, loserData);
+
+            console.log('Coins updated');
+
+            // Remove all pokemon from pools (winner's alive + loser's all)
+            const allPokemonToRemove = [...alivePokemon];
+            
+            // Add loser's pokemon too
+            const loserChosen = winnerNumber === 'p1' ? p2Chosen : p1Chosen;
+            ['S', 'A', 'B'].forEach(tier => {
+                const pokemon = loserChosen[tier];
+                if (pokemon) {
+                    allPokemonToRemove.push({ tier, pokemon });
+                    console.log(`Removing loser's ${tier}: ${pokemon.english_name}`);
+                }
+            });
+
+            console.log('Total pokemon to remove from pools:', allPokemonToRemove.length);
+
+            // Remove from pools
+            for (const { tier, pokemon } of allPokemonToRemove) {
+                try {
+                    const poolName = `${tier.toLowerCase()}_tier`;
+                    
+                    // For arrays, we need to find and remove the item
+                    const poolRef = ref(database, `pools/${poolName}`);
+                    const poolSnap = await get(poolRef);
+                    
+                    if (poolSnap.exists()) {
+                        const poolData = poolSnap.val();
+                        
+                        if (Array.isArray(poolData)) {
+                            // Find index and remove
+                            const index = poolData.findIndex(p => 
+                                p.national_number === pokemon.national_number && 
+                                p.english_name === pokemon.english_name
+                            );
+                            if (index !== -1) {
+                                poolData.splice(index, 1);
+                                await set(poolRef, poolData);
+                                console.log(`Removed ${pokemon.english_name} from ${poolName} (array)`);
+                            }
+                        } else {
+                            // Object structure
+                            const itemRef = ref(database, `pools/${poolName}/${pokemon.key}`);
+                            await remove(itemRef);
+                            console.log(`Removed ${pokemon.english_name} from ${poolName} (object)`);
+                        }
+                    }
+                } catch (error) {
+                    console.error('Error removing pokemon from pool:', error);
+                }
+            }
+
+            console.log('Pokemon removed from pools');
+
+            // Update game status
+            await update(eventRef, {
+                isGameOver: true,
+                winner: winnerId,
+                alivePokemonCount: alivePokemon.length
+            });
+
+            console.log('Game status updated');
+
+            // Remove players from event
+            const playersRef = ref(database, `events/clay/players`);
+            await remove(playersRef);
+
+            // Clean up chosen and boards
+            await remove(ref(database, `events/clay/chosen`));
+            await remove(ref(database, `events/clay/boards`));
+
+            console.log('Cleanup complete - showing game over screen');
+            
+            // Force show game over screen
+            showGameOver({
+                winner: winnerId,
+                alivePokemonCount: alivePokemon.length
+            });
+        }
+
+        // Show Game Over
+        function showGameOver(gameData) {
+            const screen = document.getElementById('gameOverScreen');
+            const winnerName = document.getElementById('winnerName');
+            const rewardsList = document.getElementById('rewardsList');
+
+            winnerName.textContent = `${gameData.winner} ha vinto!`;
+
+            const alivePokemonCount = gameData.alivePokemonCount || 0;
+
+            rewardsList.innerHTML = `
+                <div class="reward-item">🏆 ${gameData.winner}: ${alivePokemonCount} Pokémon non affondati</div>
+                <div class="reward-item">💰 ${gameData.winner}: +100 Coins</div>
+                <div class="reward-item">💰 Perdente: +100 Coins</div>
+            `;
+
+            screen.classList.add('show');
+        }
+
+        // Initialize
+        if (!getCurrentPlayer()) {
+            alert('Devi impostare il tuo nome dalla home page!');
+            window.location.href = 'index.html';
+        } else {
+            loadPokemonData();
+            renderLanding();
+        }
+    </script>
+</body>
+</html>
