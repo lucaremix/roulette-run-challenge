@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>May (ORAS) - Reward Selection</title>
+    <title>RS Mayor - Challenge</title>
     <style>
         * {
             margin: 0;
@@ -13,9 +13,7 @@
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-image: url('https://raw.githubusercontent.com/lucaremix/roulette-run-challenge/main/background/May_ORAS_background.png');
-            background-size: cover;
-            background-position: center;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
             background-attachment: fixed;
             color: #e0e0e0;
         }
@@ -73,6 +71,12 @@
             font-size: 2.5em;
             color: #ffffff;
             margin-bottom: 15px;
+        }
+
+        .event-description {
+            font-size: 1.1em;
+            color: #aaa;
+            line-height: 1.6;
         }
 
         .event-status {
@@ -199,7 +203,8 @@
             padding: 30px;
         }
 
-        .intro-screen {
+        /* Schermate */
+        .intro-screen, .choice-screen, .waiting-screen, .final-screen {
             background: #1a1a1a;
             border: 1px solid #2a2a2a;
             border-radius: 12px;
@@ -207,20 +212,20 @@
             display: none;
         }
 
-        .intro-screen.show {
+        .intro-screen.show, .choice-screen.show, .waiting-screen.show, .final-screen.show {
             display: block;
         }
 
-        .intro-content {
+        .intro-content, .choice-content, .waiting-content, .final-content {
             max-width: 800px;
             margin: 0 auto;
+            text-align: center;
         }
 
-        .intro-text h2 {
+        .intro-text h2, .choice-content h2 {
             font-size: 2em;
-            color: #ff69b4;
+            color: #4a9eff;
             margin-bottom: 20px;
-            text-align: center;
         }
 
         .intro-text p {
@@ -231,99 +236,84 @@
         }
 
         .intro-text .highlight {
-            color: #ff69b4;
+            color: #4a9eff;
             font-weight: bold;
         }
 
-        .choice-section {
-            background: #1a1a1a;
-            border: 1px solid #2a2a2a;
-            border-radius: 12px;
-            padding: 40px;
-            margin-bottom: 30px;
-            display: none;
+        .start-btn, .choice-btn {
+            display: inline-block;
+            margin: 15px 10px;
+            padding: 20px 60px;
+            background: #4a9eff;
+            color: #1a1a1a;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.3em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
         }
 
-        .choice-section.show {
-            display: block;
+        .start-btn:hover, .choice-btn:hover {
+            background: #5aafff;
+            transform: translateY(-2px);
         }
 
-        .choice-title {
-            font-size: 2em;
-            color: #ff69b4;
-            text-align: center;
-            margin-bottom: 30px;
+        .choice-options {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            margin-top: 30px;
         }
 
-        .choices-container {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 30px;
-            max-width: 900px;
-            margin: 0 auto;
-        }
-
-        .choice-card {
+        .choice-option {
             background: #0a0a0a;
             border: 2px solid #2a2a2a;
             border-radius: 12px;
             padding: 30px;
-            text-align: center;
-            transition: all 0.3s ease;
             cursor: pointer;
+            transition: all 0.3s ease;
         }
 
-        .choice-card:hover {
-            border-color: #ff69b4;
-            transform: translateY(-5px);
-            box-shadow: 0 5px 20px rgba(255, 105, 180, 0.3);
+        .choice-option:hover {
+            border-color: #4a9eff;
+            background: #1a1a1a;
         }
 
-        .choice-card.selected {
-            border-color: #7fff7f;
-            background: #1a2a1a;
-        }
-
-        .choice-card.disabled {
+        .choice-option.disabled {
             opacity: 0.5;
             cursor: not-allowed;
-            pointer-events: none;
         }
 
-        .choice-icon {
-            font-size: 4em;
-            margin-bottom: 20px;
-        }
-
-        .pokemon-selection {
+        .choice-option.disabled:hover {
+            border-color: #2a2a2a;
             background: #0a0a0a;
-            border: 1px solid #2a2a2a;
-            border-radius: 12px;
-            padding: 30px;
-            margin-top: 30px;
-            display: none !important;
         }
 
-        .pokemon-selection.show {
-            display: block !important;
-        }
-
-        .pokemon-selection-title {
+        .choice-title {
             font-size: 1.5em;
-            color: #ff6464;
-            text-align: center;
-            margin-bottom: 20px;
+            color: #4a9eff;
+            margin-bottom: 10px;
+        }
+
+        .choice-description {
+            font-size: 1.1em;
+            color: #aaa;
+        }
+
+        .pokemon-selector {
+            margin-top: 20px;
         }
 
         .pokemon-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
             gap: 15px;
-            margin-bottom: 20px;
+            margin-top: 15px;
         }
 
-        .pokemon-card {
-            background: #1a1a1a;
+        .pokemon-item {
+            background: #0a0a0a;
             border: 2px solid #2a2a2a;
             border-radius: 8px;
             padding: 15px;
@@ -332,588 +322,504 @@
             transition: all 0.3s ease;
         }
 
-        .pokemon-card:hover {
-            border-color: #ff6464;
-            transform: translateY(-3px);
+        .pokemon-item:hover {
+            border-color: #4a9eff;
+            background: #1a1a1a;
         }
 
-        .pokemon-card.selected {
-            border-color: #ff6464;
-            background: #2a1a1a;
+        .pokemon-item.selected {
+            border-color: #4a9eff;
+            background: #1a2a3a;
         }
 
-        .pokemon-card img {
+        .pokemon-item img {
             width: 80px;
             height: 80px;
             object-fit: contain;
             image-rendering: pixelated;
         }
 
-        .pokemon-card-name {
-            font-size: 1em;
-            color: #e0e0e0;
+        .pokemon-item .pokemon-name {
             margin-top: 10px;
-            font-weight: 600;
+            font-size: 0.9em;
+            color: #e0e0e0;
         }
 
-        .no-pokemon {
-            text-align: center;
-            color: #ff6464;
-            font-size: 1.2em;
-            padding: 30px;
-        }
-
-        .choice-name {
-            font-size: 1.5em;
-            color: #ffffff;
-            margin-bottom: 15px;
-            font-weight: 600;
-        }
-
-        .choice-description {
-            font-size: 1.1em;
-            color: #aaa;
-            line-height: 1.6;
-        }
-
-        .confirm-btn {
-            display: block;
-            margin: 30px auto 0;
-            padding: 15px 50px;
-            background: #ff69b4;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 1.2em;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            font-weight: 600;
-        }
-
-        .confirm-btn:hover {
-            background: #ff1493;
-        }
-
-        .confirm-btn:disabled {
-            background: #2a2a2a;
-            color: #555;
-            cursor: not-allowed;
-        }
-
-        .selection-status {
-            text-align: center;
+        .confirm-trade-btn {
             margin-top: 20px;
-            padding: 20px;
-            background: #0a0a0a;
-            border-radius: 8px;
-            font-size: 1.1em;
-        }
-
-        .selection-status.waiting {
-            color: #ffa500;
-        }
-
-        .selection-status.both-selected {
-            color: #7fff7f;
-        }
-
-        .final-result {
-            background: #1a1a1a;
-            border: 1px solid #2a2a2a;
-            border-radius: 12px;
-            padding: 40px;
-            text-align: center;
-            display: none;
-        }
-
-        .final-result.show {
-            display: block;
-        }
-
-        .final-title {
-            font-size: 2.5em;
-            color: #7fff7f;
-            margin-bottom: 30px;
-        }
-
-        .rewards-summary {
-            max-width: 600px;
-            margin: 0 auto;
-        }
-
-        .reward-item {
-            background: #0a0a0a;
-            border: 1px solid #2a2a2a;
-            border-radius: 8px;
-            padding: 20px;
-            margin-bottom: 15px;
-            font-size: 1.2em;
-        }
-
-        .go-spin-btn {
-            display: inline-block;
-            margin-top: 30px;
-            padding: 15px 50px;
+            padding: 15px 40px;
             background: #2a7a2a;
             color: white;
             border: none;
             border-radius: 8px;
-            font-size: 1.2em;
+            font-size: 1.1em;
             cursor: pointer;
             transition: all 0.3s ease;
-            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .confirm-trade-btn:hover {
+            background: #357a35;
+        }
+
+        .confirm-trade-btn:disabled {
+            background: #2a2a2a;
+            cursor: not-allowed;
+            opacity: 0.5;
+        }
+
+        .waiting-content h2 {
+            font-size: 1.8em;
+            color: #4a9eff;
+            margin-bottom: 20px;
+        }
+
+        .waiting-content p {
+            font-size: 1.2em;
+            color: #aaa;
+        }
+
+        .spinner {
+            border: 4px solid #2a2a2a;
+            border-top: 4px solid #4a9eff;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 30px auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .final-content h2 {
+            font-size: 2.2em;
+            color: #7fff7f;
+            margin-bottom: 30px;
+        }
+
+        .reward-summary {
+            background: #0a0a0a;
+            border: 1px solid #2a2a2a;
+            border-radius: 12px;
+            padding: 30px;
+            margin: 20px 0;
+        }
+
+        .reward-item {
+            font-size: 1.2em;
+            color: #e0e0e0;
+            padding: 15px;
+            margin: 10px 0;
+            background: #1a1a1a;
+            border-radius: 8px;
+        }
+
+        .go-spin-btn {
+            display: inline-block;
+            margin: 20px auto;
+            padding: 20px 60px;
+            background: #ffa500;
+            color: #1a1a1a;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.3em;
+            cursor: pointer;
+            transition: all 0.3s ease;
             font-weight: 600;
         }
 
         .go-spin-btn:hover {
-            background: #357a35;
-        }
-
-        @media (max-width: 768px) {
-            .choices-container {
-                grid-template-columns: 1fr;
-            }
-
-            .event-header {
-                flex-direction: column;
-                text-align: center;
-            }
+            background: #ffb520;
+            transform: translateY(-2px);
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <a href="index.html" class="back-btn">← Torna alla Home</a>
+        <a href="index.html" class="back-btn">
+            ← Torna alla Home
+        </a>
 
         <div class="event-header">
-            <img src="https://raw.githubusercontent.com/lucaremix/roulette-run-challenge/main/trainers/May_ORAS.png" 
-                 alt="May ORAS" 
-                 class="event-trainer-img">
+            <img src="https://raw.githubusercontent.com/lucaremix/roulette-run-challenge/main/trainers/rs_mayor.png" 
+                 alt="RS Mayor" class="event-trainer-img" onerror="this.style.display='none'">
             <div class="event-info">
-                <h1 class="event-title">May (ORAS) - Reward Selection</h1>
+                <h1 class="event-title">RS Mayor Challenge</h1>
+                <p class="event-description">Il sindaco ti propone una scelta: ricevi 1500 coins oppure 750 coins e scambia un tuo Pokémon per uno spin del Tier B!</p>
                 <div class="event-status">
-                    <span class="status-badge" id="statusBadge">Non Unito</span>
-                    <button class="join-leave-btn join-btn" id="joinLeaveBtn" onclick="toggleJoin()">
-                        Unisciti all'evento
-                    </button>
+                    <span class="status-badge" id="statusBadge">Non Partecipante</span>
+                    <button class="join-leave-btn join-btn" id="joinBtn" onclick="toggleJoin()">Unisciti</button>
                 </div>
             </div>
         </div>
 
         <div class="players-section">
             <h2 class="players-title">
-                Giocatori in Lobby
+                Giocatori nella Lobby
                 <span class="player-count-badge" id="playerCount">0/2</span>
             </h2>
             <div class="players-list" id="playersList">
-                <div class="no-players">Nessun giocatore in lobby</div>
+                <div class="no-players">Nessun giocatore nella lobby</div>
             </div>
         </div>
 
+        <!-- Schermata Introduzione -->
         <div class="intro-screen" id="introScreen">
             <div class="intro-content">
                 <div class="intro-text">
-                    <h2>🎁 Scegli la tua Ricompensa!</h2>
-                    <p>May ti offre una scelta per ringraziarti del tuo aiuto:</p>
-                    <p class="highlight">Opzione 1: 1500 Coins</p>
-                    <p>Ricevi subito una generosa ricompensa in monete!</p>
-                    <p class="highlight">Opzione 2: 750 Coins + Spin Tier B</p>
-                    <p>Ricevi meno monete, ma avrai anche l'opportunità di ottenere un Pokémon dal pool Tier B!</p>
-                    <p style="margin-top: 20px; font-style: italic; color: #aaa;">
-                        Entrambi i giocatori possono fare la propria scelta indipendentemente.
-                    </p>
+                    <h2>Benvenuto alla RS Mayor Challenge!</h2>
+                    <p>Il <span class="highlight">sindaco</span> ti propone una scelta importante:</p>
+                    <p>📊 <span class="highlight">Opzione 1:</span> Ricevi 1500 coins</p>
+                    <p>🔄 <span class="highlight">Opzione 2:</span> Ricevi 750 coins + Scambia un tuo Pokémon per 1 Spin Tier B</p>
+                    <p>Scegli saggiamente! Entrambi i giocatori faranno la loro scelta.</p>
+                </div>
+                <button class="start-btn" onclick="startChallenge()">Inizia!</button>
+            </div>
+        </div>
+
+        <!-- Schermata Scelta -->
+        <div class="choice-screen" id="choiceScreen">
+            <div class="choice-content">
+                <h2>Fai la tua scelta!</h2>
+                <div class="choice-options">
+                    <!-- Opzione 1: Solo Coins -->
+                    <div class="choice-option" id="option1" onclick="selectOption(1)">
+                        <div class="choice-title">💰 1500 Coins</div>
+                        <div class="choice-description">Ricevi semplicemente 1500 coins</div>
+                    </div>
+
+                    <!-- Opzione 2: Coins + Trade -->
+                    <div class="choice-option" id="option2">
+                        <div class="choice-title">🔄 750 Coins + Trade</div>
+                        <div class="choice-description">Ricevi 750 coins e scambia un Pokémon per 1 Spin Tier B</div>
+                        
+                        <div class="pokemon-selector" id="pokemonSelector" style="display: none;">
+                            <p style="color: #aaa; margin-bottom: 10px;">Seleziona un Pokémon da scambiare:</p>
+                            <div class="pokemon-grid" id="pokemonGrid"></div>
+                            <button class="confirm-trade-btn" id="confirmTradeBtn" onclick="confirmTrade()" disabled>
+                                Conferma Scambio
+                            </button>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <div class="choice-section" id="choiceSection">
-            <h2 class="choice-title">Scegli la tua ricompensa</h2>
-            <div class="choices-container">
-                <div class="choice-card" id="choice1" onclick="selectChoice(1)">
-                    <div class="choice-icon">💰</div>
-                    <div class="choice-name">1500 Coins</div>
-                    <div class="choice-description">
-                        Ricevi 1500 coins direttamente nel tuo inventario
-                    </div>
-                </div>
-                <div class="choice-card" id="choice2" onclick="selectChoice(2)">
-                    <div class="choice-icon">🎰</div>
-                    <div class="choice-name">750 Coins + Spin</div>
-                    <div class="choice-description">
-                        Ricevi 750 coins e un'opportunità di ottenere un Pokémon dal Tier B<br>
-                        <span style="color: #ff6464; font-weight: bold;">⚠️ Devi sacrificare un Pokémon della tua squadra</span>
-                    </div>
-                </div>
+        <!-- Schermata Attesa -->
+        <div class="waiting-screen" id="waitingScreen">
+            <div class="waiting-content">
+                <h2>In attesa dell'altro giocatore...</h2>
+                <div class="spinner"></div>
+                <p>Aspettando che l'altro giocatore completi la sua scelta.</p>
             </div>
-            <div class="pokemon-selection" id="pokemonSelection">
-                <h3 class="pokemon-selection-title">⚠️ Seleziona un Pokémon da sacrificare</h3>
-                <div class="pokemon-grid" id="pokemonGrid"></div>
-            </div>
-            <button class="confirm-btn" id="confirmBtn" onclick="confirmChoice()" disabled>
-                Conferma Scelta
-            </button>
-            <div class="selection-status" id="selectionStatus"></div>
         </div>
 
-        <div class="final-result" id="finalResult">
-            <h2 class="final-title">🎉 Ricompense Assegnate!</h2>
-            <div class="rewards-summary" id="rewardsSummary"></div>
-            <button class="go-spin-btn" onclick="goToSpin()">
-                Vai allo Spin
-            </button>
+        <!-- Schermata Finale -->
+        <div class="final-screen" id="finalScreen">
+            <div class="final-content">
+                <h2>Challenge Completata!</h2>
+                <div class="reward-summary" id="rewardSummary"></div>
+                <button class="go-spin-btn" onclick="goToSpin()" id="goSpinBtn" style="display: none;">
+                    Vai allo Spin! 🎰
+                </button>
+            </div>
         </div>
     </div>
 
     <script type="module">
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js';
-        import { getDatabase, ref, set, get, onValue, remove } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js';
+        import { getDatabase, ref, set, get, onValue, update, remove } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js';
 
         const firebaseConfig = {
-            apiKey: "AIzaSyDICmNTl-ELvmZmVHa7OkkcJ0D5rdarxJI",
-            authDomain: "roulette-run-challenge.firebaseapp.com",
-            databaseURL: "https://roulette-run-challenge-default-rtdb.europe-west1.firebasedatabase.app",
-            projectId: "roulette-run-challenge",
-            storageBucket: "roulette-run-challenge.firebasestorage.app",
-            messagingSenderId: "122753205997",
-            appId: "1:122753205997:web:c2005ca35c46ea31f80d37"
+            apiKey: "AIzaSyDWbFOYlxHYw_J7frnHJO9LQBue0eqVXoM",
+            authDomain: "pokemon-roulette-run-challenge.firebaseapp.com",
+            databaseURL: "https://pokemon-roulette-run-challenge-default-rtdb.europe-west1.firebasedatabase.app",
+            projectId: "pokemon-roulette-run-challenge",
+            storageBucket: "pokemon-roulette-run-challenge.firebasestorage.app",
+            messagingSenderId: "786149427296",
+            appId: "1:786149427296:web:afd50bd62da4c6d29d8b9f"
         };
 
         const app = initializeApp(firebaseConfig);
         const database = getDatabase(app);
-        const eventRef = ref(database, 'events/may-oras-2');
+        const eventRef = ref(database, 'events/rs-mayor');
 
         function getCurrentPlayer() {
             return localStorage.getItem('playerName');
         }
 
-        let selectedChoice = null;
-        let eventState = null;
+        let myTeam = [];
         let selectedPokemon = null;
-        let playerTeam = [];
 
         async function loadPlayerTeam() {
+            const playerName = getCurrentPlayer();
+            const teamRef = ref(database, `players/${playerName}/rubyteam`);
+            const snapshot = await get(teamRef);
+            
+            if (snapshot.exists()) {
+                myTeam = Object.values(snapshot.val());
+                console.log('Team caricato:', myTeam);
+            } else {
+                myTeam = [];
+            }
+        }
+
+        async function renderLanding() {
             const currentPlayer = getCurrentPlayer();
-            console.log('Loading team for player:', currentPlayer);
-            
-            // Il percorso corretto è players/${player}/rubyteam
-            const playerRef = ref(database, `players/${currentPlayer}/rubyteam`);
-            const snapshot = await get(playerRef);
-            const teamData = snapshot.val();
-            
-            console.log('Raw team data from Firebase:', teamData);
-            
-            // Il team è un oggetto con chiavi numeriche, lo convertiamo in array
-            if (teamData && typeof teamData === 'object') {
-                playerTeam = Object.values(teamData);
+            const snapshot = await get(eventRef);
+            const data = snapshot.val();
+
+            const isJoined = data?.players?.includes(currentPlayer);
+            const playerCount = data?.players?.length || 0;
+
+            document.getElementById('statusBadge').textContent = isJoined ? 'Partecipante' : 'Non Partecipante';
+            document.getElementById('statusBadge').className = `status-badge ${isJoined ? 'joined' : 'not-joined'}`;
+
+            const joinBtn = document.getElementById('joinBtn');
+            if (isJoined) {
+                joinBtn.textContent = 'Abbandona';
+                joinBtn.className = 'join-leave-btn leave-btn';
             } else {
-                playerTeam = [];
+                joinBtn.textContent = 'Unisciti';
+                joinBtn.className = 'join-leave-btn join-btn';
             }
-            
-            console.log('Player team loaded (converted to array):', playerTeam);
-            console.log('Team length:', playerTeam.length);
-            return playerTeam;
-        }
 
-        window.selectChoice = async function(choiceNum) {
-            console.log('=== SELECT CHOICE ===');
-            console.log('Choice number:', choiceNum);
-            selectedChoice = choiceNum;
-            selectedPokemon = null;
-            
-            document.getElementById('choice1').classList.remove('selected');
-            document.getElementById('choice2').classList.remove('selected');
-            document.getElementById(`choice${choiceNum}`).classList.add('selected');
-            
-            const pokemonSelection = document.getElementById('pokemonSelection');
-            const confirmBtn = document.getElementById('confirmBtn');
-            
-            console.log('Pokemon selection element:', pokemonSelection);
-            console.log('Confirm button element:', confirmBtn);
+            document.getElementById('playerCount').textContent = `${playerCount}/2`;
 
-            if (choiceNum === 2) {
-                console.log('📋 Choice 2 selected - Loading team...');
-                
-                // Carica il team del giocatore
-                await loadPlayerTeam();
-                console.log('✅ Team loaded, length:', playerTeam.length);
-                console.log('Full team data:', JSON.stringify(playerTeam, null, 2));
-                
-                if (playerTeam.length === 0) {
-                    console.log('❌ No pokemon in team!');
-                    alert('Non hai Pokémon nella tua squadra! Devi scegliere l\'altra opzione.');
-                    document.getElementById('choice2').classList.add('disabled');
-                    document.getElementById('choice2').classList.remove('selected');
-                    selectedChoice = null;
-                    pokemonSelection.classList.remove('show');
-                    confirmBtn.disabled = true;
-                    return;
-                }
-                
-                // Mostra la selezione Pokémon e disabilita il pulsante finché non viene selezionato un Pokémon
-                console.log('🎯 About to show pokemon selection...');
-                console.log('Pokemon selection current display:', window.getComputedStyle(pokemonSelection).display);
-                console.log('Pokemon selection current classes:', pokemonSelection.className);
-                
-                pokemonSelection.classList.add('show');
-                
-                console.log('✅ Added "show" class');
-                console.log('Pokemon selection new classes:', pokemonSelection.className);
-                console.log('Pokemon selection new display:', window.getComputedStyle(pokemonSelection).display);
-                console.log('Pokemon selection visibility:', window.getComputedStyle(pokemonSelection).visibility);
-                console.log('Pokemon selection opacity:', window.getComputedStyle(pokemonSelection).opacity);
-                
-                console.log('📊 Calling renderPokemonGrid...');
-                renderPokemonGrid();
-                
-                confirmBtn.disabled = true;
-                console.log('✅ Confirm button disabled');
+            const playersList = document.getElementById('playersList');
+            if (playerCount === 0) {
+                playersList.innerHTML = '<div class="no-players">Nessun giocatore nella lobby</div>';
             } else {
-                console.log('💰 Choice 1 selected');
-                // Nascondi la selezione Pokémon
-                pokemonSelection.classList.remove('show');
-                confirmBtn.disabled = false; // Abilita subito per opzione 1
-            }
-        };
-
-        function renderPokemonGrid() {
-            const grid = document.getElementById('pokemonGrid');
-            console.log('=== RENDER POKEMON GRID ===');
-            console.log('Grid element:', grid);
-            console.log('Player team:', playerTeam);
-            console.log('Team length:', playerTeam.length);
-            
-            if (!grid) {
-                console.error('❌ Pokemon grid element not found!');
-                alert('Errore: elemento griglia non trovato!');
-                return;
-            }
-            
-            if (playerTeam.length === 0) {
-                console.log('⚠️ No pokemon in team');
-                grid.innerHTML = '<div class="no-pokemon">Nessun Pokémon disponibile nella squadra</div>';
-                return;
-            }
-
-            const cardsHtml = playerTeam.map((pokemon, index) => {
-                console.log(`Processing pokemon ${index}:`, pokemon);
-                
-                // I campi corretti sono english_name e national_number
-                const nationalNumber = pokemon.national_number || pokemon.nationalNumber || 1;
-                const pokemonName = pokemon.english_name || pokemon.name || 'Unknown';
-                const imgUrl = `https://www.pokemon.com/static-assets/content-assets/cms2/img/pokedex/full/${padNumber(nationalNumber)}.png`;
-                
-                console.log(`  - Name: ${pokemonName}, Number: ${nationalNumber}`);
-                
-                return `
-                    <div class="pokemon-card" id="poke-${index}" onclick="selectPokemon(${index})">
-                        <img src="${imgUrl}" alt="${pokemonName}" onerror="this.src='https://via.placeholder.com/80?text=${pokemonName}'">
-                        <div class="pokemon-card-name">${pokemonName}</div>
+                playersList.innerHTML = data.players.map(player => `
+                    <div class="player-card ${player === currentPlayer ? 'current-user' : ''}">
+                        <span class="player-name">${player}</span>
+                        ${player === currentPlayer ? '<span class="you-badge">Tu</span>' : ''}
                     </div>
-                `;
-            }).join('');
-            
-            console.log('Generated HTML length:', cardsHtml.length);
-            console.log('First 200 chars:', cardsHtml.substring(0, 200));
-            
-            grid.innerHTML = cardsHtml;
-            
-            console.log('✅ Grid HTML set, final innerHTML length:', grid.innerHTML.length);
-            console.log('Grid children count:', grid.children.length);
-        }
+                `).join('');
+            }
 
-        window.selectPokemon = function(index) {
-            selectedPokemon = index;
-            
-            // Rimuovi selezione da tutti
-            document.querySelectorAll('.pokemon-card').forEach(card => {
-                card.classList.remove('selected');
-            });
-            
-            // Aggiungi selezione al pokémon scelto
-            document.getElementById(`poke-${index}`).classList.add('selected');
-            
-            // Abilita il pulsante conferma
-            document.getElementById('confirmBtn').disabled = false;
-        };
-
-        function padNumber(num) {
-            return String(num).padStart(3, '0');
+            // Mostra la schermata appropriata
+            if (data?.started && isJoined) {
+                document.getElementById('introScreen').classList.remove('show');
+                
+                if (data.choices && data.choices[currentPlayer]) {
+                    // Ho già fatto la mia scelta
+                    const bothChosen = Object.keys(data.choices).length === 2;
+                    if (bothChosen) {
+                        showFinalScreen(data);
+                    } else {
+                        document.getElementById('waitingScreen').classList.add('show');
+                    }
+                } else {
+                    // Devo ancora scegliere
+                    document.getElementById('choiceScreen').classList.add('show');
+                }
+            } else if (playerCount === 2 && !data?.started) {
+                document.getElementById('introScreen').classList.add('show');
+            }
         }
 
         window.toggleJoin = async function() {
             const currentPlayer = getCurrentPlayer();
             const snapshot = await get(eventRef);
-            const state = snapshot.val() || {};
+            let data = snapshot.val() || { players: [] };
 
-            if (state.players && state.players[currentPlayer]) {
-                // Leave
-                delete state.players[currentPlayer];
-                if (Object.keys(state.players).length === 0) {
+            const isJoined = data.players?.includes(currentPlayer);
+
+            if (isJoined) {
+                data.players = data.players.filter(p => p !== currentPlayer);
+                if (data.players.length === 0) {
                     await remove(eventRef);
                 } else {
-                    await set(eventRef, state);
+                    await set(eventRef, data);
                 }
             } else {
-                // Join
-                if (!state.players) state.players = {};
-                
-                if (Object.keys(state.players).length >= 2) {
+                if (data.players.length >= 2) {
                     alert('La lobby è piena!');
                     return;
                 }
-
-                state.players[currentPlayer] = {
-                    name: currentPlayer,
-                    choice: null,
-                    confirmed: false
-                };
-
-                await set(eventRef, state);
+                data.players = [...(data.players || []), currentPlayer];
+                await set(eventRef, data);
             }
         };
 
-        window.selectChoice = function(choiceNum) {
-            selectedChoice = choiceNum;
+        window.startChallenge = async function() {
+            const snapshot = await get(eventRef);
+            const data = snapshot.val();
+
+            data.started = true;
+            data.choices = {};
+            await set(eventRef, data);
             
-            document.getElementById('choice1').classList.remove('selected');
-            document.getElementById('choice2').classList.remove('selected');
-            document.getElementById(`choice${choiceNum}`).classList.add('selected');
-            
-            document.getElementById('confirmBtn').disabled = false;
+            await loadPlayerTeam();
         };
 
-        window.confirmChoice = async function() {
-            if (!selectedChoice) return;
+        window.selectOption = function(option) {
+            if (option === 1) {
+                // Opzione 1: Solo coins
+                document.getElementById('option1').style.borderColor = '#4a9eff';
+                document.getElementById('option2').style.borderColor = '#2a2a2a';
+                document.getElementById('pokemonSelector').style.display = 'none';
+                
+                confirmChoice(1, null);
+            } else if (option === 2) {
+                // Opzione 2: Trade
+                document.getElementById('option1').style.borderColor = '#2a2a2a';
+                document.getElementById('option2').style.borderColor = '#4a9eff';
+                document.getElementById('pokemonSelector').style.display = 'block';
+                
+                renderPokemonGrid();
+            }
+        };
+
+        function renderPokemonGrid() {
+            const grid = document.getElementById('pokemonGrid');
             
-            // Se scelta 2, verifica che sia stato selezionato un Pokémon
-            if (selectedChoice === 2 && selectedPokemon === null) {
-                alert('Devi selezionare un Pokémon da sacrificare!');
+            if (myTeam.length === 0) {
+                grid.innerHTML = '<p style="color: #ff6464; text-align: center;">Non hai Pokémon nel team!</p>';
                 return;
             }
 
-            const currentPlayer = getCurrentPlayer();
-            const snapshot = await get(eventRef);
-            const state = snapshot.val();
-
-            if (state.players[currentPlayer]) {
-                state.players[currentPlayer].choice = selectedChoice;
-                state.players[currentPlayer].confirmed = true;
-                
-                // Se scelta 2, salva anche il Pokémon da rimuovere
-                if (selectedChoice === 2) {
-                    state.players[currentPlayer].sacrificedPokemon = playerTeam[selectedPokemon];
-                    state.players[currentPlayer].sacrificedPokemonIndex = selectedPokemon;
-                }
-                
-                await set(eventRef, state);
-                
-                document.getElementById('confirmBtn').disabled = true;
-                document.getElementById('pokemonSelection').classList.remove('show');
-                checkBothConfirmed(state);
-            }
-        };
-
-        function checkBothConfirmed(state) {
-            const players = Object.values(state.players);
-            const allConfirmed = players.length === 2 && players.every(p => p.confirmed);
-
-            if (allConfirmed) {
-                giveRewards(state);
-            } else {
-                updateSelectionStatus(state);
-            }
+            grid.innerHTML = myTeam.map((poke, index) => `
+                <div class="pokemon-item" onclick="selectPokemonForTrade(${index})">
+                    <img src="https://www.pokemon.com/static-assets/content-assets/cms2/img/pokedex/full/${String(poke.national_number).padStart(3, '0')}.png" 
+                         alt="${poke.name}">
+                    <div class="pokemon-name">${poke.name}</div>
+                </div>
+            `).join('');
         }
 
-        function updateSelectionStatus(state) {
-            const statusDiv = document.getElementById('selectionStatus');
-            const players = Object.values(state.players);
-            const confirmedCount = players.filter(p => p.confirmed).length;
+        window.selectPokemonForTrade = function(index) {
+            selectedPokemon = myTeam[index];
+            
+            // Evidenzia il pokemon selezionato
+            document.querySelectorAll('.pokemon-item').forEach((item, i) => {
+                if (i === index) {
+                    item.classList.add('selected');
+                } else {
+                    item.classList.remove('selected');
+                }
+            });
 
-            if (confirmedCount === 0) {
-                statusDiv.innerHTML = '';
-                statusDiv.className = 'selection-status';
-            } else if (confirmedCount === 1) {
-                statusDiv.innerHTML = '⏳ In attesa dell\'altro giocatore...';
-                statusDiv.className = 'selection-status waiting';
+            document.getElementById('confirmTradeBtn').disabled = false;
+        };
+
+        window.confirmTrade = function() {
+            if (!selectedPokemon) return;
+            confirmChoice(2, selectedPokemon);
+        };
+
+        async function confirmChoice(option, pokemon) {
+            const currentPlayer = getCurrentPlayer();
+            const snapshot = await get(eventRef);
+            const data = snapshot.val();
+
+            if (!data.choices) data.choices = {};
+            
+            data.choices[currentPlayer] = {
+                option: option,
+                pokemon: pokemon
+            };
+
+            await set(eventRef, data);
+
+            document.getElementById('choiceScreen').classList.remove('show');
+            
+            // Verifica se entrambi hanno scelto
+            if (Object.keys(data.choices).length === 2) {
+                await giveRewards(data);
             } else {
-                statusDiv.innerHTML = '✅ Entrambi i giocatori hanno scelto!';
-                statusDiv.className = 'selection-status both-selected';
+                document.getElementById('waitingScreen').classList.add('show');
             }
         }
 
         async function giveRewards(state) {
-            const players = Object.values(state.players);
-
-            for (const player of players) {
-                // Percorso corretto: players/${player}/
-                const playerRef = ref(database, `players/${player.name}`);
+            const players = state.players;
+            
+            for (const playerName of players) {
+                const choice = state.choices[playerName];
+                const playerRef = ref(database, `players/${playerName}`);
                 const playerSnap = await get(playerRef);
-                let playerData = playerSnap.val() || { coins: 0, rubyteam: {} };
+                let playerData = playerSnap.val() || { coins: 0 };
 
                 const hasAmulet = playerData?.inventory?.itempermanenti?.['Amulet Coin'] === true;
 
-                if (player.choice === 1) {
-                    // 1500 coins
+                if (choice.option === 1) {
+                    // Opzione 1: 1500 coins
                     const coins = 1500;
                     playerData.coins = (playerData.coins || 0) + coins + (hasAmulet ? Math.floor(coins / 4) : 0);
-                } else {
-                    // 750 coins + spin + rimuovi Pokémon
+                } else if (choice.option === 2) {
+                    // Opzione 2: 750 coins + trade
                     const coins = 750;
                     playerData.coins = (playerData.coins || 0) + coins + (hasAmulet ? Math.floor(coins / 4) : 0);
-                    playerData.pendingSpin = { pool: 'b-tier', from: 'may-oras-2' };
                     
-                    // Rimuovi il Pokémon sacrificato dal rubyteam
-                    // Il rubyteam è un oggetto con chiavi numeriche
-                    if (playerData.rubyteam && player.sacrificedPokemonIndex !== undefined) {
-                        // Converti in array, rimuovi l'elemento, riconverti in oggetto
-                        const teamArray = Object.values(playerData.rubyteam);
-                        teamArray.splice(player.sacrificedPokemonIndex, 1);
+                    // Rimuovi il pokemon dal team
+                    const teamRef = ref(database, `players/${playerName}/rubyteam`);
+                    const teamSnap = await get(teamRef);
+                    if (teamSnap.exists()) {
+                        const team = teamSnap.val();
+                        const teamArray = Object.entries(team);
+                        const indexToRemove = teamArray.findIndex(([key, poke]) => 
+                            poke.name === choice.pokemon.name && 
+                            poke.national_number === choice.pokemon.national_number
+                        );
                         
-                        // Ricostruisci l'oggetto rubyteam con nuove chiavi
-                        playerData.rubyteam = {};
-                        teamArray.forEach((pokemon, index) => {
-                            playerData.rubyteam[index] = pokemon;
-                        });
+                        if (indexToRemove !== -1) {
+                            const keyToRemove = teamArray[indexToRemove][0];
+                            await remove(ref(database, `players/${playerName}/rubyteam/${keyToRemove}`));
+                        }
                     }
+                    
+                    // Aggiungi pending spin
+                    playerData.pendingSpin = { pool: 'b-tier', from: 'rs-mayor' };
                 }
 
                 await set(playerRef, playerData);
             }
 
-            // Show final result
-            showFinalResult(state);
+            state.completed = true;
+            await set(eventRef, state);
         }
 
-        function showFinalResult(state) {
-            document.getElementById('choiceSection').classList.remove('show');
-            document.getElementById('finalResult').classList.add('show');
+        function showFinalScreen(data) {
+            document.getElementById('waitingScreen').classList.remove('show');
+            document.getElementById('finalScreen').classList.add('show');
 
-            const summaryDiv = document.getElementById('rewardsSummary');
-            let html = '';
+            const currentPlayer = getCurrentPlayer();
+            const myChoice = data.choices[currentPlayer];
+            const otherPlayer = data.players.find(p => p !== currentPlayer);
+            const otherChoice = data.choices[otherPlayer];
 
-            for (const player of Object.values(state.players)) {
-                const playerRef = ref(database, `players/${player.name}`);
-                get(playerRef).then(snap => {
-                    const playerData = snap.val();
-                    const hasAmulet = playerData?.inventory?.itempermanenti?.['Amulet Coin'] === true;
-                    
-                    if (player.choice === 1) {
-                        const coins = 1500;
-                        const bonus = hasAmulet ? Math.floor(coins / 4) : 0;
-                        html += `<div class="reward-item">
-                            💰 ${player.name}: ${coins}${bonus > 0 ? ` + ${bonus} (Amulet Coin)` : ''} coins
-                        </div>`;
-                    } else {
-                        const coins = 750;
-                        const bonus = hasAmulet ? Math.floor(coins / 4) : 0;
-                        const sacrificed = player.sacrificedPokemon ? player.sacrificedPokemon.english_name || player.sacrificedPokemon.name : 'Pokémon';
-                        html += `<div class="reward-item">
-                            🎰 ${player.name}: ${coins}${bonus > 0 ? ` + ${bonus} (Amulet Coin)` : ''} coins + 1 Spin Tier B<br>
-                            <span style="color: #ff6464; font-size: 0.9em;">⚰️ ${sacrificed} è stato sacrificato</span>
-                        </div>`;
-                    }
-                    summaryDiv.innerHTML = html;
-                });
+            let summaryHTML = '<h3 style="color: #4a9eff; margin-bottom: 20px;">Riepilogo Scelte</h3>';
+            
+            // Mia scelta
+            summaryHTML += '<div class="reward-item">';
+            summaryHTML += `<strong>🎯 ${currentPlayer}:</strong> `;
+            if (myChoice.option === 1) {
+                summaryHTML += `1500 Coins 💰`;
+            } else {
+                summaryHTML += `750 Coins 💰 + Scambiato ${myChoice.pokemon.name} per 1 Spin Tier B 🎰`;
+            }
+            summaryHTML += '</div>';
+
+            // Scelta avversario
+            summaryHTML += '<div class="reward-item">';
+            summaryHTML += `<strong>🎯 ${otherPlayer}:</strong> `;
+            if (otherChoice.option === 1) {
+                summaryHTML += `1500 Coins 💰`;
+            } else {
+                summaryHTML += `750 Coins 💰 + Scambiato ${otherChoice.pokemon.name} per 1 Spin Tier B 🎰`;
+            }
+            summaryHTML += '</div>';
+
+            document.getElementById('rewardSummary').innerHTML = summaryHTML;
+
+            // Mostra bottone spin se ho scelto opzione 2
+            if (myChoice.option === 2) {
+                document.getElementById('goSpinBtn').style.display = 'inline-block';
             }
         }
 
@@ -921,96 +827,15 @@
             window.location.href = 'pokemon-spin.html';
         };
 
-        function renderLobby(state) {
-            const currentPlayer = getCurrentPlayer();
-            const statusBadge = document.getElementById('statusBadge');
-            const joinLeaveBtn = document.getElementById('joinLeaveBtn');
-            const playersList = document.getElementById('playersList');
-            const playerCount = document.getElementById('playerCount');
-
-            const players = state?.players ? Object.values(state.players) : [];
-            const isJoined = players.some(p => p.name === currentPlayer);
-
-            // Update status badge
-            if (isJoined) {
-                statusBadge.textContent = 'Unito';
-                statusBadge.className = 'status-badge joined';
-                joinLeaveBtn.textContent = 'Lascia l\'evento';
-                joinLeaveBtn.className = 'join-leave-btn leave-btn';
-            } else {
-                statusBadge.textContent = 'Non Unito';
-                statusBadge.className = 'status-badge not-joined';
-                joinLeaveBtn.textContent = 'Unisciti all\'evento';
-                joinLeaveBtn.className = 'join-leave-btn join-btn';
-            }
-
-            // Update player count
-            playerCount.textContent = `${players.length}/2`;
-
-            // Update players list
-            if (players.length === 0) {
-                playersList.innerHTML = '<div class="no-players">Nessun giocatore in lobby</div>';
-            } else {
-                playersList.innerHTML = players.map(player => `
-                    <div class="player-card ${player.name === currentPlayer ? 'current-user' : ''}">
-                        <span class="player-name">${player.name}</span>
-                        ${player.name === currentPlayer ? '<span class="you-badge">TU</span>' : ''}
-                    </div>
-                `).join('');
-            }
-
-            // Show appropriate screen
-            if (players.length === 2 && isJoined) {
-                document.getElementById('introScreen').classList.remove('show');
-                document.getElementById('choiceSection').classList.add('show');
-                
-                // Update selection status
-                updateSelectionStatus(state);
-                
-                // If player already confirmed, show their choice
-                const playerData = state.players[currentPlayer];
-                if (playerData.confirmed) {
-                    selectedChoice = playerData.choice;
-                    document.getElementById(`choice${selectedChoice}`).classList.add('selected');
-                    document.getElementById('confirmBtn').disabled = true;
-                    
-                    // Se aveva scelto opzione 2, mostra il Pokémon sacrificato
-                    if (selectedChoice === 2 && playerData.sacrificedPokemon) {
-                        const pokemonSelection = document.getElementById('pokemonSelection');
-                        pokemonSelection.classList.add('show');
-                        loadPlayerTeam().then(() => {
-                            renderPokemonGrid();
-                            if (playerData.sacrificedPokemonIndex !== undefined) {
-                                document.getElementById(`poke-${playerData.sacrificedPokemonIndex}`)?.classList.add('selected');
-                            }
-                        });
-                    }
-                } else {
-                    // Verifica se il giocatore ha Pokémon per l'opzione 2
-                    loadPlayerTeam().then(() => {
-                        if (playerTeam.length === 0) {
-                            document.getElementById('choice2').classList.add('disabled');
-                        }
-                    });
-                }
-            } else if (players.length === 1 && isJoined) {
-                document.getElementById('introScreen').classList.add('show');
-                document.getElementById('choiceSection').classList.remove('show');
-            } else {
-                document.getElementById('introScreen').classList.remove('show');
-                document.getElementById('choiceSection').classList.remove('show');
-            }
-        }
-
         onValue(eventRef, (snapshot) => {
-            const state = snapshot.val();
-            eventState = state;
-            renderLobby(state);
+            renderLanding();
         });
 
         if (!getCurrentPlayer()) {
             alert('Devi impostare il tuo nome dalla home page!');
             window.location.href = 'index.html';
+        } else {
+            renderLanding();
         }
     </script>
 </body>
