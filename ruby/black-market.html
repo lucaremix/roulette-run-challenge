@@ -75,6 +75,23 @@
             image-rendering: pixelated;
         }
 
+        .voucher-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            font-weight: bold;
+            margin-top: 10px;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
         .timer-section {
             background: #2a2a2a;
             padding: 15px 25px;
@@ -103,10 +120,10 @@
 
         .spins-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
             gap: 20px;
             margin-bottom: 40px;
-            max-width: 900px;
+            max-width: 1000px;
             margin-left: auto;
             margin-right: auto;
         }
@@ -118,17 +135,13 @@
             padding: 30px;
             text-align: center;
             transition: all 0.3s ease;
+            position: relative;
         }
 
         .spin-card:hover {
             transform: translateY(-5px);
         }
 
-        .spin-card.type-tier {
-            border-color: #8f00ff;
-            box-shadow: 0 0 20px rgba(255, 68, 68, 0.3);
-        }
-        
         .spin-card.s-tier {
             border-color: #ff4444;
             box-shadow: 0 0 20px rgba(255, 68, 68, 0.3);
@@ -144,6 +157,18 @@
             box-shadow: 0 0 20px rgba(68, 136, 255, 0.3);
         }
 
+        .discount-label {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: #667eea;
+            color: white;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.8em;
+            font-weight: bold;
+        }
+
         .spin-badge {
             display: inline-block;
             padding: 8px 20px;
@@ -153,12 +178,6 @@
             margin-bottom: 15px;
         }
 
-
-        .spin-badge.type-tier {
-            background: #8f00ff;
-            color: white;
-        }
-        
         .spin-badge.s-tier {
             background: #ff4444;
             color: white;
@@ -183,6 +202,12 @@
             font-size: 1.5em;
             color: #ffd700;
             font-weight: bold;
+        }
+
+        .original-price {
+            text-decoration: line-through;
+            color: #888;
+            font-size: 0.8em;
         }
 
         .buy-spin-btn {
@@ -231,10 +256,6 @@
             transform: translateY(-5px);
         }
 
-        .pokemon-card.type-tier {
-            border-color: #8f00ff;
-        }
-        
         .pokemon-card.s-tier {
             border-color: #ff4444;
         }
@@ -263,11 +284,6 @@
             text-transform: uppercase;
         }
 
-        .tier-badge.type-tier {
-            background: #8f00ff;
-            color: white;
-        }
-        
         .tier-badge.s-tier {
             background: #ff4444;
             color: white;
@@ -337,6 +353,7 @@
             font-size: 1.3em;
             color: #ffd700;
             font-weight: bold;
+            flex-wrap: wrap;
         }
 
         .buy-pokemon-btn {
@@ -375,7 +392,11 @@
                 font-size: 2em;
             }
 
-            .pokemon-grid, .spins-grid {
+            .pokemon-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .spins-grid {
                 grid-template-columns: 1fr;
             }
         }
@@ -398,6 +419,9 @@
                 <span id="playerCoins">0</span>
                 <span style="font-size: 0.8em; color: #888;">Coins</span>
             </div>
+            <div id="voucherBadge" style="display: none;">
+                <div class="voucher-badge">✨ Credit Voucher Attivo - 10% di sconto! ✨</div>
+            </div>
             <div class="timer-section">
                 <div class="timer-label">Prossimo aggiornamento in:</div>
                 <div class="timer-value" id="timerValue">--:--:--</div>
@@ -405,58 +429,63 @@
         </header>
 
         <h2 class="section-title">🎰 Acquista Spin</h2>
-        <div class="spin-card type-tier">
-                  <div class="spin-badge type-tier">TYPE TIER</div>
-                  <div class="spin-price">
-                      <img src="https://raw.githubusercontent.com/lucaremix/roulette-run-challenge/main/pixel-art-red-chinese-gold-coin-png.png" 
-                           alt="Coins" 
-                           class="coin-img"
-                           onerror="this.style.display='none'">
-                      <span>3000</span>
-                  </div>
-                  <button class="buy-spin-btn" onclick="buySpin('b_tier', 3000)">
-                      🎰 Acquista Spin di Tipo
-                  </button>
-              </div>
-          <div class="spins-grid">
+        <div class="spins-grid">
             <div class="spin-card s-tier">
+                <div class="discount-label" id="discountS" style="display: none;">-10%</div>
                 <div class="spin-badge s-tier">S TIER</div>
                 <div class="spin-price">
-                    <img src="https://raw.githubusercontent.com/lucaremix/roulette-run-challenge/main/pixel-art-red-chinese-gold-coin-png.png" 
-                         alt="Coins" 
-                         class="coin-img"
-                         onerror="this.style.display='none'">
-                    <span>2500</span>
+                    <div style="display: flex; flex-direction: column; align-items: center; gap: 5px;">
+                        <span class="original-price" id="originalPriceS" style="display: none;">200</span>
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <img src="https://raw.githubusercontent.com/lucaremix/roulette-run-challenge/main/pixel-art-red-chinese-gold-coin-png.png" 
+                                 alt="Coins" 
+                                 class="coin-img"
+                                 onerror="this.style.display='none'">
+                            <span id="priceS">200</span>
+                        </div>
+                    </div>
                 </div>
-                <button class="buy-spin-btn" onclick="buySpin('s_tier', 2500)">
+                <button class="buy-spin-btn" onclick="buySpin('s_tier', 's')">
                     🎰 Acquista Spin S
                 </button>
             </div>
 
             <div class="spin-card a-tier">
+                <div class="discount-label" id="discountA" style="display: none;">-10%</div>
                 <div class="spin-badge a-tier">A TIER</div>
                 <div class="spin-price">
-                    <img src="https://raw.githubusercontent.com/lucaremix/roulette-run-challenge/main/pixel-art-red-chinese-gold-coin-png.png" 
-                         alt="Coins" 
-                         class="coin-img"
-                         onerror="this.style.display='none'">
-                    <span>1500</span>
+                    <div style="display: flex; flex-direction: column; align-items: center; gap: 5px;">
+                        <span class="original-price" id="originalPriceA" style="display: none;">150</span>
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <img src="https://raw.githubusercontent.com/lucaremix/roulette-run-challenge/main/pixel-art-red-chinese-gold-coin-png.png" 
+                                 alt="Coins" 
+                                 class="coin-img"
+                                 onerror="this.style.display='none'">
+                            <span id="priceA">150</span>
+                        </div>
+                    </div>
                 </div>
-                <button class="buy-spin-btn" onclick="buySpin('a_tier', 1500)">
+                <button class="buy-spin-btn" onclick="buySpin('a_tier', 'a')">
                     🎰 Acquista Spin A
                 </button>
             </div>
 
             <div class="spin-card b-tier">
+                <div class="discount-label" id="discountB" style="display: none;">-10%</div>
                 <div class="spin-badge b-tier">B TIER</div>
                 <div class="spin-price">
-                    <img src="https://raw.githubusercontent.com/lucaremix/roulette-run-challenge/main/pixel-art-red-chinese-gold-coin-png.png" 
-                         alt="Coins" 
-                         class="coin-img"
-                         onerror="this.style.display='none'">
-                    <span>500</span>
+                    <div style="display: flex; flex-direction: column; align-items: center; gap: 5px;">
+                        <span class="original-price" id="originalPriceB" style="display: none;">100</span>
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <img src="https://raw.githubusercontent.com/lucaremix/roulette-run-challenge/main/pixel-art-red-chinese-gold-coin-png.png" 
+                                 alt="Coins" 
+                                 class="coin-img"
+                                 onerror="this.style.display='none'">
+                            <span id="priceB">100</span>
+                        </div>
+                    </div>
                 </div>
-                <button class="buy-spin-btn" onclick="buySpin('b_tier', 500)">
+                <button class="buy-spin-btn" onclick="buySpin('b_tier', 'b')">
                     🎰 Acquista Spin B
                 </button>
             </div>
@@ -484,15 +513,67 @@
         const app = initializeApp(firebaseConfig);
         const database = getDatabase(app);
 
-        const PRICES = {
-            s_tier: 3000,
-            a_tier: 2000,
-            b_tier: 1000,
-            legendary: 5000
+        const BASE_PRICES = {
+            s_tier_spin: 200,
+            a_tier_spin: 150,
+            b_tier_spin: 100,
+            s_tier: 250,
+            a_tier: 200,
+            b_tier: 150,
+            legendary: 400
         };
+
+        let hasCreditVoucher = false;
 
         function getCurrentPlayer() {
             return localStorage.getItem('playerName') || '';
+        }
+
+        function applyDiscount(price) {
+            if (hasCreditVoucher) {
+                return Math.floor(price * 0.9);
+            }
+            return price;
+        }
+
+        async function checkCreditVoucher() {
+            const player = getCurrentPlayer();
+            if (!player) return false;
+
+            const voucherRef = ref(database, `players/${player}/inventory/itempermanenti/Credit Voucher`);
+            const snapshot = await get(voucherRef);
+            hasCreditVoucher = snapshot.val() === true;
+            
+            // Mostra il badge se il voucher è attivo
+            if (hasCreditVoucher) {
+                document.getElementById('voucherBadge').style.display = 'block';
+                
+                // Aggiorna i prezzi degli spin con lo sconto
+                updateSpinPrices();
+            }
+            
+            return hasCreditVoucher;
+        }
+
+        function updateSpinPrices() {
+            const spinPrices = {
+                's': BASE_PRICES.s_tier_spin,
+                'a': BASE_PRICES.a_tier_spin,
+                'b': BASE_PRICES.b_tier_spin
+            };
+
+            Object.keys(spinPrices).forEach(tier => {
+                const basePrice = spinPrices[tier];
+                const discountedPrice = applyDiscount(basePrice);
+                
+                document.getElementById(`price${tier.toUpperCase()}`).textContent = discountedPrice;
+                
+                if (hasCreditVoucher) {
+                    document.getElementById(`originalPrice${tier.toUpperCase()}`).textContent = basePrice;
+                    document.getElementById(`originalPrice${tier.toUpperCase()}`).style.display = 'block';
+                    document.getElementById(`discount${tier.toUpperCase()}`).style.display = 'block';
+                }
+            });
         }
 
         function padNumber(num) {
@@ -504,6 +585,8 @@
         }
 
         async function initializeMarket() {
+            await checkCreditVoucher();
+            
             const marketRef = ref(database, 'markets/black_market');
             const snapshot = await get(marketRef);
 
@@ -627,8 +710,13 @@
                 const types = [p.primary_type];
                 if (p.secondary_type) types.push(p.secondary_type);
 
+                const basePrice = BASE_PRICES[p.tier];
+                const finalPrice = applyDiscount(basePrice);
+                const showDiscount = hasCreditVoucher;
+
                 return `
                     <div class="pokemon-card ${p.tier}">
+                        ${showDiscount ? '<div class="discount-label">-10%</div>' : ''}
                         <div class="tier-badge ${p.tier}">${p.tier.replace('_', ' ')}</div>
                         <img src="${getPokemonImageUrl(p.national_number)}" 
                              alt="${p.english_name}" 
@@ -649,11 +737,12 @@
                             </div>
                         </div>
                         <div class="pokemon-price">
+                            ${showDiscount ? `<span class="original-price">${basePrice}</span>` : ''}
                             <img src="https://raw.githubusercontent.com/lucaremix/roulette-run-challenge/main/pixel-art-red-chinese-gold-coin-png.png" 
                                  alt="Coins" 
                                  class="coin-img"
                                  onerror="this.style.display='none'">
-                            <span>${PRICES[p.tier]}</span>
+                            <span>${finalPrice}</span>
                         </div>
                         <button class="buy-pokemon-btn" onclick="buyPokemon(${index})">
                             💰 Acquista
@@ -674,13 +763,16 @@
             });
         }
 
-        window.buySpin = async function(tier, cost) {
+        window.buySpin = async function(tier, tierLetter) {
             const player = getCurrentPlayer();
             if (!player) {
                 alert('Devi impostare il tuo nome dalla home page!');
                 window.location.href = 'index.html';
                 return;
             }
+
+            const baseCost = BASE_PRICES[`${tier}_spin`];
+            const cost = applyDiscount(baseCost);
 
             const playerRef = ref(database, `players/${player}`);
             const playerSnapshot = await get(playerRef);
@@ -691,7 +783,8 @@
                 return;
             }
 
-            if (confirm(`Vuoi acquistare uno Spin ${tier.toUpperCase().replace('_', ' ')} per ${cost} Coins?`)) {
+            const discountText = hasCreditVoucher ? ` (scontato del 10% da ${baseCost})` : '';
+            if (confirm(`Vuoi acquistare uno Spin ${tier.toUpperCase().replace('_', ' ')} per ${cost} Coins${discountText}?`)) {
                 playerData.coins = (playerData.coins || 0) - cost;
                 await set(playerRef, playerData);
 
@@ -718,7 +811,8 @@
             }
 
             const pokemon = marketData.pokemon[index];
-            const price = PRICES[pokemon.tier];
+            const basePrice = BASE_PRICES[pokemon.tier];
+            const price = applyDiscount(basePrice);
 
             const playerRef = ref(database, `players/${player}`);
             const playerSnapshot = await get(playerRef);
@@ -729,7 +823,8 @@
                 return;
             }
 
-            if (confirm(`Vuoi acquistare ${pokemon.english_name} per ${price} Coins?`)) {
+            const discountText = hasCreditVoucher ? ` (scontato del 10% da ${basePrice})` : '';
+            if (confirm(`Vuoi acquistare ${pokemon.english_name} per ${price} Coins${discountText}?`)) {
                 // Deduct coins
                 playerData.coins = (playerData.coins || 0) - price;
 
