@@ -882,21 +882,30 @@
                     const coins = 750;
                     playerData.coins = (playerData.coins || 0) + coins + (hasAmulet ? Math.floor(coins / 4) : 0);
                     
-                    // Rimuovi il pokemon scelto dal team
-                    const teamRef = ref(database, `players/${playerName}/rubyteam/${choice.pokemon.key}`);
-                    await remove(teamRef);
-                    
-                    // Aggiungi il pokemon dell'altro giocatore
+                    // Determina chi è l'altro giocatore
                     const otherPlayer = playerName === player1 ? player2 : player1;
+                    const myChoice = state.choices[playerName];
                     const otherChoice = state.choices[otherPlayer];
                     
-                    // Crea una copia pulita del pokemon senza il campo 'key'
-                    const pokemonToAdd = { ...otherChoice.pokemon };
-                    delete pokemonToAdd.key;
+                    console.log(`[TRADE] ${playerName} scambia con ${otherPlayer}`);
+                    console.log(`[TRADE] ${playerName} cede:`, myChoice.pokemon?.english_name);
+                    console.log(`[TRADE] ${playerName} riceve:`, otherChoice.pokemon?.english_name);
                     
-                    // Aggiungi il pokemon ricevuto al team
-                    const newPokemonRef = push(ref(database, `players/${playerName}/rubyteam`));
-                    await set(newPokemonRef, pokemonToAdd);
+                    // 1. Rimuovi il mio pokemon dal mio team
+                    if (myChoice.pokemonKey) {
+                        const myTeamRef = ref(database, `players/${playerName}/rubyteam/${myChoice.pokemonKey}`);
+                        await remove(myTeamRef);
+                        console.log(`[TRADE] Rimosso ${myChoice.pokemon?.english_name} dal team di ${playerName}`);
+                    }
+                    
+                    // 2. Aggiungi il pokemon dell'altro giocatore al mio team
+                    if (otherChoice.pokemon) {
+                        const newPokemonRef = push(ref(database, `players/${playerName}/rubyteam`));
+                        await set(newPokemonRef, otherChoice.pokemon);
+                        console.log(`[TRADE] Aggiunto ${otherChoice.pokemon.english_name} al team di ${playerName}`);
+                    } else {
+                        console.error(`[TRADE] ERRORE: Pokemon di ${otherPlayer} non trovato!`);
+                    }
                 }
 
                 await set(playerRef, playerData);
