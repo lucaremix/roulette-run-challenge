@@ -344,11 +344,11 @@
         let revealedStats = [];
         let selectedPokemon = null;
         let currentBonuses = {
-            attempt1: ['IV Perfette', 'Abilità Scelta', '100 Coins', 'Shiny', 'Natura Perfetta'],
-            attempt2: ['IV Perfette', '100 Coins', 'Abilità Hidden', 'Natura Perfetta'],
-            attempt3: ['50 Coins', 'Natura Perfetta'],
-            attempt4: ['50 Coins'],
-            attempt5: ['10 Coins']
+            attempt1: ['IV Perfette', 'Abilità Scelta', '1000 Coins', 'Shiny', 'Natura Perfetta'],
+            attempt2: ['IV Perfette', '1000 Coins', 'Abilità Hidden', 'Natura Perfetta'],
+            attempt3: ['500 Coins', 'Natura Perfetta'],
+            attempt4: ['500 Coins'],
+            attempt5: ['100 Coins']
         };
 
         const statNames = {
@@ -618,17 +618,17 @@
             // Determine rewards based on attempt number
             if (attemptNumber === 1) {
                 rewards = ['IV Perfette', 'Abilità Scelta', 'Shiny', 'Natura Perfetta'];
-                coins = 100;
+                coins = 1000;
             } else if (attemptNumber === 2) {
                 rewards = ['IV Perfette', 'Abilità Hidden', 'Natura Perfetta'];
-                coins = 100;
+                coins = 1000;
             } else if (attemptNumber === 3) {
                 rewards = ['Natura Perfetta'];
-                coins = 50;
+                coins = 500;
             } else if (attemptNumber === 4) {
-                coins = 50;
+                coins = 500;
             } else if (attemptNumber === 5) {
-                coins = 10;
+                coins = 100;
             }
 
             const player = getCurrentPlayer();
