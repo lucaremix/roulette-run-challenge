@@ -890,9 +890,13 @@
                     const otherPlayer = playerName === player1 ? player2 : player1;
                     const otherChoice = state.choices[otherPlayer];
                     
+                    // Crea una copia pulita del pokemon senza il campo 'key'
+                    const pokemonToAdd = { ...otherChoice.pokemon };
+                    delete pokemonToAdd.key;
+                    
                     // Aggiungi il pokemon ricevuto al team
                     const newPokemonRef = push(ref(database, `players/${playerName}/rubyteam`));
-                    await set(newPokemonRef, otherChoice.pokemon);
+                    await set(newPokemonRef, pokemonToAdd);
                 }
 
                 await set(playerRef, playerData);
