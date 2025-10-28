@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>May - Route 110</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-image: url('https://raw.githubusercontent.com/lucaremix/roulette-run-challenge/main/background/r-route110_background.png');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            color: #e0e0e0;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            background: #1a1a1a;
+            border: 1px solid #2a2a2a;
+            border-radius: 8px;
+            color: #e0e0e0;
+            text-decoration: none;
+            font-size: 1em;
+            transition: all 0.3s ease;
+            margin-bottom: 30px;
+        }
+
+        .back-btn:hover {
+            background: #252525;
+        }
+
+        .event-header {
+            background: #1a1a1a;
+            border: 1px solid #2a2a2a;
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 30px;
+            display: flex;
+            align-items: center;
+            gap: 30px;
+        }
+
+        .event-trainer-img {
+            width: 160px;
+            height: 160px;
+            object-fit: contain;
+            border: none;
+            flex-shrink: 0;
+            image-rendering: pixelated;
+        }
+
+        .event-info {
+            flex: 1;
+        }
+
+        .event-title {
+            font-size: 2.5em;
+            color: #ffffff;
+            margin-bottom: 15px;
+        }
+
+        .event-status {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .status-badge {
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 1.1em;
+        }
+
+        .status-badge.joined {
+            background: #2d4a2d;
+            color: #7fff7f;
+        }
+
+        .status-badge.not-joined {
+            background: #2a2a2a;
+            color: #888;
+        }
+
+        .join-leave-btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+
+        .join-btn {
+            background: #2a7a2a;
+            color: white;
+        }
+
+        .join-btn:hover {
+            background: #357a35;
+        }
+
+        .leave-btn {
+            background: #7a2a2a;
+            color: white;
+        }
+
+        .leave-btn:hover {
+            background: #8a3535;
+        }
+
+        .players-section {
+            background: #1a1a1a;
+            border: 1px solid #2a2a2a;
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 30px;
+        }
+
+        .players-title {
+            font-size: 1.8em;
+            color: #ffffff;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .player-count-badge {
+            background: #2a2a2a;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.7em;
+            color: #888;
+        }
+
+        .players-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .player-card {
+            background: #0a0a0a;
+            border: 1px solid #2a2a2a;
+            border-radius: 8px;
+            padding: 15px 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .player-card.current-user {
+            border-color: #4a4a4a;
+            background: #1f1f1f;
+        }
+
+        .player-name {
+            font-size: 1.1em;
+            color: #e0e0e0;
+        }
+
+        .player-card.current-user .player-name {
+            color: #ffffff;
+            font-weight: 600;
+        }
+
+        .you-badge {
+            background: #2a7a2a;
+            color: white;
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 0.8em;
+            font-weight: 600;
+        }
+
+        .no-players {
+            text-align: center;
+            color: #555;
+            font-style: italic;
+            padding: 30px;
+        }
+
+        .intro-screen {
+            background: #1a1a1a;
+            border: 1px solid #2a2a2a;
+            border-radius: 12px;
+            padding: 40px;
+            display: none;
+        }
+
+        .intro-screen.show {
+            display: block;
+        }
+
+        .intro-content {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .intro-text h2 {
+            font-size: 2em;
+            color: #ff69b4;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .intro-text p {
+            font-size: 1.2em;
+            line-height: 1.8;
+            color: #e0e0e0;
+            margin-bottom: 15px;
+        }
+
+        .intro-text .highlight {
+            color: #ff69b4;
+            font-weight: bold;
+        }
+
+        .choice-section {
+            background: #1a1a1a;
+            border: 1px solid #2a2a2a;
+            border-radius: 12px;
+            padding: 40px;
+            margin-bottom: 30px;
+            display: none;
+        }
+
+        .choice-section.show {
+            display: block;
+        }
+
+        .choice-title {
+            font-size: 2em;
+            color: #ff69b4;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .choices-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .choice-card {
+            background: #0a0a0a;
+            border: 2px solid #2a2a2a;
+            border-radius: 12px;
+            padding: 30px;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .choice-card:hover {
+            border-color: #ff69b4;
+            transform: translateY(-5px);
+            box-shadow: 0 5px 20px rgba(255, 105, 180, 0.3);
+        }
+
+        .choice-card.selected {
+            border-color: #7fff7f;
+            background: #1a2a1a;
+        }
+
+        .choice-icon {
+            font-size: 4em;
+            margin-bottom: 20px;
+        }
+
+        .choice-name {
+            font-size: 1.5em;
+            color: #ffffff;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+
+        .choice-description {
+            font-size: 1.1em;
+            color: #aaa;
+            line-height: 1.6;
+        }
+
+        .confirm-btn {
+            display: block;
+            margin: 30px auto 0;
+            padding: 15px 50px;
+            background: #ff69b4;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.2em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+
+        .confirm-btn:hover {
+            background: #ff1493;
+        }
+
+        .confirm-btn:disabled {
+            background: #2a2a2a;
+            color: #555;
+            cursor: not-allowed;
+        }
+
+        .selection-status {
+            text-align: center;
+            margin-top: 20px;
+            padding: 20px;
+            background: #0a0a0a;
+            border-radius: 8px;
+            font-size: 1.1em;
+        }
+
+        .selection-status.waiting {
+            color: #ffa500;
+        }
+
+        .selection-status.both-selected {
+            color: #7fff7f;
+        }
+
+        .final-result {
+            background: #1a1a1a;
+            border: 1px solid #2a2a2a;
+            border-radius: 12px;
+            padding: 40px;
+            text-align: center;
+            display: none;
+        }
+
+        .final-result.show {
+            display: block;
+        }
+
+        .final-title {
+            font-size: 2.5em;
+            color: #7fff7f;
+            margin-bottom: 30px;
+        }
+
+        .rewards-summary {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .reward-item {
+            background: #0a0a0a;
+            border: 1px solid #2a2a2a;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+        }
+
+        .go-spin-btn {
+            display: inline-block;
+            margin-top: 30px;
+            padding: 15px 50px;
+            background: #2a7a2a;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.2em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .go-spin-btn:hover {
+            background: #357a35;
+        }
+
+        @media (max-width: 768px) {
+            .choices-container {
+                grid-template-columns: 1fr;
+            }
+
+            .event-header {
+                flex-direction: column;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="index.html" class="back-btn">← Torna alla Home</a>
+
+        <div class="event-header">
+            <img src="https://img.nuzlocke.app//leaders/rs-may-oras.png" 
+                 alt="May" 
+                 class="event-trainer-img">
+            <div class="event-info">
+                <h1 class="event-title">May - Route 110</h1>
+                <div class="event-status">
+                    <span class="status-badge" id="statusBadge">Non Unito</span>
+                    <button class="join-leave-btn join-btn" id="joinLeaveBtn" onclick="toggleJoin()">
+                        Unisciti all'evento
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="players-section">
+            <h2 class="players-title">
+                Giocatori in Lobby
+                <span class="player-count-badge" id="playerCount">0/2</span>
+            </h2>
+            <div class="players-list" id="playersList">
+                <div class="no-players">Nessun giocatore in lobby</div>
+            </div>
+        </div>
+
+        <div class="intro-screen" id="introScreen">
+            <div class="intro-content">
+                <div class="intro-text">
+                    <h2>🎁 Scegli la tua Ricompensa!</h2>
+                    <p>May ti offre una scelta per ringraziarti del tuo aiuto:</p>
+                    <p class="highlight">Opzione 1: 1500 Coins</p>
+                    <p>Ricevi subito una generosa ricompensa in monete!</p>
+                    <p class="highlight">Opzione 2: 750 Coins + Spin Tier B</p>
+                    <p>Ricevi meno monete, ma avrai anche l'opportunità di ottenere un Pokémon dal pool Tier B!</p>
+                    <p style="margin-top: 20px; font-style: italic; color: #aaa;">
+                        Entrambi i giocatori possono fare la propria scelta indipendentemente.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="choice-section" id="choiceSection">
+            <h2 class="choice-title">Scegli la tua ricompensa</h2>
+            <div class="choices-container">
+                <div class="choice-card" id="choice1" onclick="selectChoice(1)">
+                    <div class="choice-icon">💰</div>
+                    <div class="choice-name">1500 Coins</div>
+                    <div class="choice-description">
+                        Ricevi 1500 coins direttamente nel tuo inventario
+                    </div>
+                </div>
+                <div class="choice-card" id="choice2" onclick="selectChoice(2)">
+                    <div class="choice-icon">🎰</div>
+                    <div class="choice-name">750 Coins + Spin</div>
+                    <div class="choice-description">
+                        Ricevi 750 coins e un'opportunità di ottenere un Pokémon dal Tier B
+                    </div>
+                </div>
+            </div>
+            <button class="confirm-btn" id="confirmBtn" onclick="confirmChoice()" disabled>
+                Conferma Scelta
+            </button>
+            <div class="selection-status" id="selectionStatus"></div>
+        </div>
+
+        <div class="final-result" id="finalResult">
+            <h2 class="final-title">🎉 Ricompense Assegnate!</h2>
+            <div class="rewards-summary" id="rewardsSummary"></div>
+            <button class="go-spin-btn" onclick="goToSpin()">
+                Vai allo Spin
+            </button>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js';
+        import { getDatabase, ref, set, get, onValue, remove } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js';
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDICmNTl-ELvmZmVHa7OkkcJ0D5rdarxJI",
+            authDomain: "roulette-run-challenge.firebaseapp.com",
+            databaseURL: "https://roulette-run-challenge-default-rtdb.europe-west1.firebasedatabase.app",
+            projectId: "roulette-run-challenge",
+            storageBucket: "roulette-run-challenge.firebasestorage.app",
+            messagingSenderId: "122753205997",
+            appId: "1:122753205997:web:c2005ca35c46ea31f80d37"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app);
+        const eventRef = ref(database, 'events/may-oras-2');
+
+        function getCurrentPlayer() {
+            return localStorage.getItem('playerName');
+        }
+
+        let selectedChoice = null;
+        let eventState = null;
+
+        window.toggleJoin = async function() {
+            const currentPlayer = getCurrentPlayer();
+            const snapshot = await get(eventRef);
+            const state = snapshot.val() || {};
+
+            if (state.players && state.players[currentPlayer]) {
+                // Leave
+                delete state.players[currentPlayer];
+                if (Object.keys(state.players).length === 0) {
+                    await remove(eventRef);
+                } else {
+                    await set(eventRef, state);
+                }
+            } else {
+                // Join
+                if (!state.players) state.players = {};
+                
+                if (Object.keys(state.players).length >= 2) {
+                    alert('La lobby è piena!');
+                    return;
+                }
+
+                state.players[currentPlayer] = {
+                    name: currentPlayer,
+                    choice: null,
+                    confirmed: false
+                };
+
+                await set(eventRef, state);
+            }
+        };
+
+        window.selectChoice = function(choiceNum) {
+            selectedChoice = choiceNum;
+            
+            document.getElementById('choice1').classList.remove('selected');
+            document.getElementById('choice2').classList.remove('selected');
+            document.getElementById(`choice${choiceNum}`).classList.add('selected');
+            
+            document.getElementById('confirmBtn').disabled = false;
+        };
+
+        window.confirmChoice = async function() {
+            if (!selectedChoice) return;
+
+            const currentPlayer = getCurrentPlayer();
+            const snapshot = await get(eventRef);
+            const state = snapshot.val();
+
+            if (state.players[currentPlayer]) {
+                state.players[currentPlayer].choice = selectedChoice;
+                state.players[currentPlayer].confirmed = true;
+                
+                await set(eventRef, state);
+                
+                document.getElementById('confirmBtn').disabled = true;
+                checkBothConfirmed(state);
+            }
+        };
+
+        function checkBothConfirmed(state) {
+            const players = Object.values(state.players);
+            const allConfirmed = players.length === 2 && players.every(p => p.confirmed);
+
+            if (allConfirmed) {
+                giveRewards(state);
+            } else {
+                updateSelectionStatus(state);
+            }
+        }
+
+        function updateSelectionStatus(state) {
+            const statusDiv = document.getElementById('selectionStatus');
+            const players = Object.values(state.players);
+            const confirmedCount = players.filter(p => p.confirmed).length;
+
+            if (confirmedCount === 0) {
+                statusDiv.innerHTML = '';
+                statusDiv.className = 'selection-status';
+            } else if (confirmedCount === 1) {
+                statusDiv.innerHTML = '⏳ In attesa dell\'altro giocatore...';
+                statusDiv.className = 'selection-status waiting';
+            } else {
+                statusDiv.innerHTML = '✅ Entrambi i giocatori hanno scelto!';
+                statusDiv.className = 'selection-status both-selected';
+            }
+        }
+
+        async function giveRewards(state) {
+            const players = Object.values(state.players);
+
+            for (const player of players) {
+                const playerRef = ref(database, `players/${player.name}`);
+                const playerSnap = await get(playerRef);
+                let playerData = playerSnap.val() || { coins: 0, team: [] };
+
+                const hasAmulet = playerData?.inventory?.itempermanenti?.['Amulet Coin'] === true;
+
+                if (player.choice === 1) {
+                    // 1500 coins
+                    const coins = 1500;
+                    playerData.coins = (playerData.coins || 0) + coins + (hasAmulet ? Math.floor(coins / 4) : 0);
+                } else {
+                    // 750 coins + spin
+                    const coins = 750;
+                    playerData.coins = (playerData.coins || 0) + coins + (hasAmulet ? Math.floor(coins / 4) : 0);
+                }
+
+                await set(playerRef, playerData);
+            }
+
+            // Show final result
+            showFinalResult(state);
+        }
+
+        function showFinalResult(state) {
+            document.getElementById('choiceSection').classList.remove('show');
+            document.getElementById('finalResult').classList.add('show');
+
+            const summaryDiv = document.getElementById('rewardsSummary');
+            let html = '';
+
+            for (const player of Object.values(state.players)) {
+                const playerRef = ref(database, `players/${player.name}`);
+                get(playerRef).then(snap => {
+                    const playerData = snap.val();
+                    const hasAmulet = playerData?.inventory?.itempermanenti?.['Amulet Coin'] === true;
+                    
+                    if (player.choice === 1) {
+                        const coins = 1500;
+                        const bonus = hasAmulet ? Math.floor(coins / 4) : 0;
+                        html += `<div class="reward-item">
+                            💰 ${player.name}: ${coins}${bonus > 0 ? ` + ${bonus} (Amulet Coin)` : ''} coins
+                        </div>`;
+                    } else {
+                        const coins = 750;
+                        const bonus = hasAmulet ? Math.floor(coins / 4) : 0;
+                        html += `<div class="reward-item">
+                            🎰 ${player.name}: ${coins}${bonus > 0 ? ` + ${bonus} (Amulet Coin)` : ''} coins + 1 Spin Tier B
+                        </div>`;
+                    }
+                    summaryDiv.innerHTML = html;
+                });
+            }
+        }
+
+        window.goToSpin = function() {
+            window.location.href = 'pokemon-spin.html';
+        };
+
+        function renderLobby(state) {
+            const currentPlayer = getCurrentPlayer();
+            const statusBadge = document.getElementById('statusBadge');
+            const joinLeaveBtn = document.getElementById('joinLeaveBtn');
+            const playersList = document.getElementById('playersList');
+            const playerCount = document.getElementById('playerCount');
+
+            const players = state?.players ? Object.values(state.players) : [];
+            const isJoined = players.some(p => p.name === currentPlayer);
+
+            // Update status badge
+            if (isJoined) {
+                statusBadge.textContent = 'Unito';
+                statusBadge.className = 'status-badge joined';
+                joinLeaveBtn.textContent = 'Lascia l\'evento';
+                joinLeaveBtn.className = 'join-leave-btn leave-btn';
+            } else {
+                statusBadge.textContent = 'Non Unito';
+                statusBadge.className = 'status-badge not-joined';
+                joinLeaveBtn.textContent = 'Unisciti all\'evento';
+                joinLeaveBtn.className = 'join-leave-btn join-btn';
+            }
+
+            // Update player count
+            playerCount.textContent = `${players.length}/2`;
+
+            // Update players list
+            if (players.length === 0) {
+                playersList.innerHTML = '<div class="no-players">Nessun giocatore in lobby</div>';
+            } else {
+                playersList.innerHTML = players.map(player => `
+                    <div class="player-card ${player.name === currentPlayer ? 'current-user' : ''}">
+                        <span class="player-name">${player.name}</span>
+                        ${player.name === currentPlayer ? '<span class="you-badge">TU</span>' : ''}
+                    </div>
+                `).join('');
+            }
+
+            // Show appropriate screen
+            if (players.length === 2 && isJoined) {
+                document.getElementById('introScreen').classList.remove('show');
+                document.getElementById('choiceSection').classList.add('show');
+                
+                // Update selection status
+                updateSelectionStatus(state);
+                
+                // If player already confirmed, show their choice
+                const playerData = state.players[currentPlayer];
+                if (playerData.confirmed) {
+                    selectedChoice = playerData.choice;
+                    document.getElementById(`choice${selectedChoice}`).classList.add('selected');
+                    document.getElementById('confirmBtn').disabled = true;
+                }
+            } else if (players.length === 1 && isJoined) {
+                document.getElementById('introScreen').classList.add('show');
+                document.getElementById('choiceSection').classList.remove('show');
+            } else {
+                document.getElementById('introScreen').classList.remove('show');
+                document.getElementById('choiceSection').classList.remove('show');
+            }
+        }
+
+        onValue(eventRef, (snapshot) => {
+            const state = snapshot.val();
+            eventState = state;
+            renderLobby(state);
+        });
+
+        if (!getCurrentPlayer()) {
+            alert('Devi impostare il tuo nome dalla home page!');
+            window.location.href = 'index.html';
+        }
+    </script>
+</body>
+</html>
