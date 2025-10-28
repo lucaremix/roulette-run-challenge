@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>May - Route 110</title>
+    <title>RS Mayor - Challenge</title>
     <style>
         * {
             margin: 0;
@@ -558,14 +558,23 @@
         async function loadPlayerTeam() {
             const playerName = getCurrentPlayer();
             const teamRef = ref(database, `players/${playerName}/rubyteam`);
+            
             const snapshot = await get(teamRef);
+            myTeam = [];
             
             if (snapshot.exists()) {
-                myTeam = Object.values(snapshot.val());
-                console.log('Team caricato:', myTeam);
-            } else {
-                myTeam = [];
+                snapshot.forEach((childSnapshot) => {
+                    const data = childSnapshot.val();
+                    myTeam.push({
+                        key: childSnapshot.key,
+                        name: data.name || data.english_name || 'Unknown',
+                        national_number: data.national_number || 0,
+                        ...data
+                    });
+                });
             }
+
+            console.log('Team caricato:', myTeam);
         }
 
         function renderLanding() {
@@ -733,13 +742,15 @@
                 return;
             }
 
-            grid.innerHTML = myTeam.map((poke, index) => `
-                <div class="pokemon-item" onclick="selectPokemonForTrade(${index})">
-                    <img src="https://www.pokemon.com/static-assets/content-assets/cms2/img/pokedex/full/${String(poke.national_number).padStart(3, '0')}.png" 
-                         alt="${poke.name}">
-                    <div class="pokemon-name">${poke.name}</div>
-                </div>
-            `).join('');
+            grid.innerHTML = myTeam.map((poke, index) => {
+                const imgUrl = `https://www.pokemon.com/static-assets/content-assets/cms2/img/pokedex/full/${String(poke.national_number).padStart(3, '0')}.png`;
+                return `
+                    <div class="pokemon-item" onclick="selectPokemonForTrade(${index})">
+                        <img src="${imgUrl}" alt="${poke.name}">
+                        <div class="pokemon-name">${poke.name}</div>
+                    </div>
+                `;
+            }).join('');
         }
 
         window.selectPokemonForTrade = function(index) {
@@ -806,22 +817,9 @@
                     const coins = 750;
                     playerData.coins = (playerData.coins || 0) + coins + (hasAmulet ? Math.floor(coins / 4) : 0);
                     
-                    // Rimuovi il pokemon dal team
-                    const teamRef = ref(database, `players/${playerName}/rubyteam`);
-                    const teamSnap = await get(teamRef);
-                    if (teamSnap.exists()) {
-                        const team = teamSnap.val();
-                        const teamArray = Object.entries(team);
-                        const indexToRemove = teamArray.findIndex(([key, poke]) => 
-                            poke.name === choice.pokemon.name && 
-                            poke.national_number === choice.pokemon.national_number
-                        );
-                        
-                        if (indexToRemove !== -1) {
-                            const keyToRemove = teamArray[indexToRemove][0];
-                            await remove(ref(database, `players/${playerName}/rubyteam/${keyToRemove}`));
-                        }
-                    }
+                    // Rimuovi il pokemon dal team usando la key
+                    const teamRef = ref(database, `players/${playerName}/rubyteam/${choice.pokemon.key}`);
+                    await remove(teamRef);
                     
                     // Aggiungi pending spin
                     playerData.pendingSpin = { pool: 'b-tier', from: 'rs-mayor' };
