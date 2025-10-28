@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RS Mayor - Challenge</title>
+    <title>May - Route 110</title>
     <style>
         * {
             margin: 0;
@@ -492,7 +492,7 @@
                     </div>
 
                     <!-- Opzione 2: Coins + Trade -->
-                    <div class="choice-option" id="option2">
+                    <div class="choice-option" id="option2" onclick="selectOption(2)">
                         <div class="choice-title">🔄 750 Coins + Trade</div>
                         <div class="choice-description">Ricevi 750 coins e scambia un Pokémon per 1 Spin Tier B</div>
                         
@@ -713,7 +713,10 @@
             };
             
             await set(eventRef, data);
+            
+            // Carica il team del giocatore
             await loadPlayerTeam();
+            console.log('Team caricato con', myTeam.length, 'Pokemon');
         };
 
         window.selectOption = function(option) {
@@ -730,7 +733,15 @@
                 document.getElementById('option2').style.borderColor = '#4a9eff';
                 document.getElementById('pokemonSelector').style.display = 'block';
                 
-                renderPokemonGrid();
+                // Verifica se il team è stato caricato
+                if (myTeam.length === 0) {
+                    console.log('Team vuoto, ricarico...');
+                    loadPlayerTeam().then(() => {
+                        renderPokemonGrid();
+                    });
+                } else {
+                    renderPokemonGrid();
+                }
             }
         };
 
