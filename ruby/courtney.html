@@ -1,0 +1,947 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Courtney - Silhouette Challenge</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-image: url('https://raw.githubusercontent.com/lucaremix/roulette-run-challenge/main/background/Courtney_background.png');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            color: #e0e0e0;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            background: #1a1a1a;
+            border: 1px solid #2a2a2a;
+            border-radius: 8px;
+            color: #e0e0e0;
+            text-decoration: none;
+            font-size: 1em;
+            transition: all 0.3s ease;
+            margin-bottom: 30px;
+        }
+
+        .back-btn:hover {
+            background: #252525;
+        }
+
+        .event-header {
+            background: #1a1a1a;
+            border: 1px solid #2a2a2a;
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 30px;
+            display: flex;
+            align-items: center;
+            gap: 30px;
+        }
+
+        .event-trainer-img {
+            width: 160px;
+            height: 160px;
+            object-fit: contain;
+            border: none;
+            flex-shrink: 0;
+            image-rendering: pixelated;
+        }
+
+        .event-info {
+            flex: 1;
+        }
+
+        .event-title {
+            font-size: 2.5em;
+            color: #ffffff;
+            margin-bottom: 15px;
+        }
+
+        .event-status {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .status-badge {
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 1.1em;
+        }
+
+        .status-badge.joined {
+            background: #2d4a2d;
+            color: #7fff7f;
+        }
+
+        .status-badge.not-joined {
+            background: #2a2a2a;
+            color: #888;
+        }
+
+        .join-leave-btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+
+        .join-btn {
+            background: #2a7a2a;
+            color: white;
+        }
+
+        .join-btn:hover {
+            background: #357a35;
+        }
+
+        .leave-btn {
+            background: #7a2a2a;
+            color: white;
+        }
+
+        .leave-btn:hover {
+            background: #8a3535;
+        }
+
+        .players-section {
+            background: #1a1a1a;
+            border: 1px solid #2a2a2a;
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 30px;
+        }
+
+        .players-title {
+            font-size: 1.8em;
+            color: #ffffff;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .player-count-badge {
+            background: #2a2a2a;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.7em;
+            color: #888;
+        }
+
+        .players-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .player-card {
+            background: #0a0a0a;
+            border: 1px solid #2a2a2a;
+            border-radius: 8px;
+            padding: 15px 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .player-card.current-user {
+            border-color: #4a4a4a;
+            background: #1f1f1f;
+        }
+
+        .player-name {
+            font-size: 1.1em;
+            color: #e0e0e0;
+        }
+
+        .player-card.current-user .player-name {
+            color: #ffffff;
+            font-weight: 600;
+        }
+
+        .you-badge {
+            background: #2a7a2a;
+            color: white;
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 0.8em;
+            font-weight: 600;
+        }
+
+        .no-players {
+            text-align: center;
+            color: #555;
+            font-style: italic;
+            padding: 30px;
+        }
+
+        .intro-screen {
+            background: #1a1a1a;
+            border: 1px solid #2a2a2a;
+            border-radius: 12px;
+            padding: 40px;
+            display: none;
+        }
+
+        .intro-screen.show {
+            display: block;
+        }
+
+        .intro-content {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .intro-text h2 {
+            font-size: 2em;
+            color: #ff6464;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .intro-text p {
+            font-size: 1.2em;
+            line-height: 1.8;
+            color: #e0e0e0;
+            margin-bottom: 15px;
+        }
+
+        .intro-text .highlight {
+            color: #ff6464;
+            font-weight: bold;
+        }
+
+        .start-btn {
+            display: block;
+            margin: 30px auto 0;
+            padding: 20px 60px;
+            background: #ff6464;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.3em;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .start-btn:hover {
+            background: #ff7a7a;
+            transform: scale(1.05);
+        }
+
+        .game-screen {
+            display: none;
+        }
+
+        .game-screen.show {
+            display: block;
+        }
+
+        .game-header {
+            background: #1a1a1a;
+            border: 1px solid #2a2a2a;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .player-info {
+            flex: 1;
+            text-align: center;
+        }
+
+        .player-info.active {
+            background: #2a2a2a;
+            border-radius: 8px;
+            padding: 10px;
+        }
+
+        .player-info h3 {
+            font-size: 1.2em;
+            margin-bottom: 5px;
+        }
+
+        .player-info .score {
+            font-size: 2em;
+            color: #ff6464;
+            font-weight: bold;
+        }
+
+        .turn-indicator {
+            flex: 1;
+            text-align: center;
+        }
+
+        .turn-indicator h2 {
+            font-size: 1.5em;
+            color: #ff6464;
+        }
+
+        .silhouette-container {
+            background: #1a1a1a;
+            border: 1px solid #2a2a2a;
+            border-radius: 12px;
+            padding: 40px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .silhouette-img {
+            max-width: 400px;
+            height: 400px;
+            object-fit: contain;
+            margin: 0 auto;
+            display: block;
+            filter: brightness(0);
+        }
+
+        .input-section {
+            background: #1a1a1a;
+            border: 1px solid #2a2a2a;
+            border-radius: 12px;
+            padding: 30px;
+        }
+
+        .input-group {
+            position: relative;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        #pokemonInput {
+            width: 100%;
+            padding: 15px;
+            font-size: 1.2em;
+            border: 2px solid #2a2a2a;
+            border-radius: 8px;
+            background: #0a0a0a;
+            color: #e0e0e0;
+        }
+
+        #pokemonInput:focus {
+            outline: none;
+            border-color: #ff6464;
+        }
+
+        #submitBtn {
+            width: 100%;
+            margin-top: 15px;
+            padding: 15px;
+            background: #ff6464;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.2em;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        #submitBtn:hover:not(:disabled) {
+            background: #ff7a7a;
+        }
+
+        #submitBtn:disabled {
+            background: #2a2a2a;
+            cursor: not-allowed;
+            color: #555;
+        }
+
+        .suggestions {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: #0a0a0a;
+            border: 2px solid #2a2a2a;
+            border-top: none;
+            border-radius: 0 0 8px 8px;
+            max-height: 300px;
+            overflow-y: auto;
+            z-index: 1000;
+            display: none;
+        }
+
+        .suggestions.show {
+            display: block;
+        }
+
+        .suggestion-item {
+            padding: 12px 15px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .suggestion-item:hover {
+            background: #2a2a2a;
+        }
+
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 9998;
+            display: none;
+        }
+
+        .overlay.show {
+            display: block;
+        }
+
+        .round-winner {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: #1a1a1a;
+            border: 3px solid #ff6464;
+            border-radius: 12px;
+            padding: 40px;
+            z-index: 9999;
+            text-align: center;
+            display: none;
+            min-width: 400px;
+        }
+
+        .round-winner.show {
+            display: block;
+        }
+
+        .round-winner h2 {
+            font-size: 2em;
+            margin-bottom: 20px;
+        }
+
+        .round-winner img {
+            max-width: 300px;
+            height: 300px;
+            object-fit: contain;
+            margin: 20px 0;
+        }
+
+        .round-winner .pokemon-name {
+            font-size: 1.5em;
+            color: #e0e0e0;
+        }
+
+        .game-over {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: #1a1a1a;
+            border: 3px solid #ff6464;
+            border-radius: 12px;
+            padding: 50px;
+            z-index: 10000;
+            text-align: center;
+            display: none;
+            min-width: 500px;
+        }
+
+        .game-over.show {
+            display: block;
+        }
+
+        .game-over h2 {
+            font-size: 2.5em;
+            color: #ff6464;
+            margin-bottom: 30px;
+        }
+
+        .rewards {
+            margin: 20px 0;
+            font-size: 1.2em;
+        }
+
+        .reward-item {
+            margin: 10px 0;
+            padding: 15px;
+            background: #0a0a0a;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="index.html" class="back-btn">
+            ← Torna alla Home
+        </a>
+
+        <div class="event-header">
+            <img src="https://raw.githubusercontent.com/lucaremix/roulette-run-challenge/main/trainers/Courtney.png" 
+                 alt="Courtney" 
+                 class="event-trainer-img">
+            <div class="event-info">
+                <h1 class="event-title">Courtney - Silhouette Challenge</h1>
+                <div class="event-status">
+                    <div id="statusBadge" class="status-badge not-joined">Non Partecipante</div>
+                    <button id="joinLeaveBtn" class="join-leave-btn join-btn" onclick="toggleJoin()">Unisciti</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="players-section">
+            <div class="players-title">
+                Giocatori <span id="playerCountBadge" class="player-count-badge">0/2</span>
+            </div>
+            <div id="playersList" class="players-list">
+                <div class="no-players">Nessun giocatore connesso...</div>
+            </div>
+        </div>
+
+        <div id="introScreen" class="intro-screen">
+            <div class="intro-content">
+                <div class="intro-text">
+                    <h2>🎭 Regole della Sfida</h2>
+                    <p>Benvenuti alla <span class="highlight">Silhouette Challenge di Courtney!</span></p>
+                    <p>In questa sfida dovrete <span class="highlight">indovinare il Pokémon dalla sua silhouette</span>.</p>
+                    <p>I giocatori si <span class="highlight">alternano</span> nei turni. Un giocatore casuale inizia per primo.</p>
+                    <p><span class="highlight">Il primo errore fa perdere</span> chi è di turno. Chi sbaglia perde il match!</p>
+                    <p><span class="highlight">🏆 Vincitore: 1500 Coins</span></p>
+                    <p><span class="highlight">💀 Perdente: 1000 Coins</span></p>
+                </div>
+                <button class="start-btn" onclick="startGame()">Inizia la Sfida!</button>
+            </div>
+        </div>
+
+        <div id="gameScreen" class="game-screen">
+            <div class="game-header">
+                <div id="player1Info" class="player-info">
+                    <h3 id="player1Name">Player 1</h3>
+                    <div class="score" id="player1Score">0</div>
+                </div>
+                <div class="turn-indicator">
+                    <h2 id="turnText">Turno di: ...</h2>
+                </div>
+                <div id="player2Info" class="player-info">
+                    <h3 id="player2Name">Player 2</h3>
+                    <div class="score" id="player2Score">0</div>
+                </div>
+            </div>
+
+            <div class="silhouette-container">
+                <img id="silhouetteImg" src="" alt="Silhouette" class="silhouette-img">
+            </div>
+
+            <div class="input-section">
+                <div class="input-group">
+                    <input type="text" 
+                           id="pokemonInput" 
+                           placeholder="Inserisci il nome del Pokémon..."
+                           autocomplete="off">
+                    <div id="suggestions" class="suggestions"></div>
+                    <button id="submitBtn" onclick="submitGuess()" disabled>Indovina!</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="overlay" class="overlay"></div>
+
+        <div id="roundWinner" class="round-winner">
+            <h2 id="roundWinnerName">Risultato</h2>
+            <img id="revealImg" src="" alt="Pokémon">
+            <div class="pokemon-name" id="revealName"></div>
+        </div>
+
+        <div id="gameOver" class="game-over">
+            <h2 id="winnerText">Vittoria!</h2>
+            <div id="rewardsDiv" class="rewards"></div>
+            <button class="start-btn" onclick="window.location.href='index.html'">Torna alla Home</button>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js';
+        import { getDatabase, ref, onValue, set, get, remove } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js';
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBTKheyLTKB-M_c0D1bJLs-VnBTV-_VqrE",
+            authDomain: "pokemon-roulette-run.firebaseapp.com",
+            databaseURL: "https://pokemon-roulette-run-default-rtdb.europe-west1.firebasedatabase.app",
+            projectId: "pokemon-roulette-run",
+            storageBucket: "pokemon-roulette-run.firebasestorage.app",
+            messagingSenderId: "1039798559782",
+            appId: "1:1039798559782:web:4d89db0ab5e7e30b60c050"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app);
+        const eventRef = ref(database, 'events/courtney');
+
+        let allPokemon = [];
+        
+        fetch('pokemon.json')
+            .then(res => res.json())
+            .then(data => {
+                allPokemon = data;
+            });
+
+        function getCurrentPlayer() {
+            return localStorage.getItem('playerName');
+        }
+
+        function padNumber(num) {
+            return String(num).padStart(3, '0');
+        }
+
+        async function renderLanding() {
+            const snapshot = await get(eventRef);
+            const state = snapshot.val();
+
+            const currentPlayer = getCurrentPlayer();
+            const isJoined = state?.players && state.players[currentPlayer];
+
+            document.getElementById('statusBadge').textContent = isJoined ? 'Partecipante' : 'Non Partecipante';
+            document.getElementById('statusBadge').className = `status-badge ${isJoined ? 'joined' : 'not-joined'}`;
+            document.getElementById('joinLeaveBtn').textContent = isJoined ? 'Abbandona' : 'Unisciti';
+            document.getElementById('joinLeaveBtn').className = `join-leave-btn ${isJoined ? 'leave-btn' : 'join-btn'}`;
+
+            renderPlayersList(state?.players || {});
+
+            if (state?.isGameStarted && isJoined) {
+                document.getElementById('introScreen').classList.add('show');
+            }
+
+            onValue(eventRef, (snapshot) => {
+                const state = snapshot.val();
+                if (!state) return;
+
+                renderPlayersList(state.players || {});
+
+                if (state.isGameStarted && isJoined) {
+                    document.getElementById('introScreen').classList.add('show');
+                }
+
+                if (state.isGameActive && isJoined) {
+                    renderGameScreen(state);
+                }
+
+                if (state.showRoundWinner) {
+                    showRoundWinner(state.showRoundWinner.winner, state.showRoundWinner.pokemon, state.showRoundWinner.reason);
+                }
+
+                if (state.isGameOver && isJoined) {
+                    showFinalResult(state);
+                }
+            });
+        }
+
+        function renderPlayersList(players) {
+            const playersList = document.getElementById('playersList');
+            const currentPlayer = getCurrentPlayer();
+            const playersArray = Object.entries(players || {});
+
+            document.getElementById('playerCountBadge').textContent = `${playersArray.length}/2`;
+
+            if (playersArray.length === 0) {
+                playersList.innerHTML = '<div class="no-players">Nessun giocatore connesso...</div>';
+                return;
+            }
+
+            playersList.innerHTML = playersArray.map(([name, data]) => `
+                <div class="player-card ${name === currentPlayer ? 'current-user' : ''}">
+                    <span class="player-name">${name}</span>
+                    ${name === currentPlayer ? '<span class="you-badge">TU</span>' : ''}
+                </div>
+            `).join('');
+        }
+
+        window.toggleJoin = async function() {
+            const currentPlayer = getCurrentPlayer();
+            const snapshot = await get(eventRef);
+            let state = snapshot.val() || {};
+
+            if (!state.players) state.players = {};
+
+            if (state.players[currentPlayer]) {
+                delete state.players[currentPlayer];
+            } else {
+                if (Object.keys(state.players).length >= 2) {
+                    alert('Evento pieno! Massimo 2 giocatori.');
+                    return;
+                }
+                state.players[currentPlayer] = { joined: Date.now() };
+            }
+
+            if (Object.keys(state.players).length === 2 && !state.isGameStarted) {
+                state.isGameStarted = true;
+            } else if (Object.keys(state.players).length < 2) {
+                state.isGameStarted = false;
+                state.isGameActive = false;
+            }
+
+            await set(eventRef, state);
+        };
+
+        window.startGame = async function() {
+            const snapshot = await get(eventRef);
+            let state = snapshot.val();
+
+            if (!state || Object.keys(state.players).length !== 2) {
+                alert('Servono esattamente 2 giocatori!');
+                return;
+            }
+
+            const players = Object.keys(state.players);
+            const randomStarter = players[Math.floor(Math.random() * players.length)];
+
+            state.isGameActive = true;
+            state.player1 = { name: players[0], score: 0 };
+            state.player2 = { name: players[1], score: 0 };
+            state.currentTurn = randomStarter;
+
+            await generateNewPokemon(state);
+        };
+
+        async function generateNewPokemon(state) {
+            const randomPokemon = allPokemon[Math.floor(Math.random() * allPokemon.length)];
+            
+            state.currentPokemon = {
+                name: randomPokemon.english_name,
+                national_number: randomPokemon.national_number
+            };
+
+            await set(eventRef, state);
+        }
+
+        function renderGameScreen(state) {
+            document.getElementById('introScreen').classList.remove('show');
+            document.getElementById('gameScreen').classList.add('show');
+
+            document.getElementById('player1Name').textContent = state.player1.name;
+            document.getElementById('player2Name').textContent = state.player2.name;
+            document.getElementById('player1Score').textContent = state.player1.score;
+            document.getElementById('player2Score').textContent = state.player2.score;
+
+            const currentPlayer = getCurrentPlayer();
+            const isMyTurn = state.currentTurn === currentPlayer;
+
+            document.getElementById('turnText').textContent = `Turno di: ${state.currentTurn}`;
+            
+            document.getElementById('player1Info').classList.toggle('active', state.currentTurn === state.player1.name);
+            document.getElementById('player2Info').classList.toggle('active', state.currentTurn === state.player2.name);
+
+            const imgUrl = `https://www.pokemon.com/static-assets/content-assets/cms2/img/pokedex/full/${padNumber(state.currentPokemon.national_number)}.png`;
+            document.getElementById('silhouetteImg').src = imgUrl;
+
+            document.getElementById('pokemonInput').disabled = !isMyTurn;
+            document.getElementById('submitBtn').disabled = !isMyTurn;
+
+            if (isMyTurn) {
+                document.getElementById('pokemonInput').focus();
+            }
+        }
+
+        window.submitGuess = async function() {
+            const input = document.getElementById('pokemonInput').value.trim();
+            if (!input) return;
+
+            const guessedPokemon = allPokemon.find(p => 
+                p.english_name.toLowerCase() === input.toLowerCase()
+            );
+
+            if (!guessedPokemon) {
+                alert('Pokémon non trovato!');
+                return;
+            }
+
+            const currentPlayer = getCurrentPlayer();
+            const snapshot = await get(eventRef);
+            const state = snapshot.val();
+
+            const isCorrect = guessedPokemon.english_name.toLowerCase() === state.currentPokemon.name.toLowerCase();
+
+            if (isCorrect) {
+                // Risposta corretta - incrementa score e passa il turno
+                if (currentPlayer === state.player1.name) {
+                    state.player1.score++;
+                } else {
+                    state.player2.score++;
+                }
+
+                const nextTurn = state.currentTurn === state.player1.name ? state.player2.name : state.player1.name;
+                state.currentTurn = nextTurn;
+
+                state.showRoundWinner = {
+                    winner: currentPlayer,
+                    pokemon: state.currentPokemon,
+                    reason: 'correct'
+                };
+                await set(eventRef, state);
+
+                setTimeout(async () => {
+                    delete state.showRoundWinner;
+                    await generateNewPokemon(state);
+                }, 3000);
+            } else {
+                // Risposta sbagliata - il giocatore di turno perde
+                const winner = state.currentTurn === state.player1.name ? state.player2 : state.player1;
+                const loser = state.currentTurn === state.player1.name ? state.player1 : state.player2;
+
+                state.showRoundWinner = {
+                    winner: null,
+                    pokemon: state.currentPokemon,
+                    reason: 'wrong'
+                };
+                await set(eventRef, state);
+
+                setTimeout(async () => {
+                    delete state.showRoundWinner;
+                    state.isGameOver = true;
+                    state.finalWinner = winner.name;
+                    state.finalLoser = loser.name;
+                    await giveRewards(state);
+                    await set(eventRef, state);
+                }, 3000);
+            }
+
+            document.getElementById('pokemonInput').value = '';
+        };
+
+        function showRoundWinner(winner, pokemon, reason) {
+            const overlay = document.getElementById('overlay');
+            const roundWinner = document.getElementById('roundWinner');
+            
+            overlay.classList.add('show');
+            roundWinner.classList.add('show');
+            
+            if (reason === 'correct') {
+                document.getElementById('roundWinnerName').textContent = `${winner} indovina!`;
+                document.getElementById('roundWinnerName').style.color = '#7fff7f';
+            } else {
+                document.getElementById('roundWinnerName').textContent = `Sbagliato!`;
+                document.getElementById('roundWinnerName').style.color = '#ff6464';
+            }
+            
+            const imgUrl = `https://www.pokemon.com/static-assets/content-assets/cms2/img/pokedex/full/${padNumber(pokemon.national_number)}.png`;
+            document.getElementById('revealImg').src = imgUrl;
+            document.getElementById('revealName').textContent = pokemon.name;
+            
+            setTimeout(() => {
+                overlay.classList.remove('show');
+                roundWinner.classList.remove('show');
+            }, 3000);
+        }
+
+        function showFinalResult(state) {
+            const overlay = document.getElementById('overlay');
+            const gameOver = document.getElementById('gameOver');
+            
+            overlay.classList.add('show');
+            gameOver.classList.add('show');
+
+            document.getElementById('winnerText').textContent = `${state.finalWinner} ha vinto!`;
+            
+            document.getElementById('rewardsDiv').innerHTML = `
+                <h3 style="color: #ff6464; margin-bottom: 15px;">Ricompense</h3>
+                <div class="reward-item">🏆 ${state.finalWinner}: 1500 Coins</div>
+                <div class="reward-item">💀 ${state.finalLoser}: 1000 Coins</div>
+            `;
+        }
+
+        async function giveRewards(state) {
+            const winnerRef = ref(database, `players/${state.finalWinner}`);
+            const loserRef = ref(database, `players/${state.finalLoser}`);
+
+            const winnerSnap = await get(winnerRef);
+            const loserSnap = await get(loserRef);
+
+            let winnerData = winnerSnap.val() || { coins: 0, team: [] };
+            let loserData = loserSnap.val() || { coins: 0, team: [] };
+
+            winnerData.coins = (winnerData.coins || 0) + 1500;
+            loserData.coins = (loserData.coins || 0) + 1000;
+
+            await set(winnerRef, winnerData);
+            await set(loserRef, loserData);
+        }
+
+        // Autocomplete
+        const input = document.getElementById('pokemonInput');
+        const suggestionsDiv = document.getElementById('suggestions');
+
+        input.addEventListener('input', function(e) {
+            const value = e.target.value.toLowerCase().trim();
+            
+            if (value.length > 0) {
+                document.getElementById('submitBtn').disabled = false;
+            }
+            
+            if (value.length < 2) {
+                suggestionsDiv.classList.remove('show');
+                return;
+            }
+
+            const matches = allPokemon
+                .filter(p => p.english_name.toLowerCase().startsWith(value))
+                .slice(0, 8);
+
+            if (matches.length > 0) {
+                suggestionsDiv.innerHTML = matches
+                    .map(p => `<div class="suggestion-item" onclick="selectPokemon('${p.english_name}')">${p.english_name}</div>`)
+                    .join('');
+                suggestionsDiv.classList.add('show');
+            } else {
+                suggestionsDiv.classList.remove('show');
+            }
+        });
+
+        window.selectPokemon = function(name) {
+            input.value = name;
+            suggestionsDiv.classList.remove('show');
+            document.getElementById('submitBtn').disabled = false;
+        };
+
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.input-group')) {
+                suggestionsDiv.classList.remove('show');
+            }
+        });
+
+        input.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                submitGuess();
+            }
+        });
+
+        if (!getCurrentPlayer()) {
+            alert('Devi impostare il tuo nome dalla home page!');
+            window.location.href = 'index.html';
+        } else {
+            renderLanding();
+        }
+    </script>
+</body>
+</html>
