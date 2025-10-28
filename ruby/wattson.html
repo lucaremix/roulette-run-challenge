@@ -1,0 +1,1239 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Burgh - Mauville City</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-image: url('https://raw.githubusercontent.com/lucaremix/roulette-run-challenge/main/background/r-wattson_background.png');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            color: #e0e0e0;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            background: #1a1a1a;
+            border: 1px solid #2a2a2a;
+            border-radius: 8px;
+            color: #e0e0e0;
+            text-decoration: none;
+            font-size: 1em;
+            transition: all 0.3s ease;
+            margin-bottom: 30px;
+        }
+
+        .back-btn:hover {
+            background: #252525;
+        }
+
+        .event-header {
+            background: #1a1a1a;
+            border: 1px solid #2a2a2a;
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 30px;
+            display: flex;
+            align-items: center;
+            gap: 30px;
+        }
+
+        .event-trainer-img {
+            width: 160px;
+            height: 160px;
+            object-fit: contain;
+            border: none;
+            flex-shrink: 0;
+            image-rendering: pixelated;
+        }
+
+        .event-info {
+            flex: 1;
+        }
+
+        .event-title {
+            font-size: 2.5em;
+            color: #ffffff;
+            margin-bottom: 15px;
+        }
+
+        .event-status {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .status-badge {
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 1.1em;
+        }
+
+        .status-badge.joined {
+            background: #2d4a2d;
+            color: #7fff7f;
+        }
+
+        .status-badge.not-joined {
+            background: #2a2a2a;
+            color: #888;
+        }
+
+        .join-leave-btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+
+        .join-btn {
+            background: #2a7a2a;
+            color: white;
+        }
+
+        .join-btn:hover {
+            background: #357a35;
+        }
+
+        .leave-btn {
+            background: #7a2a2a;
+            color: white;
+        }
+
+        .leave-btn:hover {
+            background: #8a3535;
+        }
+
+        .players-section {
+            background: #1a1a1a;
+            border: 1px solid #2a2a2a;
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 30px;
+        }
+
+        .players-title {
+            font-size: 1.8em;
+            color: #ffffff;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .player-count-badge {
+            background: #2a2a2a;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.7em;
+            color: #888;
+        }
+
+        .players-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .player-card {
+            background: #0a0a0a;
+            border: 1px solid #2a2a2a;
+            border-radius: 8px;
+            padding: 15px 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .player-card.current-user {
+            border-color: #4a4a4a;
+            background: #1f1f1f;
+        }
+
+        .player-name {
+            font-size: 1.1em;
+            color: #e0e0e0;
+        }
+
+        .player-card.current-user .player-name {
+            color: #ffffff;
+            font-weight: 600;
+        }
+
+        .you-badge {
+            background: #2a7a2a;
+            color: white;
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 0.8em;
+            font-weight: 600;
+        }
+
+        .no-players {
+            text-align: center;
+            color: #555;
+            font-style: italic;
+            padding: 30px;
+        }
+
+        .intro-screen {
+            background: #1a1a1a;
+            border: 1px solid #2a2a2a;
+            border-radius: 12px;
+            padding: 40px;
+            display: none;
+        }
+
+        .intro-screen.show {
+            display: block;
+        }
+
+        .intro-content {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .intro-text h2 {
+            font-size: 2em;
+            color: #ffa500;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .intro-text p {
+            font-size: 1.2em;
+            line-height: 1.8;
+            color: #e0e0e0;
+            margin-bottom: 15px;
+        }
+
+        .intro-text .highlight {
+            color: #ffa500;
+            font-weight: bold;
+        }
+
+        .start-btn {
+            display: block;
+            margin: 30px auto 0;
+            padding: 20px 60px;
+            background: #ffa500;
+            color: #1a1a1a;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.3em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .start-btn:hover {
+            background: #ffb733;
+            transform: translateY(-2px);
+        }
+
+        .game-screen {
+            display: none;
+        }
+
+        .game-screen.show {
+            display: block;
+        }
+
+        .scoreboard {
+            background: #1a1a1a;
+            border: 1px solid #2a2a2a;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+        }
+
+        .player-score {
+            text-align: center;
+        }
+
+        .player-score.active {
+            background: rgba(255, 165, 0, 0.1);
+            padding: 15px;
+            border-radius: 8px;
+            border: 2px solid #ffa500;
+        }
+
+        .player-score .name {
+            font-size: 1.3em;
+            color: #e0e0e0;
+            margin-bottom: 10px;
+        }
+
+        .player-score.active .name {
+            color: #ffa500;
+            font-weight: bold;
+        }
+
+        .player-score .score {
+            font-size: 2.5em;
+            color: #ffa500;
+            font-weight: bold;
+        }
+
+        .turn-indicator {
+            text-align: center;
+            background: #2a2a2a;
+            padding: 15px;
+            border-radius: 8px;
+            font-size: 1.2em;
+            color: #ffa500;
+            font-weight: bold;
+        }
+
+        .description-card {
+            background: #1a1a1a;
+            border: 1px solid #2a2a2a;
+            border-radius: 12px;
+            padding: 40px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .description-title {
+            font-size: 1.5em;
+            color: #ffa500;
+            margin-bottom: 20px;
+        }
+
+        .description-text {
+            font-size: 1.3em;
+            line-height: 1.8;
+            color: #e0e0e0;
+            background: #0a0a0a;
+            padding: 30px;
+            border-radius: 8px;
+            font-style: italic;
+        }
+
+        .guess-section {
+            background: #1a1a1a;
+            border: 1px solid #2a2a2a;
+            border-radius: 12px;
+            padding: 30px;
+        }
+
+        .input-group {
+            position: relative;
+            margin-bottom: 20px;
+        }
+
+        .pokemon-input {
+            width: 100%;
+            padding: 15px;
+            font-size: 1.2em;
+            border: 2px solid #2a2a2a;
+            border-radius: 8px;
+            background: #0a0a0a;
+            color: #e0e0e0;
+        }
+
+        .pokemon-input:focus {
+            outline: none;
+            border-color: #ffa500;
+        }
+
+        .suggestions {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: #0a0a0a;
+            border: 1px solid #2a2a2a;
+            border-top: none;
+            border-radius: 0 0 8px 8px;
+            max-height: 200px;
+            overflow-y: auto;
+            display: none;
+            z-index: 100;
+        }
+
+        .suggestions.show {
+            display: block;
+        }
+
+        .suggestion-item {
+            padding: 10px 15px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .suggestion-item:hover {
+            background: #2a2a2a;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 15px;
+            font-size: 1.2em;
+            background: #ffa500;
+            color: #1a1a1a;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .submit-btn:hover:not(:disabled) {
+            background: #ffb733;
+        }
+
+        .submit-btn:disabled {
+            background: #2a2a2a;
+            color: #555;
+            cursor: not-allowed;
+        }
+
+        .waiting-message {
+            text-align: center;
+            color: #888;
+            font-size: 1.2em;
+            padding: 30px;
+        }
+
+        .result-message {
+            margin-top: 20px;
+            padding: 20px;
+            border-radius: 8px;
+            font-size: 1.2em;
+            text-align: center;
+        }
+
+        .result-message.correct {
+            background: rgba(127, 255, 127, 0.1);
+            border: 2px solid #7fff7f;
+            color: #7fff7f;
+        }
+
+        .result-message.wrong {
+            background: rgba(255, 100, 100, 0.1);
+            border: 2px solid #ff6464;
+            color: #ff6464;
+        }
+
+        .round-winner {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: #1a1a1a;
+            border: 3px solid #ffa500;
+            border-radius: 20px;
+            padding: 50px;
+            text-align: center;
+            z-index: 1000;
+            display: none;
+            min-width: 400px;
+        }
+
+        .round-winner.show {
+            display: block;
+            animation: popIn 0.3s ease;
+        }
+
+        @keyframes popIn {
+            from {
+                transform: translate(-50%, -50%) scale(0.8);
+                opacity: 0;
+            }
+            to {
+                transform: translate(-50%, -50%) scale(1);
+                opacity: 1;
+            }
+        }
+
+        .round-winner h2 {
+            font-size: 2.5em;
+            color: #ffa500;
+            margin-bottom: 20px;
+        }
+
+        .round-winner .winner-name {
+            font-size: 2em;
+            color: #7fff7f;
+            font-weight: bold;
+        }
+
+        .pokemon-reveal {
+            margin-top: 30px;
+        }
+
+        .pokemon-reveal img {
+            width: 200px;
+            height: 200px;
+            object-fit: contain;
+            image-rendering: pixelated;
+        }
+
+        .pokemon-reveal .pokemon-name {
+            font-size: 1.8em;
+            color: #ffa500;
+            margin-top: 15px;
+        }
+
+        .final-result {
+            background: #1a1a1a;
+            border: 1px solid #2a2a2a;
+            border-radius: 12px;
+            padding: 40px;
+            text-align: center;
+            display: none;
+        }
+
+        .final-result.show {
+            display: block;
+        }
+
+        .final-result h2 {
+            font-size: 3em;
+            color: #ffa500;
+            margin-bottom: 30px;
+        }
+
+        .rewards-section {
+            background: #0a0a0a;
+            border-radius: 8px;
+            padding: 30px;
+            margin: 30px 0;
+        }
+
+        .reward-item {
+            font-size: 1.3em;
+            padding: 15px;
+            margin: 10px 0;
+            background: #1a1a1a;
+            border-radius: 8px;
+        }
+
+        .spin-btn {
+            margin-top: 30px;
+            padding: 20px 60px;
+            background: #ffa500;
+            color: #1a1a1a;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.3em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .spin-btn:hover {
+            background: #ffb733;
+            transform: translateY(-2px);
+        }
+
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            display: none;
+            z-index: 999;
+        }
+
+        .overlay.show {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="index.html" class="back-btn">← Torna alla Home</a>
+
+        <!-- Landing / Join Section -->
+        <div id="landingSection">
+            <div class="event-header">
+                <img src="https://img.nuzlocke.app/leaders/rs-wattson-oras.png" 
+                     alt="Burgh" class="event-trainer-img">
+                <div class="event-info">
+                    <h1 class="event-title">Wattson - Mauville City</h1>
+                    <p style="font-size: 1.1em; color: #ccc;">
+                        Sfida 1v1 di descrizioni Pokédex. Verrà mostrata la descrizione di un Pokémon, 
+                        e a turni alterni i giocatori dovranno indovinare di quale Pokémon si tratta.
+                    </p>
+                    <div class="event-status">
+                        <span class="status-badge not-joined" id="joinStatus">Non partecipante</span>
+                        <button class="join-leave-btn join-btn" id="joinBtn" onclick="toggleJoin()">
+                            Unisciti all'evento
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="players-section">
+                <div class="players-title">
+                    Giocatori
+                    <span class="player-count-badge" id="playerCount">0/2</span>
+                </div>
+                <div class="players-list" id="playersList">
+                    <div class="no-players">Nessun giocatore nell'evento</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Intro Screen -->
+        <div class="intro-screen" id="introScreen">
+            <div class="intro-content">
+                <div class="intro-text">
+                    <h2>🔍 Pokédex Description Challenge</h2>
+                    <p>Benvenuti alla sfida delle descrizioni Pokédex!</p>
+                    <p>
+                        <span class="highlight">Come funziona:</span><br>
+                        • A turni alterni, verrà mostrata una descrizione Pokédex<br>
+                        • Il giocatore di turno ha il primo tentativo di indovinare<br>
+                        • Se sbaglia, l'avversario può fare UN solo tentativo<br>
+                        • Se entrambi sbagliano, nessun punto e si passa alla prossima<br>
+                        • Chi indovina prende 1 punto e diventa il primo del turno successivo
+                    </p>
+                    <p>
+                        <span class="highlight">Obiettivo:</span> Primo a <span class="highlight">5 punti</span> vince!
+                    </p>
+                    <p>
+                        <span class="highlight">Ricompense:</span><br>
+                        🏆 Vincitore: 1 Spin Pool A + 1500 Coins<br>
+                        💰 Perdente: 1 Spin Pool B + 750 Coins
+                    </p>
+                </div>
+                <button class="start-btn" onclick="startGame()">Inizia la Sfida</button>
+            </div>
+        </div>
+
+        <!-- Game Screen -->
+        <div class="game-screen" id="gameScreen">
+            <div class="scoreboard">
+                <div class="player-score" id="player1Score">
+                    <div class="name" id="player1Name">Giocatore 1</div>
+                    <div class="score" id="player1Points">0</div>
+                </div>
+                <div class="turn-indicator" id="turnIndicator">
+                    Turno di: <span id="currentTurnPlayer">-</span>
+                </div>
+                <div class="player-score" id="player2Score">
+                    <div class="name" id="player2Name">Giocatore 2</div>
+                    <div class="score" id="player2Points">0</div>
+                </div>
+            </div>
+
+            <div class="description-card">
+                <div class="description-title">📖 Descrizione Pokédex</div>
+                <div class="description-text" id="descriptionText">
+                    Caricamento descrizione...
+                </div>
+            </div>
+
+            <div class="guess-section" id="guessSection">
+                <div id="myTurnSection" style="display: none;">
+                    <div class="input-group">
+                        <input type="text" 
+                               class="pokemon-input" 
+                               id="pokemonInput" 
+                               placeholder="Inserisci il nome del Pokémon..."
+                               autocomplete="off">
+                        <div class="suggestions" id="suggestions"></div>
+                    </div>
+                    <button class="submit-btn" id="submitBtn" onclick="submitGuess()" disabled>
+                        Conferma Risposta
+                    </button>
+                    <div class="result-message" id="resultMessage"></div>
+                </div>
+                <div id="waitingSection" style="display: none;">
+                    <div class="waiting-message">
+                        In attesa della risposta dell'avversario...
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Round Winner Overlay -->
+        <div class="overlay" id="overlay"></div>
+        <div class="round-winner" id="roundWinner">
+            <h2>Round completato!</h2>
+            <div class="winner-name" id="roundWinnerName">-</div>
+            <div class="pokemon-reveal">
+                <img id="revealImg" src="" alt="">
+                <div class="pokemon-name" id="revealName">-</div>
+            </div>
+        </div>
+
+        <!-- Final Result -->
+        <div class="final-result" id="finalResult">
+            <h2 id="winnerText">Vincitore!</h2>
+            <div class="rewards-section" id="rewardsDiv"></div>
+            <button class="spin-btn" onclick="goToSpin()">Vai allo Spin! 🎰</button>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+        import { getDatabase, ref, onValue, set, get, remove, push } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js';
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDNuD9wViLLxteHMCEBlvfdONwcZbAjAvo",
+            authDomain: "roulette-run-challenge.firebaseapp.com",
+            databaseURL: "https://roulette-run-challenge-default-rtdb.europe-west1.firebasedatabase.app",
+            projectId: "roulette-run-challenge",
+            storageBucket: "roulette-run-challenge.firebasestorage.app",
+            messagingSenderId: "994019156093",
+            appId: "1:994019156093:web:9792bdce75c486f589d114"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app);
+        const eventRef = ref(database, 'events/burgh');
+
+        let allPokemon = [];
+        let gameState = null;
+        const MAX_PLAYERS = 2;
+
+        // Carica i Pokémon da GitHub
+        fetch('https://raw.githubusercontent.com/lucaremix/roulette-run-challenge/main/pokemon.json')
+            .then(res => res.json())
+            .then(data => {
+                allPokemon = data.filter(p => {
+                    // Deve avere una descrizione
+                    if (!p.description || p.description.trim().length === 0) return false;
+                    
+                    // Deve avere un nome
+                    if (!p.english_name || p.english_name.trim().length === 0) return false;
+                    
+                    // Il nome NON deve essere presente nella descrizione
+                    const nameLower = p.english_name.toLowerCase();
+                    const descLower = p.description.toLowerCase();
+                    
+                    return !descLower.includes(nameLower);
+                });
+                console.log(`Caricati ${allPokemon.length} Pokémon con descrizioni valide (senza nome)`);
+            })
+            .catch(err => console.error('Errore nel caricamento dei Pokémon:', err));
+
+        function getCurrentPlayer() {
+            return localStorage.getItem('playerName') || '';
+        }
+
+        function padNumber(num) {
+            return String(num).padStart(3, '0');
+        }
+
+        // Render Landing
+        function renderLanding() {
+            const currentPlayer = getCurrentPlayer();
+            const playersRef = ref(database, `events/burgh/players`);
+
+            onValue(playersRef, (snapshot) => {
+                const players = [];
+                snapshot.forEach((childSnapshot) => {
+                    players.push(childSnapshot.val());
+                });
+
+                const isJoined = players.includes(currentPlayer);
+
+                const statusBadge = document.getElementById('joinStatus');
+                const joinLeaveBtn = document.getElementById('joinBtn');
+
+                if (statusBadge && joinLeaveBtn) {
+                    if (isJoined) {
+                        statusBadge.textContent = 'Partecipante';
+                        statusBadge.className = 'status-badge joined';
+                        joinLeaveBtn.textContent = 'Abbandona evento';
+                        joinLeaveBtn.className = 'join-leave-btn leave-btn';
+                    } else {
+                        statusBadge.textContent = 'Non partecipante';
+                        statusBadge.className = 'status-badge not-joined';
+                        joinLeaveBtn.textContent = 'Unisciti all\'evento';
+                        joinLeaveBtn.className = 'join-leave-btn join-btn';
+                    }
+                }
+
+                const countBadge = document.getElementById('playerCount');
+                if (countBadge) {
+                    countBadge.textContent = `${players.length}/2`;
+                }
+
+                const playersList = document.getElementById('playersList');
+                
+                if (playersList) {
+                    if (players.length === 0) {
+                        playersList.innerHTML = '<div class="no-players">Nessun giocatore nell\'evento</div>';
+                    } else {
+                        playersList.innerHTML = players.map(player => {
+                            const isCurrentUser = player === currentPlayer;
+                            return `
+                                <div class="player-card ${isCurrentUser ? 'current-user' : ''}">
+                                    <span class="player-name">${player}</span>
+                                    ${isCurrentUser ? '<span class="you-badge">Tu</span>' : ''}
+                                </div>
+                            `;
+                        }).join('');
+                    }
+                }
+
+                if (players.length === 2) {
+                    document.getElementById('landingSection').style.display = 'none';
+                    document.getElementById('introScreen').classList.add('show');
+                } else {
+                    document.getElementById('landingSection').style.display = 'block';
+                    document.getElementById('introScreen').classList.remove('show');
+                }
+            });
+
+            // Listener per lo stato del gioco
+            onValue(eventRef, (snapshot) => {
+                const data = snapshot.val();
+                if (!data) return;
+
+                // Se il gioco è iniziato, mostra game screen
+                if (data.gameStarted && !data.isGameOver) {
+                    document.getElementById('landingSection').style.display = 'none';
+                    document.getElementById('introScreen').classList.remove('show');
+                    document.getElementById('gameScreen').classList.add('show');
+                    gameState = data;
+                    renderGame();
+                }
+
+                // Se il gioco è finito, mostra risultato finale
+                if (data.isGameOver) {
+                    document.getElementById('landingSection').style.display = 'none';
+                    document.getElementById('introScreen').classList.remove('show');
+                    document.getElementById('gameScreen').style.display = 'none';
+                    document.getElementById('finalResult').classList.add('show');
+                    showFinalResult(data);
+                }
+            });
+        }
+
+        async function toggleJoin() {
+            const playerName = getCurrentPlayer();
+            if (!playerName) {
+                alert('Devi impostare il tuo nome dalla home page!');
+                window.location.href = 'index.html';
+                return;
+            }
+
+            const playersRef = ref(database, `events/burgh/players`);
+            
+            const snapshot = await new Promise((resolve) => {
+                onValue(playersRef, (snap) => resolve(snap), { onlyOnce: true });
+            });
+
+            let isInEvent = false;
+            let playerNodeKey = null;
+
+            snapshot.forEach((childSnapshot) => {
+                if (childSnapshot.val() === playerName) {
+                    isInEvent = true;
+                    playerNodeKey = childSnapshot.key;
+                }
+            });
+
+            if (isInEvent && playerNodeKey) {
+                await remove(ref(database, `events/burgh/players/${playerNodeKey}`));
+            } else {
+                const newPlayerRef = push(ref(database, `events/burgh/players`));
+                await set(newPlayerRef, playerName);
+            }
+        }
+
+        window.toggleJoin = toggleJoin;
+
+        window.startGame = async function() {
+            const playersRef = ref(database, `events/burgh/players`);
+            const snapshot = await get(playersRef);
+            
+            const players = [];
+            snapshot.forEach((childSnapshot) => {
+                players.push(childSnapshot.val());
+            });
+
+            if (players.length !== 2) {
+                alert('Servono esattamente 2 giocatori per iniziare!');
+                return;
+            }
+
+            // Inizializza il gioco
+            const newGame = {
+                gameStarted: true,
+                player1: { name: players[0], score: 0 },
+                player2: { name: players[1], score: 0 },
+                currentRound: 1,
+                roundsToWin: 5,
+                currentTurn: players[0], // Il primo giocatore inizia
+                currentDescription: null,
+                currentPokemon: null,
+                firstPlayerGuessed: false,
+                isGameOver: false
+            };
+
+            await set(eventRef, newGame);
+            await generateNewDescription(newGame);
+        };
+
+        async function generateNewDescription(state) {
+            if (allPokemon.length === 0) {
+                setTimeout(() => generateNewDescription(state), 500);
+                return;
+            }
+
+            const randomPokemon = allPokemon[Math.floor(Math.random() * allPokemon.length)];
+            
+            state.currentPokemon = {
+                name: randomPokemon.english_name,
+                national_number: randomPokemon.national_number
+            };
+            state.currentDescription = randomPokemon.description;
+            state.firstPlayerGuessed = false;
+            state.guesses = {};
+
+            await set(eventRef, state);
+        }
+
+        function renderGame() {
+            if (!gameState) return;
+
+            // Gestisci la schermata di vittoria del round (visibile a entrambi)
+            if (gameState.showRoundWinner) {
+                showRoundWinner(gameState.showRoundWinner.winner, gameState.showRoundWinner.pokemon);
+                return;
+            }
+
+            // Aggiorna punteggi
+            document.getElementById('player1Name').textContent = gameState.player1.name;
+            document.getElementById('player1Points').textContent = gameState.player1.score;
+            document.getElementById('player2Name').textContent = gameState.player2.name;
+            document.getElementById('player2Points').textContent = gameState.player2.score;
+
+            // Evidenzia il giocatore di turno
+            const isPlayer1Turn = gameState.currentTurn === gameState.player1.name;
+            document.getElementById('player1Score').classList.toggle('active', isPlayer1Turn);
+            document.getElementById('player2Score').classList.toggle('active', !isPlayer1Turn);
+
+            // Mostra chi è di turno
+            document.getElementById('currentTurnPlayer').textContent = gameState.currentTurn;
+
+            // Mostra descrizione
+            document.getElementById('descriptionText').textContent = gameState.currentDescription || 'Caricamento...';
+
+            // Gestisci input
+            const currentPlayer = getCurrentPlayer();
+            const isMyTurn = gameState.currentTurn === currentPlayer;
+            const hasGuessed = gameState.guesses && gameState.guesses[currentPlayer];
+
+            if (isMyTurn && !hasGuessed) {
+                // È il mio turno e non ho ancora indovinato
+                document.getElementById('myTurnSection').style.display = 'block';
+                document.getElementById('waitingSection').style.display = 'none';
+                document.getElementById('pokemonInput').value = '';
+                document.getElementById('pokemonInput').disabled = false;
+                document.getElementById('submitBtn').disabled = true;
+                document.getElementById('resultMessage').innerHTML = '';
+            } else if (!isMyTurn && gameState.firstPlayerGuessed && !hasGuessed) {
+                // È il turno dell'altro giocatore per il secondo tentativo
+                // Mostra cosa ha indovinato il primo giocatore
+                const firstPlayer = gameState.currentTurn;
+                const firstPlayerGuess = gameState.guesses[firstPlayer];
+                
+                document.getElementById('myTurnSection').style.display = 'block';
+                document.getElementById('waitingSection').style.display = 'none';
+                document.getElementById('pokemonInput').value = '';
+                document.getElementById('pokemonInput').disabled = false;
+                document.getElementById('submitBtn').disabled = true;
+                
+                if (firstPlayerGuess) {
+                    document.getElementById('resultMessage').innerHTML = `
+                        <div style="background: rgba(255, 100, 100, 0.1); border: 2px solid #ff6464; color: #ff6464; padding: 15px; border-radius: 8px; margin-bottom: 15px;">
+                            ❌ ${firstPlayer} ha indovinato: <strong>${firstPlayerGuess.pokemon}</strong><br>
+                            È il tuo turno!
+                        </div>
+                    `;
+                } else {
+                    document.getElementById('resultMessage').innerHTML = '';
+                }
+            } else {
+                document.getElementById('myTurnSection').style.display = 'none';
+                document.getElementById('waitingSection').style.display = 'block';
+            }
+        }
+
+        window.submitGuess = async function() {
+            const input = document.getElementById('pokemonInput').value.trim();
+            if (!input) return;
+
+            const guessedPokemon = allPokemon.find(p => 
+                p.english_name.toLowerCase() === input.toLowerCase()
+            );
+
+            if (!guessedPokemon) {
+                alert('Pokémon non trovato!');
+                return;
+            }
+
+            const currentPlayer = getCurrentPlayer();
+            const snapshot = await get(eventRef);
+            const state = snapshot.val();
+
+            if (!state.guesses) {
+                state.guesses = {};
+            }
+
+            const isCorrect = guessedPokemon.english_name.toLowerCase() === state.currentPokemon.name.toLowerCase();
+            
+            state.guesses[currentPlayer] = {
+                pokemon: guessedPokemon.english_name,
+                correct: isCorrect
+            };
+
+            // Se è il primo tentativo
+            if (!state.firstPlayerGuessed) {
+                state.firstPlayerGuessed = true;
+                
+                if (isCorrect) {
+                    // Il primo giocatore ha indovinato - prende il punto
+                    if (currentPlayer === state.player1.name) {
+                        state.player1.score++;
+                    } else {
+                        state.player2.score++;
+                    }
+                    
+                    await set(eventRef, state);
+                    
+                    // Cambio turno alternato - passa all'altro giocatore
+                    const nextTurn = state.currentTurn === state.player1.name ? state.player2.name : state.player1.name;
+                    
+                    // Mostra schermata vittoria con flag per entrambi
+                    state.showRoundWinner = {
+                        winner: currentPlayer,
+                        pokemon: state.currentPokemon
+                    };
+                    await set(eventRef, state);
+                    
+                    setTimeout(async () => {
+                        delete state.showRoundWinner;
+                        state.currentTurn = nextTurn;
+                        state.currentRound++;
+                        
+                        if (state.player1.score >= state.roundsToWin || state.player2.score >= state.roundsToWin) {
+                            state.isGameOver = true;
+                            await giveRewards(state);
+                            await set(eventRef, state);
+                        } else {
+                            await generateNewDescription(state);
+                        }
+                    }, 3000);
+                } else {
+                    // Il primo ha sbagliato - salva il guess e passa al secondo
+                    await set(eventRef, state);
+                }
+            } else {
+                // È il secondo tentativo
+                if (isCorrect) {
+                    // Il secondo giocatore ha indovinato
+                    if (currentPlayer === state.player1.name) {
+                        state.player1.score++;
+                    } else {
+                        state.player2.score++;
+                    }
+                    
+                    await set(eventRef, state);
+                    
+                    // Cambio turno alternato - passa all'altro giocatore
+                    const nextTurn = state.currentTurn === state.player1.name ? state.player2.name : state.player1.name;
+                    
+                    // Mostra schermata vittoria con flag per entrambi
+                    state.showRoundWinner = {
+                        winner: currentPlayer,
+                        pokemon: state.currentPokemon
+                    };
+                    await set(eventRef, state);
+                    
+                    setTimeout(async () => {
+                        delete state.showRoundWinner;
+                        state.currentTurn = nextTurn;
+                        state.currentRound++;
+                        
+                        if (state.player1.score >= state.roundsToWin || state.player2.score >= state.roundsToWin) {
+                            state.isGameOver = true;
+                            await giveRewards(state);
+                            await set(eventRef, state);
+                        } else {
+                            await generateNewDescription(state);
+                        }
+                    }, 3000);
+                } else {
+                    // Entrambi hanno sbagliato - nessun punto
+                    await set(eventRef, state);
+                    
+                    // Cambio turno alternato - passa all'altro giocatore
+                    const nextTurn = state.currentTurn === state.player1.name ? state.player2.name : state.player1.name;
+                    
+                    // Mostra schermata "nessuno indovina" con flag per entrambi
+                    state.showRoundWinner = {
+                        winner: null,
+                        pokemon: state.currentPokemon
+                    };
+                    await set(eventRef, state);
+                    
+                    setTimeout(async () => {
+                        delete state.showRoundWinner;
+                        state.currentTurn = nextTurn;
+                        state.currentRound++;
+                        await generateNewDescription(state);
+                    }, 3000);
+                }
+            }
+        };
+
+        function showRoundWinner(winner, pokemon) {
+            const overlay = document.getElementById('overlay');
+            const roundWinner = document.getElementById('roundWinner');
+            
+            overlay.classList.add('show');
+            roundWinner.classList.add('show');
+            
+            if (winner) {
+                document.getElementById('roundWinnerName').textContent = `${winner} indovina!`;
+                document.getElementById('roundWinnerName').style.color = '#7fff7f';
+            } else {
+                document.getElementById('roundWinnerName').textContent = 'Nessuno indovina!';
+                document.getElementById('roundWinnerName').style.color = '#ff6464';
+            }
+            
+            const imgUrl = `https://www.pokemon.com/static-assets/content-assets/cms2/img/pokedex/full/${padNumber(pokemon.national_number)}.png`;
+            document.getElementById('revealImg').src = imgUrl;
+            document.getElementById('revealName').textContent = pokemon.name;
+            
+            setTimeout(() => {
+                overlay.classList.remove('show');
+                roundWinner.classList.remove('show');
+            }, 3000);
+        }
+
+        function showFinalResult(state) {
+            const winner = state.player1.score >= state.roundsToWin ? state.player1 : state.player2;
+            const loser = winner === state.player1 ? state.player2 : state.player1;
+
+            document.getElementById('winnerText').textContent = `${winner.name} ha vinto!`;
+            
+            document.getElementById('rewardsDiv').innerHTML = `
+                <h3 style="color: #ffa500; margin-bottom: 15px;">Ricompense</h3>
+                <div class="reward-item">🏆 ${winner.name}: 1 Spin Pool A + 125 Coins</div>
+                <div class="reward-item">💰 ${loser.name}: 1 Spin Pool B + 75 Coins</div>
+            `;
+        }
+
+        async function giveRewards(state) {
+            const winner = state.player1.score >= state.roundsToWin ? state.player1.name : state.player2.name;
+            const loser = winner === state.player1.name ? state.player2.name : state.player1.name;
+
+            const winnerRef = ref(database, `players/${winner}`);
+            const loserRef = ref(database, `players/${loser}`);
+
+            const winnerSnap = await get(winnerRef);
+            const loserSnap = await get(loserRef);
+
+            let winnerData = winnerSnap.val() || { coins: 0, rubyteam: [] };
+            let loserData = loserSnap.val() || { coins: 0, rubyteam: [] };
+
+            const hasAmulet = winnerData?.inventory?.itempermanenti?.['Amulet Coin'] === true;
+            winnerData.coins = (winnerData.coins || 0) + 1500 + (hasAmulet ? 375 : 0);
+
+            const hasAmulet = loserData?.inventory?.itempermanenti?.['Amulet Coin'] === true;
+            loserData.coins = (loserData.coins || 0) + 750 + (hasAmulet ? 188 : 0);
+
+            await set(winnerRef, winnerData);
+            await set(loserRef, loserData);
+        }
+
+        window.goToSpin = function() {
+            window.location.href = 'pokemon-spin.html';
+        };
+
+        // Autocomplete
+        const input = document.getElementById('pokemonInput');
+        const suggestionsDiv = document.getElementById('suggestions');
+
+        input.addEventListener('input', function(e) {
+            const value = e.target.value.toLowerCase().trim();
+            
+            if (value.length > 0) {
+                document.getElementById('submitBtn').disabled = false;
+            }
+            
+            if (value.length < 2) {
+                suggestionsDiv.classList.remove('show');
+                return;
+            }
+
+            const matches = allPokemon
+                .filter(p => p.english_name.toLowerCase().startsWith(value))
+                .slice(0, 8);
+
+            if (matches.length > 0) {
+                suggestionsDiv.innerHTML = matches
+                    .map(p => `<div class="suggestion-item" onclick="selectPokemon('${p.english_name}')">${p.english_name}</div>`)
+                    .join('');
+                suggestionsDiv.classList.add('show');
+            } else {
+                suggestionsDiv.classList.remove('show');
+            }
+        });
+
+        window.selectPokemon = function(name) {
+            input.value = name;
+            suggestionsDiv.classList.remove('show');
+            document.getElementById('submitBtn').disabled = false;
+        };
+
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.input-group')) {
+                suggestionsDiv.classList.remove('show');
+            }
+        });
+
+        input.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                submitGuess();
+            }
+        });
+
+        if (!getCurrentPlayer()) {
+            alert('Devi impostare il tuo nome dalla home page!');
+            window.location.href = 'index.html';
+        } else {
+            renderLanding();
+        }
+    </script>
+</body>
+</html>
