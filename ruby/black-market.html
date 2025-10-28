@@ -879,7 +879,7 @@
 
             const playerRef = ref(database, `players/${player}`);
             const playerSnapshot = await get(playerRef);
-            const playerData = playerSnapshot.val() || { coins: 0, rubytea: [] };
+            const playerData = playerSnapshot.val() || { coins: 0, rubyteam: [] };
 
             if ((playerData.coins || 0) < price) {
                 alert('Non hai abbastanza Coins!');
@@ -891,8 +891,8 @@
                 // Deduct coins
                 playerData.coins = (playerData.coins || 0) - price;
 
-                // Add to rubytea
-                if (!playerData.rubytea) playerData.rubytea = [];
+                // Add to rubyteam
+                if (!playerData.rubyteam) playerData.rubyteam = [];
                 
                 const natures = ["Hardy", "Lonely", "Brave", "Adamant", "Naughty", "Bold", "Docile", "Relaxed", "Impish", "Lax", "Timid", "Hasty", "Serious", "Jolly", "Naive", "Modest", "Mild", "Quiet", "Bashful", "Rash", "Calm", "Gentle", "Sassy", "Careful", "Quirky"];
                 const randomNature = natures[Math.floor(Math.random() * natures.length)];
@@ -900,7 +900,7 @@
                 const abilities = [pokemon.abilities_0, pokemon.abilities_1, pokemon.abilities_2].filter(a => a && a.trim() !== '');
                 const randomAbility = abilities.length > 0 ? abilities[Math.floor(Math.random() * abilities.length)] : 'Unknown';
 
-                playerData.rubytea.push({
+                playerData.rubyteam.push({
                     ...pokemon,
                     nature: randomNature,
                     ability: randomAbility,
