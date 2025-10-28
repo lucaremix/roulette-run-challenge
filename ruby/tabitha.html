@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tabitha - Weather Institute</title>
+    <title>Tabitha - Challenge</title>
     <style>
         * {
             margin: 0;
@@ -969,8 +969,15 @@
                     playerData.coins = (playerData.coins || 0) + coins + (hasAmulet ? Math.floor(coins / 4) : 0);
                     
                     // Rimuovi il pokemon dal team usando la key
+                    console.log('Rimozione pokemon:', choice.pokemon.name, 'con key:', choice.pokemon.key);
                     const teamRef = ref(database, `players/${playerName}/rubyteam/${choice.pokemon.key}`);
-                    await remove(teamRef);
+                    
+                    try {
+                        await remove(teamRef);
+                        console.log('Pokemon rimosso con successo');
+                    } catch (error) {
+                        console.error('Errore nella rimozione del pokemon:', error);
+                    }
                     
                     // Aggiungi pending spin con la rarità della carta scelta
                     playerData.pendingSpin = { 
