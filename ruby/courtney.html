@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Courtney - Magma Hideout</title>
+    <title>Courtney - Silhouette Challenge</title>
     <style>
         * {
             margin: 0;
@@ -13,7 +13,7 @@
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-image: url('https://raw.githubusercontent.com/lucaremix/roulette-run-challenge/main/background/r-magmahideout_background.png');
+            background-image: url('https://raw.githubusercontent.com/lucaremix/roulette-run-challenge/main/background/Courtney_background.png');
             background-size: cover;
             background-position: center;
             background-attachment: fixed;
@@ -499,12 +499,13 @@
             ← Torna alla Home
         </a>
 
+        <div id="landingSection">
         <div class="event-header">
-            <img src="https://img.nuzlocke.app/leaders/rs-courtney-oras.png" 
+            <img src="https://raw.githubusercontent.com/lucaremix/roulette-run-challenge/main/trainers/Courtney.png" 
                  alt="Courtney" 
                  class="event-trainer-img">
             <div class="event-info">
-                <h1 class="event-title">Courtney - Magma Hideout</h1>
+                <h1 class="event-title">Courtney - Silhouette Challenge</h1>
                 <div class="event-status">
                     <div id="statusBadge" class="status-badge not-joined">Non Partecipante</div>
                     <button id="joinLeaveBtn" class="join-leave-btn join-btn" onclick="toggleJoin()">Unisciti</button>
@@ -519,6 +520,7 @@
             <div id="playersList" class="players-list">
                 <div class="no-players">Nessun giocatore connesso...</div>
             </div>
+        </div>
         </div>
 
         <div id="introScreen" class="intro-screen">
@@ -584,7 +586,7 @@
 
     <script type="module">
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js';
-        import { getDatabase, ref, onValue, set, get, remove } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js';
+        import { getDatabase, ref, onValue, set, get, remove, push } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js';
 
         const firebaseConfig = {
             apiKey: "AIzaSyDNuD9wViLLxteHMCEBlvfdONwcZbAjAvo",
@@ -602,7 +604,7 @@
 
         let allPokemon = [];
         
-        fetch('pokemon.json')
+        fetch('https://raw.githubusercontent.com/lucaremix/roulette-run-challenge/main/pokemon.json')
             .then(res => res.json())
             .then(data => {
                 allPokemon = data;
@@ -617,112 +619,168 @@
         }
 
         async function renderLanding() {
-            const snapshot = await get(eventRef);
-            const state = snapshot.val();
-
             const currentPlayer = getCurrentPlayer();
-            const isJoined = state?.players && state.players[currentPlayer];
+            const playersRef = ref(database, `events/courtney/players`);
 
-            document.getElementById('statusBadge').textContent = isJoined ? 'Partecipante' : 'Non Partecipante';
-            document.getElementById('statusBadge').className = `status-badge ${isJoined ? 'joined' : 'not-joined'}`;
-            document.getElementById('joinLeaveBtn').textContent = isJoined ? 'Abbandona' : 'Unisciti';
-            document.getElementById('joinLeaveBtn').className = `join-leave-btn ${isJoined ? 'leave-btn' : 'join-btn'}`;
+            onValue(playersRef, (snapshot) => {
+                const players = [];
+                snapshot.forEach((childSnapshot) => {
+                    players.push(childSnapshot.val());
+                });
 
-            renderPlayersList(state?.players || {});
+                const isJoined = players.includes(currentPlayer);
 
-            if (state?.isGameStarted && isJoined) {
-                document.getElementById('introScreen').classList.add('show');
-            }
+                const statusBadge = document.getElementById('statusBadge');
+                const joinLeaveBtn = document.getElementById('joinLeaveBtn');
 
-            onValue(eventRef, (snapshot) => {
-                const state = snapshot.val();
-                if (!state) return;
+                if (statusBadge && joinLeaveBtn) {
+                    if (isJoined) {
+                        statusBadge.textContent = 'Partecipante';
+                        statusBadge.className = 'status-badge joined';
+                        joinLeaveBtn.textContent = 'Abbandona';
+                        joinLeaveBtn.className = 'join-leave-btn leave-btn';
+                    } else {
+                        statusBadge.textContent = 'Non Partecipante';
+                        statusBadge.className = 'status-badge not-joined';
+                        joinLeaveBtn.textContent = 'Unisciti';
+                        joinLeaveBtn.className = 'join-leave-btn join-btn';
+                    }
+                }
 
-                renderPlayersList(state.players || {});
+                const countBadge = document.getElementById('playerCountBadge');
+                if (countBadge) {
+                    countBadge.textContent = `${players.length}/2`;
+                }
 
-                if (state.isGameStarted && isJoined) {
+                const playersList = document.getElementById('playersList');
+                
+                if (playersList) {
+                    if (players.length === 0) {
+                        playersList.innerHTML = '<div class="no-players">Nessun giocatore connesso...</div>';
+                    } else {
+                        playersList.innerHTML = players.map(player => {
+                            const isCurrentUser = player === currentPlayer;
+                            return `
+                                <div class="player-card ${isCurrentUser ? 'current-user' : ''}">
+                                    <span class="player-name">${player}</span>
+                                    ${isCurrentUser ? '<span class="you-badge">TU</span>' : ''}
+                                </div>
+                            `;
+                        }).join('');
+                    }
+                }
+
+                if (players.length === 2) {
+                    document.getElementById('landingSection').style.display = 'none';
                     document.getElementById('introScreen').classList.add('show');
+                } else {
+                    document.getElementById('landingSection').style.display = 'block';
+                    document.getElementById('introScreen').classList.remove('show');
+                }
+            });
+
+            // Listener per lo stato del gioco
+            onValue(eventRef, (snapshot) => {
+                const data = snapshot.val();
+                if (!data) return;
+
+                // Se il gioco è iniziato, mostra game screen
+                if (data.isGameActive && !data.isGameOver) {
+                    document.getElementById('landingSection').style.display = 'none';
+                    document.getElementById('introScreen').classList.remove('show');
+                    document.getElementById('gameScreen').classList.add('show');
+                    renderGameScreen(data);
                 }
 
-                if (state.isGameActive && isJoined) {
-                    renderGameScreen(state);
+                // Mostra risultato del round
+                if (data.showRoundWinner) {
+                    showRoundWinner(data.showRoundWinner.winner, data.showRoundWinner.pokemon, data.showRoundWinner.reason);
                 }
 
-                if (state.showRoundWinner) {
-                    showRoundWinner(state.showRoundWinner.winner, state.showRoundWinner.pokemon, state.showRoundWinner.reason);
-                }
-
-                if (state.isGameOver && isJoined) {
-                    showFinalResult(state);
+                // Se il gioco è finito, mostra risultato finale
+                if (data.isGameOver) {
+                    document.getElementById('landingSection').style.display = 'none';
+                    document.getElementById('introScreen').classList.remove('show');
+                    document.getElementById('gameScreen').style.display = 'none';
+                    showFinalResult(data);
                 }
             });
         }
 
-        function renderPlayersList(players) {
-            const playersList = document.getElementById('playersList');
-            const currentPlayer = getCurrentPlayer();
-            const playersArray = Object.entries(players || {});
-
-            document.getElementById('playerCountBadge').textContent = `${playersArray.length}/2`;
-
-            if (playersArray.length === 0) {
-                playersList.innerHTML = '<div class="no-players">Nessun giocatore connesso...</div>';
+        async function toggleJoin() {
+            const playerName = getCurrentPlayer();
+            if (!playerName) {
+                alert('Devi impostare il tuo nome dalla home page!');
+                window.location.href = 'index.html';
                 return;
             }
 
-            playersList.innerHTML = playersArray.map(([name, data]) => `
-                <div class="player-card ${name === currentPlayer ? 'current-user' : ''}">
-                    <span class="player-name">${name}</span>
-                    ${name === currentPlayer ? '<span class="you-badge">TU</span>' : ''}
-                </div>
-            `).join('');
-        }
+            const playersRef = ref(database, `events/courtney/players`);
+            
+            const snapshot = await new Promise((resolve) => {
+                onValue(playersRef, (snap) => resolve(snap), { onlyOnce: true });
+            });
 
-        window.toggleJoin = async function() {
-            const currentPlayer = getCurrentPlayer();
-            const snapshot = await get(eventRef);
-            let state = snapshot.val() || {};
+            let isInEvent = false;
+            let playerNodeKey = null;
 
-            if (!state.players) state.players = {};
+            snapshot.forEach((childSnapshot) => {
+                if (childSnapshot.val() === playerName) {
+                    isInEvent = true;
+                    playerNodeKey = childSnapshot.key;
+                }
+            });
 
-            if (state.players[currentPlayer]) {
-                delete state.players[currentPlayer];
+            if (isInEvent && playerNodeKey) {
+                await remove(ref(database, `events/courtney/players/${playerNodeKey}`));
             } else {
-                if (Object.keys(state.players).length >= 2) {
+                // Verifica che non ci siano già 2 giocatori
+                const players = [];
+                snapshot.forEach((childSnapshot) => {
+                    players.push(childSnapshot.val());
+                });
+                
+                if (players.length >= 2) {
                     alert('Evento pieno! Massimo 2 giocatori.');
                     return;
                 }
-                state.players[currentPlayer] = { joined: Date.now() };
+                
+                const newPlayerRef = push(ref(database, `events/courtney/players`));
+                await set(newPlayerRef, playerName);
             }
+        }
 
-            if (Object.keys(state.players).length === 2 && !state.isGameStarted) {
-                state.isGameStarted = true;
-            } else if (Object.keys(state.players).length < 2) {
-                state.isGameStarted = false;
-                state.isGameActive = false;
-            }
-
-            await set(eventRef, state);
-        };
+        window.toggleJoin = toggleJoin;
 
         window.startGame = async function() {
-            const snapshot = await get(eventRef);
-            let state = snapshot.val();
+            const playersRef = ref(database, `events/courtney/players`);
+            const snapshot = await get(playersRef);
+            
+            const players = [];
+            snapshot.forEach((childSnapshot) => {
+                players.push(childSnapshot.val());
+            });
 
-            if (!state || Object.keys(state.players).length !== 2) {
-                alert('Servono esattamente 2 giocatori!');
+            if (players.length !== 2) {
+                alert('Servono esattamente 2 giocatori per iniziare!');
                 return;
             }
 
-            const players = Object.keys(state.players);
+            // Scegli chi inizia casualmente
             const randomStarter = players[Math.floor(Math.random() * players.length)];
 
-            state.isGameActive = true;
-            state.player1 = { name: players[0], score: 0 };
-            state.player2 = { name: players[1], score: 0 };
-            state.currentTurn = randomStarter;
+            // Inizializza il gioco
+            const newGame = {
+                isGameActive: true,
+                player1: { name: players[0], score: 0 },
+                player2: { name: players[1], score: 0 },
+                currentTurn: randomStarter,
+                currentPokemon: null,
+                isGameOver: false
+            };
 
-            await generateNewPokemon(state);
+            await set(eventRef, newGame);
+            await generateNewPokemon(newGame);
         };
 
         async function generateNewPokemon(state) {
