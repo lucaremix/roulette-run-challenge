@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MT Market - Roulette Run Challenge</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #0a0a0a;
+            min-height: 100vh;
+            padding: 20px;
+            color: #e0e0e0;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            background: #1a1a1a;
+            border: 1px solid #2a2a2a;
+            border-radius: 8px;
+            color: #e0e0e0;
+            text-decoration: none;
+            font-size: 1em;
+            transition: all 0.3s ease;
+            margin-bottom: 30px;
+        }
+
+        .back-btn:hover {
+            background: #252525;
+            border-color: #3a3a3a;
+        }
+
+        header {
+            background: #1a1a1a;
+            border: 1px solid #2a2a2a;
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 2.5em;
+            color: #ffffff;
+            margin-bottom: 15px;
+        }
+
+        .player-coins {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            font-size: 1.5em;
+            color: #ffd700;
+            margin-bottom: 20px;
+        }
+
+        .coin-img {
+            width: 32px;
+            height: 32px;
+            image-rendering: pixelated;
+        }
+
+        .timer-section {
+            background: #2a2a2a;
+            padding: 15px 25px;
+            border-radius: 8px;
+            display: inline-block;
+        }
+
+        .timer-label {
+            color: #888;
+            font-size: 0.9em;
+            margin-bottom: 5px;
+        }
+
+        .timer-value {
+            font-size: 1.3em;
+            color: #fff;
+            font-weight: bold;
+        }
+
+        .market-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .mt-card {
+            background: #1a1a1a;
+            border: 2px solid #2a2a2a;
+            border-radius: 12px;
+            padding: 25px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .mt-card:hover {
+            border-color: #3a3a3a;
+            transform: translateY(-5px);
+        }
+
+        .mt-card.danno {
+            border-color: #c41e3a;
+        }
+
+        .mt-card.status {
+            border-color: #7a2a7a;
+        }
+
+        .mt-card.broken {
+            border-color: #d4af37;
+            box-shadow: 0 0 20px rgba(212, 175, 55, 0.3);
+        }
+
+        .mt-badge {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-size: 0.8em;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .mt-badge.danno {
+            background: #c41e3a;
+            color: white;
+        }
+
+        .mt-badge.status {
+            background: #7a2a7a;
+            color: white;
+        }
+
+        .mt-badge.broken {
+            background: #d4af37;
+            color: #000;
+        }
+
+        .mt-name {
+            font-size: 1.8em;
+            color: #fff;
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+
+        .mt-stats {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .mt-stat {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 12px;
+            background: #0a0a0a;
+            border-radius: 6px;
+        }
+
+        .stat-label {
+            color: #888;
+        }
+
+        .stat-value {
+            color: #fff;
+            font-weight: bold;
+        }
+
+        .mt-price {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+            color: #ffd700;
+            font-weight: bold;
+        }
+
+        .buy-btn {
+            width: 100%;
+            padding: 12px;
+            background: #2a7a2a;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .buy-btn:hover:not(:disabled) {
+            background: #357a35;
+            transform: scale(1.02);
+        }
+
+        .buy-btn:disabled {
+            background: #2a2a2a;
+            cursor: not-allowed;
+            opacity: 0.5;
+        }
+
+        .empty-market {
+            text-align: center;
+            padding: 60px 20px;
+            color: #555;
+            font-size: 1.2em;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 60px 20px;
+            color: #888;
+            font-size: 1.2em;
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2em;
+            }
+
+            .market-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="index.html" class="back-btn">
+            <span>←</span>
+            <span>Torna alla Home</span>
+        </a>
+
+        <header>
+            <h1>🎯 MT Market</h1>
+            <div class="player-coins">
+                <img src="https://raw.githubusercontent.com/lucaremix/roulette-run-challenge/main/pixel-art-red-chinese-gold-coin-png.png" 
+                     alt="Coins" 
+                     class="coin-img"
+                     onerror="this.style.display='none'">
+                <span id="playerCoins">0</span>
+                <span style="font-size: 0.8em; color: #888;">Coins</span>
+            </div>
+            <div class="timer-section">
+                <div class="timer-label">Prossimo aggiornamento in:</div>
+                <div class="timer-value" id="timerValue">--:--:--</div>
+            </div>
+        </header>
+
+        <div class="loading" id="loading">Caricamento mercato...</div>
+        <div class="market-grid" id="marketGrid" style="display: none;"></div>
+        <div class="empty-market" id="emptyMarket" style="display: none;">
+            📦 Il mercato è vuoto
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+        import { getDatabase, ref, set, get, remove, onValue } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js';
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDNuD9wViLLxteHMCEBlvfdONwcZbAjAvo",
+            authDomain: "roulette-run-challenge.firebaseapp.com",
+            databaseURL: "https://roulette-run-challenge-default-rtdb.europe-west1.firebasedatabase.app",
+            projectId: "roulette-run-challenge",
+            storageBucket: "roulette-run-challenge.firebasestorage.app",
+            messagingSenderId: "994019156093",
+            appId: "1:994019156093:web:9792bdce75c486f589d114"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app);
+
+        const MT_DATA = {
+            "danno": [
+                { "nome": "Psicoshock", "potenza": "80", "precisione": "100" },
+                { "nome": "Velenoshock", "potenza": "65", "precisione": "100" },
+                { "nome": "Introforza", "potenza": "60", "precisione": "100" },
+                { "nome": "Bora", "potenza": "110", "precisione": "70" },
+                { "nome": "Tuono", "potenza": "120", "precisione": "70" },
+                { "nome": "Fossa", "potenza": "80", "precisione": "100" },
+                { "nome": "Palla Ombra", "potenza": "80", "precisione": "100" },
+                { "nome": "Breccia", "potenza": "75", "precisione": "100" },
+                { "nome": "Fangobomba", "potenza": "90", "precisione": "100" },
+                { "nome": "Rocciotomba", "potenza": "50", "precisione": "80" },
+                { "nome": "Aeroassalto", "potenza": "60", "precisione": "—" },
+                { "nome": "Facciata", "potenza": "70", "precisione": "100" },
+                { "nome": "Nitrocarica", "potenza": "50", "precisione": "100" },
+                { "nome": "Furto", "potenza": "40", "precisione": "100" },
+                { "nome": "Calciobasso", "potenza": "60", "precisione": "100" },
+                { "nome": "Coro", "potenza": "60", "precisione": "100" },
+                { "nome": "Eccheggiavoce", "potenza": "40", "precisione": "100" },
+                { "nome": "Falsofinale", "potenza": "40", "precisione": "100" },
+                { "nome": "Raggioscossa", "potenza": "50", "precisione": "90" },
+                { "nome": "Cadutalibera", "potenza": "60", "precisione": "100" },
+                { "nome": "Bruciatutto", "potenza": "30", "precisione": "100" },
+                { "nome": "Acrobazia", "potenza": "55", "precisione": "100" },
+                { "nome": "Ombrartigli", "potenza": "70", "precisione": "100" },
+                { "nome": "Rivincita", "potenza": "50", "precisione": "100" },
+                { "nome": "Nemesi", "potenza": "70", "precisione": "100" },
+                { "nome": "Pietrataglio", "potenza": "100", "precisione": "80" },
+                { "nome": "Invertivolt", "potenza": "70", "precisione": "100" },
+                { "nome": "Entomoblocco", "potenza": "30", "precisione": "100" },
+                { "nome": "Battiterra", "potenza": "60", "precisione": "100" },
+                { "nome": "Alitogelido", "potenza": "40", "precisione": "90" },
+                { "nome": "Codadrago", "potenza": "60", "precisione": "90" },
+                { "nome": "Velenpuntura", "potenza": "80", "precisione": "100" },
+                { "nome": "Mangiasogni", "potenza": "100", "precisione": "100" },
+                { "nome": "Sprizzalampo", "potenza": "90", "precisione": "100" },
+                { "nome": "Spaccaroccia", "potenza": "40", "precisione": "100" },
+                { "nome": "Urlorabbia", "potenza": "55", "precisione": "95" },
+                { "nome": "Solarraggio", "potenza": "120", "precisione": "100" },
+                { "nome": "Abbattimento", "potenza": "50", "precisione": "100" },
+                { "nome": "Laccioerboso", "potenza": "Variabile", "precisione": "100" }
+            ],
+            "status": [
+                { "nome": "Unghiaguzze", "potenza": "—", "precisione": "—" },
+                { "nome": "Calmamente", "potenza": "—", "precisione": "—" },
+                { "nome": "Ruggito", "potenza": "—", "precisione": "100" },
+                { "nome": "Tossina", "potenza": "—", "precisione": "90" },
+                { "nome": "Grandine", "potenza": "—", "precisione": "—" },
+                { "nome": "Granfisico", "potenza": "—", "precisione": "—" },
+                { "nome": "Giornodisole", "potenza": "—", "precisione": "—" },
+                { "nome": "Provocazione", "potenza": "—", "precisione": "100" },
+                { "nome": "Schermoluce", "potenza": "—", "precisione": "—" },
+                { "nome": "Protezione", "potenza": "—", "precisione": "—" },
+                { "nome": "Pioggiadanza", "potenza": "—", "precisione": "—" },
+                { "nome": "Telecinesi", "potenza": "—", "precisione": "—" },
+                { "nome": "Salvaguardia", "potenza": "—", "precisione": "—" },
+                { "nome": "Doppioteam", "potenza": "—", "precisione": "—" },
+                { "nome": "Terrempesta", "potenza": "—", "precisione": "—" },
+                { "nome": "Cambiaposto", "potenza": "—", "precisione": "—" },
+                { "nome": "Spintone", "potenza": "—", "precisione": "100" },
+                { "nome": "Fuocofatuo", "potenza": "—", "precisione": "75" },
+                { "nome": "Divieto", "potenza": "—", "precisione": "100" },
+                { "nome": "Lucidatura", "potenza": "—", "precisione": "—" },
+                { "nome": "Flash", "potenza": "—", "precisione": "100" },
+                { "nome": "Tuononda", "potenza": "—", "precisione": "100" },
+                { "nome": "Psicamisù", "potenza": "—", "precisione": "—" },
+                { "nome": "Cuordileone", "potenza": "—", "precisione": "—" },
+                { "nome": "Bullo", "potenza": "—", "precisione": "90" },
+                { "nome": "Sostituto", "potenza": "—", "precisione": "—" },
+                { "nome": "Distortozona", "potenza": "—", "precisione": "—" }
+            ],
+            "broken": [
+                { "nome": "Dragartigli", "potenza": "80", "precisione": "100" },
+                { "nome": "Geloraggio", "potenza": "90", "precisione": "100" },
+                { "nome": "Fulmine", "potenza": "95", "precisione": "100" },
+                { "nome": "Terremoto", "potenza": "100", "precisione": "100" },
+                { "nome": "Psichico", "potenza": "90", "precisione": "100" },
+                { "nome": "Fangonda", "potenza": "95", "precisione": "100" },
+                { "nome": "Lanciafiamme", "potenza": "95", "precisione": "100" },
+                { "nome": "Energipalla", "potenza": "80", "precisione": "100" },
+                { "nome": "Idrovampata", "potenza": "80", "precisione": "100" },
+                { "nome": "Frana", "potenza": "75", "precisione": "90" },
+                { "nome": "Forbice X", "potenza": "80", "precisione": "100" },
+                { "nome": "Cannonflash", "potenza": "80", "precisione": "100" },
+                { "nome": "Danzaspada", "potenza": "—", "precisione": "—" }
+            ]
+        };
+
+        const PRICES = {
+            danno: 500,
+            status: 250,
+            broken: 2000
+        };
+
+        function getCurrentPlayer() {
+            return localStorage.getItem('playerName') || '';
+        }
+
+        async function initializeMarket() {
+            const marketRef = ref(database, 'markets/mt_market');
+            const snapshot = await get(marketRef);
+
+            if (!snapshot.exists()) {
+                await generateNewMarket();
+            }
+
+            loadMarket();
+            updateTimer();
+            setInterval(updateTimer, 1000);
+        }
+
+        async function generateNewMarket() {
+            const marketRef = ref(database, 'markets/mt_market');
+            
+            const dannoCopy = [...MT_DATA.danno];
+            const statusCopy = [...MT_DATA.status];
+            const brokenCopy = [...MT_DATA.broken];
+
+            const selectedMTs = [];
+
+            for (let i = 0; i < 2; i++) {
+                if (dannoCopy.length > 0) {
+                    const randomIndex = Math.floor(Math.random() * dannoCopy.length);
+                    selectedMTs.push({ ...dannoCopy.splice(randomIndex, 1)[0], type: 'danno' });
+                }
+            }
+
+            for (let i = 0; i < 2; i++) {
+                if (statusCopy.length > 0) {
+                    const randomIndex = Math.floor(Math.random() * statusCopy.length);
+                    selectedMTs.push({ ...statusCopy.splice(randomIndex, 1)[0], type: 'status' });
+                }
+            }
+
+            if (brokenCopy.length > 0) {
+                const randomIndex = Math.floor(Math.random() * brokenCopy.length);
+                selectedMTs.push({ ...brokenCopy.splice(randomIndex, 1)[0], type: 'broken' });
+            }
+
+            const marketData = {
+                items: selectedMTs,
+                nextRefresh: Date.now() + (24 * 60 * 60 * 1000),
+                usedMTs: selectedMTs.map(mt => mt.nome)
+            };
+
+            await set(marketRef, marketData);
+        }
+
+        async function loadMarket() {
+            const marketRef = ref(database, 'markets/mt_market');
+            
+            onValue(marketRef, async (snapshot) => {
+                const data = snapshot.val();
+                
+                if (!data || !data.nextRefresh) {
+                    await generateNewMarket();
+                    return;
+                }
+
+                if (Date.now() >= data.nextRefresh) {
+                    await generateNewMarket();
+                    return;
+                }
+
+                renderMarket(data.items || []);
+                updatePlayerCoins();
+            });
+        }
+
+        function renderMarket(items) {
+            const grid = document.getElementById('marketGrid');
+            const loading = document.getElementById('loading');
+            const emptyMarket = document.getElementById('emptyMarket');
+
+            loading.style.display = 'none';
+
+            if (items.length === 0) {
+                grid.style.display = 'none';
+                emptyMarket.style.display = 'block';
+                return;
+            }
+
+            emptyMarket.style.display = 'none';
+            grid.style.display = 'grid';
+
+            grid.innerHTML = items.map((mt, index) => `
+                <div class="mt-card ${mt.type}">
+                    <div class="mt-badge ${mt.type}">${mt.type}</div>
+                    <div class="mt-name">${mt.nome}</div>
+                    <div class="mt-stats">
+                        <div class="mt-stat">
+                            <span class="stat-label">Potenza</span>
+                            <span class="stat-value">${mt.potenza}</span>
+                        </div>
+                        <div class="mt-stat">
+                            <span class="stat-label">Precisione</span>
+                            <span class="stat-value">${mt.precisione}</span>
+                        </div>
+                    </div>
+                    <div class="mt-price">
+                        <img src="https://raw.githubusercontent.com/lucaremix/roulette-run-challenge/main/pixel-art-red-chinese-gold-coin-png.png" 
+                             alt="Coins" 
+                             class="coin-img"
+                             onerror="this.style.display='none'">
+                        <span>${PRICES[mt.type]}</span>
+                    </div>
+                    <button class="buy-btn" onclick="buyMT(${index})">
+                        💰 Acquista
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        async function updatePlayerCoins() {
+            const player = getCurrentPlayer();
+            if (!player) return;
+
+            const playerRef = ref(database, `players/${player}/coins`);
+            onValue(playerRef, (snapshot) => {
+                const coins = snapshot.val() || 0;
+                document.getElementById('playerCoins').textContent = coins;
+            });
+        }
+
+        window.buyMT = async function(index) {
+            const player = getCurrentPlayer();
+            if (!player) {
+                alert('Devi impostare il tuo nome dalla home page!');
+                window.location.href = 'index.html';
+                return;
+            }
+
+            const marketRef = ref(database, 'markets/mt_market');
+            const marketSnapshot = await get(marketRef);
+            const marketData = marketSnapshot.val();
+
+            if (!marketData || !marketData.items || !marketData.items[index]) {
+                alert('MT non disponibile!');
+                return;
+            }
+
+            const mt = marketData.items[index];
+            const price = PRICES[mt.type];
+
+            const playerRef = ref(database, `players/${player}`);
+            const playerSnapshot = await get(playerRef);
+            const playerData = playerSnapshot.val() || { coins: 0, mts: [] };
+
+            if ((playerData.coins || 0) < price) {
+                alert('Non hai abbastanza Coins!');
+                return;
+            }
+
+            if (confirm(`Vuoi acquistare ${mt.nome} per ${price} Coins?`)) {
+                playerData.coins = (playerData.coins || 0) - price;
+                
+                if (!playerData.mts) playerData.mts = [];
+                playerData.mts.push({
+                    nome: mt.nome,
+                    potenza: mt.potenza,
+                    precisione: mt.precisione,
+                    type: mt.type,
+                    bought_at: Date.now()
+                });
+
+                await set(playerRef, playerData);
+
+                marketData.items.splice(index, 1);
+                await set(marketRef, marketData);
+
+                alert(`${mt.nome} acquistata con successo!`);
+            }
+        };
+
+        function updateTimer() {
+            const marketRef = ref(database, 'markets/mt_market');
+            
+            get(marketRef).then((snapshot) => {
+                const data = snapshot.val();
+                if (!data || !data.nextRefresh) return;
+
+                const timeLeft = data.nextRefresh - Date.now();
+                
+                if (timeLeft <= 0) {
+                    generateNewMarket();
+                    return;
+                }
+
+                const hours = Math.floor(timeLeft / (1000 * 60 * 60));
+                const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
+
+                document.getElementById('timerValue').textContent = 
+                    `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+            });
+        }
+
+        const playerName = getCurrentPlayer();
+        if (!playerName) {
+            alert('Devi impostare il tuo nome dalla home page!');
+            window.location.href = 'index.html';
+        } else {
+            initializeMarket();
+        }
+    </script>
+</body>
+</html>
