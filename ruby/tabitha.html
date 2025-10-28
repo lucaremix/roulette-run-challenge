@@ -506,8 +506,8 @@
         </a>
 
         <div class="event-header">
-            <img src="https://raw.githubusercontent.com/lucaremix/roulette-run-challenge/main/trainers/tabitha.png" 
-                 alt="Tabitha" class="event-trainer-img" onerror="this.style.display='none'">
+            <img src="https://img.nuzlocke.app/leaders/rs-tabitha-oras.png" 
+                 alt="Tabitha" class="event-trainer-img">
             <div class="event-info">
                 <h1 class="event-title">Tabitha Challenge</h1>
                 <p class="event-description">Tabitha ti propone una scelta: ricevi 1500 coins oppure 750 coins, scambia un tuo Pokémon e scegli una carta per scoprire la rarità dello spin (A o S)!</p>
@@ -613,23 +613,22 @@
     </div>
 
     <script type="module">
-        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
-        import { getDatabase, ref, set, get, onValue, update, remove, push } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js';
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js';
+        import { getDatabase, ref, set, get, onValue, remove } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js';
 
         const firebaseConfig = {
-            apiKey: "AIzaSyDNuD9wViLLxteHMCEBlvfdONwcZbAjAvo",
+            apiKey: "AIzaSyC-st4NCarh76yY0MyZpIsXvnxXMst10GA",
             authDomain: "roulette-run-challenge.firebaseapp.com",
             databaseURL: "https://roulette-run-challenge-default-rtdb.europe-west1.firebasedatabase.app",
             projectId: "roulette-run-challenge",
             storageBucket: "roulette-run-challenge.firebasestorage.app",
-            messagingSenderId: "994019156093",
-            appId: "1:994019156093:web:9792bdce75c486f589d114"
+            messagingSenderId: "587858652652",
+            appId: "1:587858652652:web:4aa99c2c5ba0586e39bcbb"
         };
 
         const app = initializeApp(firebaseConfig);
         const database = getDatabase(app);
-        const eventRef = ref(database, 'events/tabitha');
-        const playersRef = ref(database, 'events/tabitha/players');
+        const eventRef = ref(database, 'events/tabitha-2');
 
         function getCurrentPlayer() {
             return localStorage.getItem('playerName');
@@ -637,6 +636,7 @@
 
         let myTeam = [];
         let selectedPokemon = null;
+        let selectedPokemonIndex = null;
         let selectedCard = null;
         let cardRevealed = false;
 
@@ -648,28 +648,28 @@
             myTeam = [];
             
             if (snapshot.exists()) {
-                snapshot.forEach((childSnapshot) => {
-                    const data = childSnapshot.val();
-                    myTeam.push({
-                        key: childSnapshot.key,
-                        name: data.name || data.english_name || 'Unknown',
-                        national_number: data.national_number || 0,
-                        ...data
+                const teamArray = snapshot.val();
+                if (Array.isArray(teamArray)) {
+                    teamArray.forEach((pokemon, index) => {
+                        if (pokemon) {
+                            myTeam.push({
+                                index: index,
+                                ...pokemon
+                            });
+                        }
                     });
-                });
+                }
             }
 
-            console.log('Team caricato:', myTeam);
+            console.log('Team caricato:', myTeam.length, 'Pokemon');
         }
 
         function renderLanding() {
             const currentPlayer = getCurrentPlayer();
 
-            onValue(playersRef, (snapshot) => {
-                const players = [];
-                snapshot.forEach((childSnapshot) => {
-                    players.push(childSnapshot.val());
-                });
+            onValue(eventRef, (snapshot) => {
+                const data = snapshot.val() || {};
+                const players = data.players || [];
 
                 const isJoined = players.includes(currentPlayer);
 
@@ -699,32 +699,15 @@
                     `).join('');
                 }
 
-                // Mostra intro screen se ci sono 2 giocatori
-                if (players.length === 2) {
+                // Mostra intro screen se ci sono 2 giocatori e il gioco non è iniziato
+                if (players.length === 2 && !data.started) {
                     document.getElementById('introScreen').classList.add('show');
                 } else {
                     document.getElementById('introScreen').classList.remove('show');
                 }
-            });
 
-            // Listener per lo stato del gioco
-            onValue(eventRef, (snapshot) => {
-                const data = snapshot.val();
-                if (!data) return;
-
-                const currentPlayer = getCurrentPlayer();
-
-                // Se il gioco è iniziato e sono nel gioco
-                if (data.started && data.players) {
-                    const playersArray = [];
-                    if (data.players) {
-                        Object.values(data.players).forEach(p => playersArray.push(p));
-                    }
-                    
-                    if (!playersArray.includes(currentPlayer)) return;
-
-                    document.getElementById('introScreen').classList.remove('show');
-                    
+                // Gestione delle schermate del gioco
+                if (data.started && isJoined) {
                     if (data.choices && data.choices[currentPlayer]) {
                         // Ho già fatto la mia scelta
                         const bothChosen = Object.keys(data.choices).length === 2;
@@ -751,40 +734,40 @@
                 return;
             }
 
-            const snapshot = await new Promise((resolve) => {
-                onValue(playersRef, (snap) => resolve(snap), { onlyOnce: true });
-            });
+            const snapshot = await get(eventRef);
+            const data = snapshot.val() || {};
+            let players = data.players || [];
 
-            let isInEvent = false;
-            let playerNodeKey = null;
+            const isInEvent = players.includes(playerName);
 
-            snapshot.forEach((childSnapshot) => {
-                if (childSnapshot.val() === playerName) {
-                    isInEvent = true;
-                    playerNodeKey = childSnapshot.key;
+            if (isInEvent) {
+                // Rimuovi il giocatore
+                if (data.started && !data.completed) {
+                    alert('Non puoi abbandonare durante il gioco!');
+                    return;
                 }
-            });
-
-            if (isInEvent && playerNodeKey) {
-                await remove(ref(database, `events/tabitha/players/${playerNodeKey}`));
+                players = players.filter(p => p !== playerName);
+                
+                if (players.length === 0) {
+                    await remove(eventRef);
+                } else {
+                    await set(eventRef, { ...data, players: players, started: false });
+                }
             } else {
-                // Controlla se ci sono già 2 giocatori
-                const playerCount = snapshot.size;
-                if (playerCount >= 2) {
+                // Aggiungi il giocatore
+                if (players.length >= 2) {
                     alert('La lobby è piena!');
                     return;
                 }
-                const newPlayerRef = push(playersRef);
-                await set(newPlayerRef, playerName);
+                players.push(playerName);
+                await set(eventRef, { ...data, players: players });
             }
         };
 
         window.startChallenge = async function() {
-            const playersSnapshot = await get(playersRef);
-            const players = [];
-            playersSnapshot.forEach((childSnapshot) => {
-                players.push(childSnapshot.val());
-            });
+            const snapshot = await get(eventRef);
+            const data = snapshot.val() || {};
+            const players = data.players || [];
 
             if (players.length !== 2) {
                 alert('Servono esattamente 2 giocatori per iniziare!');
@@ -792,20 +775,17 @@
             }
 
             // Randomizza quali carte hanno A e S
-            const cardValues = Math.random() < 0.5 ? ['a-tier', 's-tier'] : ['s-tier', 'a-tier'];
+            const cardValues = Math.random() < 0.5 ? ['a_tier', 's_tier'] : ['s_tier', 'a_tier'];
 
-            const data = {
+            await set(eventRef, {
+                ...data,
                 started: true,
-                players: players,
                 choices: {},
                 cardValues: cardValues // [card1, card2]
-            };
-            
-            await set(eventRef, data);
+            });
             
             // Carica il team del giocatore
             await loadPlayerTeam();
-            console.log('Team caricato con', myTeam.length, 'Pokemon');
         };
 
         window.selectOption = function(option) {
@@ -816,7 +796,7 @@
                 document.getElementById('pokemonSelector').style.display = 'none';
                 document.getElementById('cardSelector').style.display = 'none';
                 
-                confirmChoice(1, null, null);
+                confirmChoice(1, null, null, null);
             } else if (option === 2) {
                 // Opzione 2: Trade + Card
                 document.getElementById('option1').style.borderColor = '#2a2a2a';
@@ -824,9 +804,8 @@
                 document.getElementById('pokemonSelector').style.display = 'block';
                 document.getElementById('cardSelector').style.display = 'none';
                 
-                // Verifica se il team è stato caricato
+                // Carica il team se non è già caricato
                 if (myTeam.length === 0) {
-                    console.log('Team vuoto, ricarico...');
                     loadPlayerTeam().then(() => {
                         renderPokemonGrid();
                     });
@@ -844,26 +823,27 @@
                 return;
             }
 
-            grid.innerHTML = myTeam.map((poke, index) => {
+            grid.innerHTML = myTeam.map((poke, idx) => {
                 const imgUrl = `https://www.pokemon.com/static-assets/content-assets/cms2/img/pokedex/full/${String(poke.national_number).padStart(3, '0')}.png`;
+                const pokeName = poke.english_name || poke.name || 'Unknown';
                 return `
-                    <div class="pokemon-item" onclick="selectPokemonForTrade(${index}, event)">
-                        <img src="${imgUrl}" alt="${poke.name}">
-                        <div class="pokemon-name">${poke.name}</div>
+                    <div class="pokemon-item" onclick="selectPokemonForTrade(${idx}, event)">
+                        <img src="${imgUrl}" alt="${pokeName}">
+                        <div class="pokemon-name">${pokeName}</div>
                     </div>
                 `;
             }).join('');
         }
 
-        window.selectPokemonForTrade = function(index, event) {
+        window.selectPokemonForTrade = function(idx, event) {
             if (event) event.stopPropagation();
             
-            selectedPokemon = myTeam[index];
-            console.log('Pokemon selezionato:', selectedPokemon);
+            selectedPokemon = myTeam[idx];
+            selectedPokemonIndex = myTeam[idx].index;
             
             // Evidenzia il pokemon selezionato
             document.querySelectorAll('.pokemon-item').forEach((item, i) => {
-                if (i === index) {
+                if (i === idx) {
                     item.classList.add('selected');
                 } else {
                     item.classList.remove('selected');
@@ -873,7 +853,6 @@
             // Mostra il card selector
             const cardSelector = document.getElementById('cardSelector');
             cardSelector.style.display = 'block';
-            console.log('Card selector mostrato');
             
             // Reset card selection
             selectedCard = null;
@@ -901,8 +880,8 @@
 
             // Mostra la rarità sulla carta
             const cardBack = document.getElementById(`card${cardNumber}Back`);
-            cardBack.textContent = cardValue === 'a-tier' ? 'A' : 'S';
-            cardBack.style.background = cardValue === 's-tier' 
+            cardBack.textContent = cardValue === 'a_tier' ? 'A' : 'S';
+            cardBack.style.background = cardValue === 's_tier' 
                 ? 'linear-gradient(135deg, #ffd700 0%, #ffed4e 100%)'
                 : 'linear-gradient(135deg, #4a9eff 0%, #6bb6ff 100%)';
 
@@ -922,10 +901,10 @@
             const data = snapshot.val();
             const cardValue = data.cardValues[selectedCard - 1];
 
-            confirmChoice(2, selectedPokemon, cardValue);
+            confirmChoice(2, selectedPokemon, selectedPokemonIndex, cardValue);
         };
 
-        async function confirmChoice(option, pokemon, cardPool) {
+        async function confirmChoice(option, pokemon, pokemonIndex, cardPool) {
             const currentPlayer = getCurrentPlayer();
             const snapshot = await get(eventRef);
             const data = snapshot.val();
@@ -935,7 +914,8 @@
             data.choices[currentPlayer] = {
                 option: option,
                 pokemon: pokemon,
-                cardPool: cardPool // a-tier o s-tier
+                pokemonIndex: pokemonIndex,
+                cardPool: cardPool // a_tier o s_tier
             };
 
             await set(eventRef, data);
@@ -957,7 +937,7 @@
                 const choice = state.choices[playerName];
                 const playerRef = ref(database, `players/${playerName}`);
                 const playerSnap = await get(playerRef);
-                let playerData = playerSnap.val() || { coins: 0 };
+                let playerData = playerSnap.val() || { coins: 0, rubyteam: [] };
 
                 const hasAmulet = playerData?.inventory?.itempermanenti?.['Amulet Coin'] === true;
 
@@ -970,15 +950,15 @@
                     const coins = 750;
                     playerData.coins = (playerData.coins || 0) + coins + (hasAmulet ? Math.floor(coins / 4) : 0);
                     
-                    // Rimuovi il pokemon dal team usando la key
-                    console.log('Rimozione pokemon:', choice.pokemon.name, 'con key:', choice.pokemon.key);
-                    const teamRef = ref(database, `players/${playerName}/rubyteam/${choice.pokemon.key}`);
+                    // Assicurati che il team sia un array
+                    if (!Array.isArray(playerData.rubyteam)) {
+                        playerData.rubyteam = [];
+                    }
                     
-                    try {
-                        await remove(teamRef);
-                        console.log('Pokemon rimosso con successo');
-                    } catch (error) {
-                        console.error('Errore nella rimozione del pokemon:', error);
+                    // Rimuovi il pokemon dal team
+                    if (choice.pokemonIndex !== null && choice.pokemonIndex !== undefined) {
+                        playerData.rubyteam.splice(choice.pokemonIndex, 1);
+                        console.log(`[TABITHA] Rimosso pokemon index ${choice.pokemonIndex} dal team di ${playerName}`);
                     }
                     
                     // Aggiungi pending spin con la rarità della carta scelta
@@ -1016,8 +996,9 @@
             if (myChoice.option === 1) {
                 summaryHTML += `1500 Coins 💰`;
             } else {
-                const tierName = myChoice.cardPool === 's-tier' ? 'S' : 'A';
-                summaryHTML += `750 Coins 💰 + Scambiato ${myChoice.pokemon.name} per 1 Spin Tier ${tierName} 🎰`;
+                const tierName = myChoice.cardPool === 's_tier' ? 'S' : 'A';
+                const pokeName = myChoice.pokemon.english_name || myChoice.pokemon.name;
+                summaryHTML += `750 Coins 💰 + Scambiato ${pokeName} per 1 Spin Tier ${tierName} 🎰`;
             }
             summaryHTML += '</div>';
 
@@ -1027,8 +1008,9 @@
             if (otherChoice.option === 1) {
                 summaryHTML += `1500 Coins 💰`;
             } else {
-                const tierName = otherChoice.cardPool === 's-tier' ? 'S' : 'A';
-                summaryHTML += `750 Coins 💰 + Scambiato ${otherChoice.pokemon.name} per 1 Spin Tier ${tierName} 🎰`;
+                const tierName = otherChoice.cardPool === 's_tier' ? 'S' : 'A';
+                const pokeName = otherChoice.pokemon.english_name || otherChoice.pokemon.name;
+                summaryHTML += `750 Coins 💰 + Scambiato ${pokeName} per 1 Spin Tier ${tierName} 🎰`;
             }
             summaryHTML += '</div>';
 
