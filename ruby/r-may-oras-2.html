@@ -547,8 +547,8 @@
 
         const app = initializeApp(firebaseConfig);
         const database = getDatabase(app);
-        const eventRef = ref(database, 'events/rs-mayor');
-        const playersRef = ref(database, 'events/rs-mayor/players');
+        const eventRef = ref(database, 'events/may-2');
+        const playersRef = ref(database, 'events/may-2/players');
 
         function getCurrentPlayer() {
             return localStorage.getItem('playerName');
@@ -556,6 +556,7 @@
 
         let myTeam = [];
         let selectedPokemon = null;
+        let selectedPokemonIndex = null;
 
         async function loadPlayerTeam() {
             const playerName = getCurrentPlayer();
@@ -565,18 +566,20 @@
             myTeam = [];
             
             if (snapshot.exists()) {
-                snapshot.forEach((childSnapshot) => {
-                    const data = childSnapshot.val();
-                    myTeam.push({
-                        key: childSnapshot.key,
-                        name: data.name || data.english_name || 'Unknown',
-                        national_number: data.national_number || 0,
-                        ...data
+                const teamArray = snapshot.val();
+                if (Array.isArray(teamArray)) {
+                    teamArray.forEach((pokemon, index) => {
+                        if (pokemon) {
+                            myTeam.push({
+                                index: index,
+                                ...pokemon
+                            });
+                        }
                     });
-                });
+                }
             }
 
-            console.log('Team caricato:', myTeam);
+            console.log('Team caricato:', myTeam.length, 'Pokemon');
         }
 
         function renderLanding() {
@@ -683,7 +686,7 @@
             });
 
             if (isInEvent && playerNodeKey) {
-                await remove(ref(database, `events/rs-mayor/players/${playerNodeKey}`));
+                await remove(ref(database, `events/may-2/players/${playerNodeKey}`));
             } else {
                 // Controlla se ci sono già 2 giocatori
                 const playerCount = snapshot.size;
@@ -728,7 +731,7 @@
                 document.getElementById('option2').style.borderColor = '#2a2a2a';
                 document.getElementById('pokemonSelector').style.display = 'none';
                 
-                confirmChoice(1, null);
+                confirmChoice(1, null, null);
             } else if (option === 2) {
                 // Opzione 2: Trade
                 document.getElementById('option1').style.borderColor = '#2a2a2a';
@@ -768,6 +771,7 @@
 
         window.selectPokemonForTrade = function(index) {
             selectedPokemon = myTeam[index];
+            selectedPokemonIndex = myTeam[index].index;
             
             // Evidenzia il pokemon selezionato
             document.querySelectorAll('.pokemon-item').forEach((item, i) => {
@@ -783,10 +787,10 @@
 
         window.confirmTrade = function() {
             if (!selectedPokemon) return;
-            confirmChoice(2, selectedPokemon);
+            confirmChoice(2, selectedPokemon, selectedPokemonIndex);
         };
 
-        async function confirmChoice(option, pokemon) {
+        async function confirmChoice(option, pokemon, pokemonIndex) {
             const currentPlayer = getCurrentPlayer();
             const snapshot = await get(eventRef);
             const data = snapshot.val();
@@ -795,7 +799,8 @@
             
             data.choices[currentPlayer] = {
                 option: option,
-                pokemon: pokemon
+                pokemon: pokemon,
+                pokemonIndex: pokemonIndex
             };
 
             await set(eventRef, data);
@@ -830,12 +835,19 @@
                     const coins = 750;
                     playerData.coins = (playerData.coins || 0) + coins + (hasAmulet ? Math.floor(coins / 4) : 0);
                     
-                    // Rimuovi il pokemon dal team usando la key
-                    const teamRef = ref(database, `players/${playerName}/rubyteam/${choice.pokemon.key}`);
-                    await remove(teamRef);
+                    // Assicurati che il team sia un array
+                    if (!Array.isArray(playerData.rubyteam)) {
+                        playerData.rubyteam = [];
+                    }
+                    
+                    // Rimuovi il pokemon dal team usando splice
+                    if (choice.pokemonIndex !== null && choice.pokemonIndex !== undefined) {
+                        playerData.rubyteam.splice(choice.pokemonIndex, 1);
+                        console.log(`[MAY] Rimosso pokemon index ${choice.pokemonIndex} dal team di ${playerName}`);
+                    }
                     
                     // Aggiungi pending spin
-                    playerData.pendingSpin = { pool: 'b-tier', from: 'rs-mayor' };
+                    playerData.pendingSpin = { pool: 'b_tier', from: 'may' };
                 }
 
                 await set(playerRef, playerData);
