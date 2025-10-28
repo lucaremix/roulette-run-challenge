@@ -65,22 +65,19 @@
             image-rendering: pixelated;
         }
 
-        .event-title {
-            font-size: 2.5em;
-            color: #ffd700;
-            margin-bottom: 10px;
+        .event-info {
+            flex: 1;
         }
 
-        .event-subtitle {
-            font-size: 1.2em;
-            color: #888;
-            margin-bottom: 20px;
+        .event-title {
+            font-size: 2.5em;
+            color: #ffffff;
+            margin-bottom: 15px;
         }
 
         .event-status {
             display: flex;
             align-items: center;
-            justify-content: center;
             gap: 15px;
             margin-top: 20px;
         }
@@ -398,14 +395,15 @@
                 <img src="https://raw.githubusercontent.com/lucaremix/roulette-run-challenge/main/images/rs-tate-liza-oras.webp" 
                      alt="TateLiza" 
                      class="event-trainer-img">
-                <h1 class="event-title">Tate & Liza - Mossdeep City</h1>
-                <p class="event-subtitle">Completa per primo una riga o colonna per vincere!</p>
-                
-                <div class="event-status">
-                    <div class="status-badge" id="statusBadge">Non Iscritto</div>
-                    <button class="join-leave-btn join-btn" id="joinLeaveBtn" onclick="toggleJoin()">
-                        Partecipa
-                    </button>
+                <div class="event-info">
+                    <h1 class="event-title">Tate & Liza - Mossdeep City</h1>
+                    
+                    <div class="event-status">
+                        <div class="status-badge" id="statusBadge">Non Iscritto</div>
+                        <button class="join-leave-btn join-btn" id="joinLeaveBtn" onclick="toggleJoin()">
+                            Partecipa
+                        </button>
+                    </div>
                 </div>
             </div>
 
@@ -766,13 +764,11 @@
             let winnerData = winnerSnap.val() || { coins: 0, team: [] };
             let loserData = loserSnap.val() || { coins: 0, team: [] };
 
-            const hasAmulet = winnerData?.inventory?.itempermanenti?.['Amulet Coin'] === true;
-            winnerData.coins = (winnerData.coins || 0) + 1500 + (hasAmulet ? 375 : 0);
+            const hasAmuletWinner = winnerData?.inventory?.itempermanenti?.['Amulet Coin'] === true;
+            winnerData.coins = (winnerData.coins || 0) + 500 + (hasAmuletWinner ? 125 : 0);
 
-
-            const hasAmulet = loserData?.inventory?.itempermanenti?.['Amulet Coin'] === true;
-            loserData.coins = (loserData.coins || 0) + 1000 + (hasAmulet ? 250 : 0);
-
+            const hasAmuletLoser = loserData?.inventory?.itempermanenti?.['Amulet Coin'] === true;
+            loserData.coins = (loserData.coins || 0) + 250 + (hasAmuletLoser ? 62 : 0);
 
             await set(winnerRef, winnerData);
             await set(loserRef, loserData);
