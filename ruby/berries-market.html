@@ -756,10 +756,10 @@
                 playerData.coins = (playerData.coins || 0) - 50;
                 
                 if (!playerData.inventory) playerData.inventory = {};
-                if (!playerData.inventory.itemconsumabili) playerData.inventory.itemconsumabili = {};
+                if (!playerData.inventory.itemgioco) playerData.inventory.itemgioco = {};
                 
-                const currentQty = playerData.inventory.itemconsumabili[berryName] || 0;
-                playerData.inventory.itemconsumabili[berryName] = currentQty + 1;
+                const currentQty = playerData.inventory.itemgioco[berryName] || 0;
+                playerData.inventory.itemgioco[berryName] = currentQty + 1;
 
                 await set(playerRef, playerData);
                 alert(`${berryName} acquistata con successo!`);
@@ -848,7 +848,7 @@
             currentPlot = plotNumber;
             selectedBerry = null;
 
-            const inventoryRef = ref(database, `players/${playerName}/inventory/itemconsumabili`);
+            const inventoryRef = ref(database, `players/${playerName}/inventory/itemgioco`);
             const snapshot = await get(inventoryRef);
             playerInventory = snapshot.val() || {};
 
@@ -897,14 +897,14 @@
             const playerSnapshot = await get(playerRef);
             const playerData = playerSnapshot.val();
 
-            if (!playerData.inventory.itemconsumabili[selectedBerry] || 
-                playerData.inventory.itemconsumabili[selectedBerry] <= 0) {
+            if (!playerData.inventory.itemgioco[selectedBerry] || 
+                playerData.inventory.itemgioco[selectedBerry] <= 0) {
                 alert('Non hai questa bacca!');
                 return;
             }
 
             // Remove berry from inventory
-            playerData.inventory.itemconsumabili[selectedBerry]--;
+            playerData.inventory.itemgioco[selectedBerry]--;
 
             // Calculate harvest time: 6 hours with Spray Duck, 12 hours without
             const hoursToHarvest = hasSprayDuck ? 6 : 12;
@@ -940,8 +940,8 @@
 
             // Add 3x berries to inventory
             const berryName = plotData.berry;
-            const currentQty = playerData.inventory.itemconsumabili[berryName] || 0;
-            playerData.inventory.itemconsumabili[berryName] = currentQty + 3;
+            const currentQty = playerData.inventory.itemgioco[berryName] || 0;
+            playerData.inventory.itemgioco[berryName] = currentQty + 3;
 
             // Clear plot
             delete playerData.berryPlots[`plot${plotNumber}`];
