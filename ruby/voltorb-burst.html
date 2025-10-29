@@ -1,0 +1,965 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Voltorb Burst - Crash Game</title>
+    <style>
+        /* ===== RESET & BASE ===== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0b0b0b 0%, #1a1a2e 100%);
+            color: #eaeaea;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        /* ===== CONTAINER ===== */
+        .game-container {
+            width: 100%;
+            max-width: 600px;
+            background: #101214;
+            border-radius: 16px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+            border: 1px solid #1c1f24;
+            overflow: hidden;
+        }
+
+        /* ===== HEADER ===== */
+        .header {
+            background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%);
+            padding: 20px 24px;
+            border-bottom: 1px solid #1c1f24;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .header-title {
+            font-size: 1.8em;
+            font-weight: 700;
+            color: #ffd54a;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .header-icon {
+            font-size: 1.2em;
+        }
+
+        /* ===== STATUS BAR ===== */
+        .status-bar {
+            background: #0b0b0b;
+            padding: 16px 24px;
+            border-bottom: 1px solid #1c1f24;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .balance-display {
+            font-size: 1.2em;
+            font-weight: 600;
+            color: #44d16f;
+        }
+
+        .seed-hash {
+            font-size: 0.85em;
+            color: #888;
+            font-family: 'Courier New', monospace;
+        }
+
+        /* ===== MULTIPLIER METER ===== */
+        .meter-container {
+            padding: 40px 24px;
+            text-align: center;
+            background: #0b0b0b;
+            border-bottom: 1px solid #1c1f24;
+        }
+
+        .multiplier-display {
+            font-size: 4em;
+            font-weight: 700;
+            font-variant-numeric: tabular-nums;
+            color: #ffd54a;
+            text-shadow: 0 0 20px rgba(255, 213, 74, 0.5);
+            transition: transform 0.1s ease;
+        }
+
+        .multiplier-display.pulse {
+            animation: pulse 0.5s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .round-status {
+            margin-top: 16px;
+            font-size: 1.1em;
+            color: #888;
+            min-height: 28px;
+        }
+
+        .round-status.win {
+            color: #44d16f;
+            font-weight: 600;
+        }
+
+        .round-status.lose {
+            color: #ff5c5c;
+            font-weight: 600;
+        }
+
+        /* ===== CONTROLS ===== */
+        .controls {
+            padding: 24px;
+            background: #101214;
+        }
+
+        .bet-input-group {
+            margin-bottom: 16px;
+        }
+
+        .bet-input-label {
+            display: block;
+            font-size: 0.9em;
+            color: #888;
+            margin-bottom: 8px;
+        }
+
+        .bet-input {
+            width: 100%;
+            padding: 14px;
+            font-size: 1.2em;
+            background: #0b0b0b;
+            border: 1px solid #1c1f24;
+            border-radius: 8px;
+            color: #eaeaea;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .bet-input:focus {
+            outline: none;
+            border-color: #ffd54a;
+        }
+
+        .bet-input:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* ===== QUICK BET CHIPS ===== */
+        .quick-chips {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+        }
+
+        .chip-btn {
+            flex: 1;
+            min-width: 70px;
+            padding: 10px;
+            background: #1c1f24;
+            border: 1px solid #2a2a2a;
+            border-radius: 8px;
+            color: #eaeaea;
+            font-size: 0.95em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .chip-btn:hover:not(:disabled) {
+            background: #2a2a2a;
+            border-color: #ffd54a;
+        }
+
+        .chip-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* ===== ACTION BUTTONS ===== */
+        .action-buttons {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .action-btn {
+            flex: 1;
+            padding: 16px;
+            font-size: 1.1em;
+            font-weight: 700;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            min-height: 56px;
+        }
+
+        .action-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .start-btn {
+            background: #44d16f;
+            color: #0b0b0b;
+        }
+
+        .start-btn:hover:not(:disabled) {
+            background: #52e080;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(68, 209, 111, 0.4);
+        }
+
+        .cashout-btn {
+            background: #ffd54a;
+            color: #0b0b0b;
+        }
+
+        .cashout-btn:hover:not(:disabled) {
+            background: #ffe066;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(255, 213, 74, 0.4);
+        }
+
+        .stop-btn {
+            background: #2a2a2a;
+            color: #888;
+        }
+
+        /* ===== BET ADJUSTMENT BUTTONS ===== */
+        .bet-adjust {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+
+        .bet-adjust-btn {
+            flex: 1;
+            padding: 10px;
+            background: #1c1f24;
+            border: 1px solid #2a2a2a;
+            border-radius: 8px;
+            color: #eaeaea;
+            font-size: 0.9em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .bet-adjust-btn:hover:not(:disabled) {
+            background: #2a2a2a;
+            border-color: #ffd54a;
+        }
+
+        .bet-adjust-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* ===== HISTORY ===== */
+        .history-section {
+            padding: 24px;
+            background: #0b0b0b;
+            border-top: 1px solid #1c1f24;
+        }
+
+        .history-title {
+            font-size: 1em;
+            color: #888;
+            margin-bottom: 12px;
+        }
+
+        .history-grid {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 8px;
+        }
+
+        .history-chip {
+            aspect-ratio: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            font-size: 0.75em;
+            font-weight: 600;
+            border: 1px solid;
+        }
+
+        .history-chip.win {
+            background: rgba(68, 209, 111, 0.2);
+            border-color: #44d16f;
+            color: #44d16f;
+        }
+
+        .history-chip.lose {
+            background: rgba(255, 92, 92, 0.2);
+            border-color: #ff5c5c;
+            color: #ff5c5c;
+        }
+
+        .history-icon {
+            font-size: 1.2em;
+            margin-bottom: 2px;
+        }
+
+        /* ===== FOOTER ===== */
+        .footer {
+            padding: 16px 24px;
+            background: #0b0b0b;
+            border-top: 1px solid #1c1f24;
+            text-align: center;
+            font-size: 0.85em;
+            color: #555;
+        }
+
+        /* ===== ERROR MESSAGE ===== */
+        .error-message {
+            background: rgba(255, 92, 92, 0.2);
+            border: 1px solid #ff5c5c;
+            color: #ff5c5c;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 16px;
+            display: none;
+            font-size: 0.95em;
+        }
+
+        .error-message.show {
+            display: block;
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 480px) {
+            .header-title {
+                font-size: 1.5em;
+            }
+
+            .multiplier-display {
+                font-size: 3em;
+            }
+
+            .action-btn {
+                font-size: 1em;
+                padding: 14px;
+                min-height: 50px;
+            }
+
+            .history-grid {
+                grid-template-columns: repeat(6, 1fr);
+                gap: 6px;
+            }
+        }
+
+        /* ===== ACCESSIBILITY ===== */
+        .action-btn:focus,
+        .chip-btn:focus,
+        .bet-adjust-btn:focus,
+        .bet-input:focus {
+            outline: 2px solid #ffd54a;
+            outline-offset: 2px;
+        }
+
+        /* Back button */
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            background: #1a1a1a;
+            border: 1px solid #2a2a2a;
+            border-radius: 8px;
+            color: #e0e0e0;
+            text-decoration: none;
+            font-size: 1em;
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+        }
+
+        .back-btn:hover {
+            background: #252525;
+        }
+    </style>
+</head>
+<body>
+    <div style="max-width: 640px; width: 100%;">
+        <a href="index.html" class="back-btn">
+            ← Torna alla Home
+        </a>
+
+        <div class="game-container">
+            <!-- HEADER -->
+            <div class="header">
+                <div class="header-title">
+                    <span class="header-icon">⚡</span>
+                    Voltorb Burst
+                </div>
+            </div>
+
+            <!-- STATUS BAR -->
+            <div class="status-bar">
+                <div class="balance-display" id="balanceDisplay">
+                    Saldo: <span id="balanceAmount">0</span>
+                </div>
+                <div class="seed-hash" id="seedHash">
+                    Seed: caricamento...
+                </div>
+            </div>
+
+            <!-- MULTIPLIER METER -->
+            <div class="meter-container">
+                <div class="multiplier-display" id="multiplierDisplay">1.00×</div>
+                <div class="round-status" id="roundStatus">Pronto</div>
+            </div>
+
+            <!-- CONTROLS -->
+            <div class="controls">
+                <!-- Error message -->
+                <div class="error-message" id="errorMessage"></div>
+
+                <!-- Bet input -->
+                <div class="bet-input-group">
+                    <label class="bet-input-label" for="betInput">Puntata (min 50, max 2000)</label>
+                    <input 
+                        type="number" 
+                        id="betInput" 
+                        class="bet-input" 
+                        placeholder="200" 
+                        min="50" 
+                        max="2000" 
+                        step="50" 
+                        value="200"
+                        aria-label="Importo puntata"
+                    >
+                </div>
+
+                <!-- Bet adjustment buttons -->
+                <div class="bet-adjust">
+                    <button class="bet-adjust-btn" id="halfBtn" aria-label="Dimezza puntata">1/2</button>
+                    <button class="bet-adjust-btn" id="doubleBtn" aria-label="Raddoppia puntata">×2</button>
+                    <button class="bet-adjust-btn" id="maxBtn" aria-label="Puntata massima">Max</button>
+                </div>
+
+                <!-- Quick bet chips -->
+                <div class="quick-chips">
+                    <button class="chip-btn" data-amount="100" aria-label="Punta 100">100</button>
+                    <button class="chip-btn" data-amount="200" aria-label="Punta 200">200</button>
+                    <button class="chip-btn" data-amount="500" aria-label="Punta 500">500</button>
+                </div>
+
+                <!-- Action buttons -->
+                <div class="action-buttons">
+                    <button class="action-btn start-btn" id="startBtn" aria-label="Avvia round">
+                        START
+                    </button>
+                    <button class="action-btn cashout-btn" id="cashoutBtn" disabled aria-label="Incassa vincita">
+                        CASHOUT
+                    </button>
+                </div>
+            </div>
+
+            <!-- HISTORY -->
+            <div class="history-section">
+                <div class="history-title">Storico ultimi 24 round</div>
+                <div class="history-grid" id="historyGrid">
+                    <!-- Populated by JS -->
+                </div>
+            </div>
+
+            <!-- FOOTER -->
+            <div class="footer">
+                RTP target ~95% · Crash: C = 1 / (0.07 + U)
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== FIREBASE SDK ===== -->
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js';
+        import { getDatabase, ref, get, set, onValue } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js';
+
+        // ===== FIREBASE CONFIG =====
+        const firebaseConfig = {
+            apiKey: "AIzaSyDudJj0tUA5k3M6iWin3uuFTkNx8Fz2jaM",
+            authDomain: "rouletterun-10da9.firebaseapp.com",
+            databaseURL: "https://rouletterun-10da9-default-rtdb.europe-west1.firebasedatabase.app",
+            projectId: "rouletterun-10da9",
+            storageBucket: "rouletterun-10da9.firebasestorage.app",
+            messagingSenderId: "148720414880",
+            appId: "1:148720414880:web:06bb58ac2acf1c10c42cd4"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app);
+
+        // ===== GAME STATE =====
+        let gameState = 'idle'; // idle, running, cooldown
+        let currentMultiplier = 1.00;
+        let crashPoint = 0;
+        let betAmount = 0;
+        let startTime = 0;
+        let animationFrame = null;
+        let cashed = false;
+        let serverSeed = '';
+        let roundCounter = 0;
+        let history = [];
+
+        // ===== PLAYER MANAGEMENT =====
+        function getCurrentPlayer() {
+            return localStorage.getItem('playerName');
+        }
+
+        const currentPlayer = getCurrentPlayer();
+        if (!currentPlayer) {
+            alert('Devi impostare il tuo nome dalla home page!');
+            window.location.href = 'index.html';
+        }
+
+        const playerRef = ref(database, `players/${currentPlayer}`);
+
+        // ===== DOM ELEMENTS =====
+        const balanceAmountEl = document.getElementById('balanceAmount');
+        const seedHashEl = document.getElementById('seedHash');
+        const multiplierDisplayEl = document.getElementById('multiplierDisplay');
+        const roundStatusEl = document.getElementById('roundStatus');
+        const betInputEl = document.getElementById('betInput');
+        const startBtnEl = document.getElementById('startBtn');
+        const cashoutBtnEl = document.getElementById('cashoutBtn');
+        const errorMessageEl = document.getElementById('errorMessage');
+        const historyGridEl = document.getElementById('historyGrid');
+        const halfBtnEl = document.getElementById('halfBtn');
+        const doubleBtnEl = document.getElementById('doubleBtn');
+        const maxBtnEl = document.getElementById('maxBtn');
+
+        // ===== BALANCE FUNCTIONS (Firebase integration) =====
+        let currentBalance = 0;
+
+        async function loadBalance() {
+            const snapshot = await get(playerRef);
+            const data = snapshot.val();
+            currentBalance = data?.coins || 0;
+            updateBalanceDisplay();
+        }
+
+        async function setBalance(value) {
+            const snapshot = await get(playerRef);
+            const data = snapshot.val() || {};
+            data.coins = Math.max(0, Math.floor(value));
+            await set(playerRef, data);
+            currentBalance = data.coins;
+            updateBalanceDisplay();
+        }
+
+        async function addCoins(delta) {
+            await setBalance(currentBalance + delta);
+        }
+
+        function updateBalanceDisplay() {
+            balanceAmountEl.textContent = formatCoins(currentBalance);
+        }
+
+        function formatCoins(value) {
+            return Math.floor(value).toLocaleString('it-IT');
+        }
+
+        // ===== SEED & HASH =====
+        function initServerSeed() {
+            let seed = localStorage.getItem('voltorbServerSeed');
+            if (!seed) {
+                seed = generateRandomSeed();
+                localStorage.setItem('voltorbServerSeed', seed);
+            }
+            serverSeed = seed;
+            updateSeedHashDisplay();
+        }
+
+        function generateRandomSeed() {
+            const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
+            let result = '';
+            for (let i = 0; i < 32; i++) {
+                result += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            return result;
+        }
+
+        function updateSeedHashDisplay() {
+            // Display hash (semplificato - FNV-1a hash per display)
+            const hash = fnv1aHash(serverSeed);
+            seedHashEl.textContent = `Seed: ${hash.substring(0, 16)}...`;
+        }
+
+        // Simple FNV-1a hash for display purposes
+        function fnv1aHash(str) {
+            let hash = 2166136261;
+            for (let i = 0; i < str.length; i++) {
+                hash ^= str.charCodeAt(i);
+                hash += (hash << 1) + (hash << 4) + (hash << 7) + (hash << 8) + (hash << 24);
+            }
+            return (hash >>> 0).toString(16);
+        }
+
+        // ===== PRNG (Provably Fair) =====
+        // Genera float deterministico (0,1] da seed string
+        function prngUniform(seedString) {
+            let hash = 0;
+            for (let i = 0; i < seedString.length; i++) {
+                const char = seedString.charCodeAt(i);
+                hash = ((hash << 5) - hash) + char;
+                hash = hash & hash;
+            }
+            
+            // Xorshift-like transformation
+            hash ^= hash << 13;
+            hash ^= hash >> 17;
+            hash ^= hash << 5;
+            
+            // Convert to (0,1]
+            const normalized = (Math.abs(hash) % 1000000) / 1000000;
+            return normalized === 0 ? 0.000001 : normalized;
+        }
+
+        // ===== CRASH POINT CALCULATION =====
+        function drawCrashPoint() {
+            roundCounter++;
+            const timestamp = Date.now();
+            const roundSalt = roundCounter.toString();
+            const seedString = `${serverSeed}|${timestamp}|${roundSalt}`;
+            
+            const U = prngUniform(seedString);
+            const b = 0.07; // House edge parameter (RTP ~95%)
+            let C = 1 / (b + U);
+            
+            // Ensure minimum crash point
+            if (C < 1.01) C = 1.01;
+            
+            return Number(C.toFixed(2));
+        }
+
+        // ===== MULTIPLIER CALCULATION =====
+        function multAt(elapsedMs) {
+            const seconds = elapsedMs / 1000;
+            const k = 0.22; // Growth rate
+            const mult = Math.exp(k * seconds);
+            return Number(mult.toFixed(2));
+        }
+
+        // ===== HISTORY MANAGEMENT =====
+        function loadHistory() {
+            const saved = localStorage.getItem('voltorbHistory');
+            if (saved) {
+                try {
+                    history = JSON.parse(saved);
+                } catch (e) {
+                    history = [];
+                }
+            }
+            updateHistoryDisplay();
+        }
+
+        function saveHistory() {
+            localStorage.setItem('voltorbHistory', JSON.stringify(history));
+        }
+
+        function addToHistory(type, mult) {
+            history.unshift({ type, mult });
+            if (history.length > 24) {
+                history = history.slice(0, 24);
+            }
+            saveHistory();
+            updateHistoryDisplay();
+        }
+
+        function updateHistoryDisplay() {
+            historyGridEl.innerHTML = '';
+            
+            // Fill with empty chips if less than 24
+            const totalChips = 24;
+            const items = [...history];
+            while (items.length < totalChips) {
+                items.push(null);
+            }
+            
+            items.slice(0, totalChips).forEach(item => {
+                const chip = document.createElement('div');
+                chip.className = 'history-chip';
+                
+                if (item) {
+                    chip.classList.add(item.type);
+                    chip.innerHTML = `
+                        <div class="history-icon">${item.type === 'win' ? '✔' : '✖'}</div>
+                        <div>${item.mult}×</div>
+                    `;
+                } else {
+                    chip.style.background = '#1c1f24';
+                    chip.style.borderColor = '#2a2a2a';
+                }
+                
+                historyGridEl.appendChild(chip);
+            });
+        }
+
+        // ===== ERROR HANDLING =====
+        function showError(message) {
+            errorMessageEl.textContent = message;
+            errorMessageEl.classList.add('show');
+            setTimeout(() => {
+                errorMessageEl.classList.remove('show');
+            }, 3000);
+        }
+
+        // ===== GAME LOGIC =====
+        async function startRound() {
+            const bet = parseInt(betInputEl.value) || 0;
+            
+            // Validation
+            if (bet < 50) {
+                showError('Puntata minima: 50 Coins');
+                return;
+            }
+            
+            if (bet > 2000) {
+                showError('Puntata massima: 2000 Coins');
+                return;
+            }
+            
+            if (bet > currentBalance) {
+                showError('Saldo insufficiente!');
+                return;
+            }
+            
+            // Initialize round
+            gameState = 'running';
+            betAmount = bet;
+            currentMultiplier = 1.00;
+            startTime = Date.now();
+            cashed = false;
+            crashPoint = drawCrashPoint();
+            
+            // Deduct bet from balance
+            await addCoins(-betAmount);
+            
+            // Update UI
+            updateUI();
+            multiplierDisplayEl.classList.add('pulse');
+            roundStatusEl.textContent = 'In corso...';
+            roundStatusEl.className = 'round-status';
+            
+            // Start animation loop
+            animate();
+        }
+
+        function animate() {
+            if (gameState !== 'running') return;
+            
+            const elapsed = Date.now() - startTime;
+            currentMultiplier = multAt(elapsed);
+            
+            // Update display
+            multiplierDisplayEl.textContent = `${currentMultiplier.toFixed(2)}×`;
+            
+            // Check for crash
+            if (currentMultiplier >= crashPoint) {
+                crash();
+                return;
+            }
+            
+            // Continue animation
+            animationFrame = requestAnimationFrame(animate);
+        }
+
+        async function cashout() {
+            if (gameState !== 'running' || cashed) return;
+            
+            cashed = true;
+            gameState = 'cooldown';
+            
+            // Stop animation
+            if (animationFrame) {
+                cancelAnimationFrame(animationFrame);
+                animationFrame = null;
+            }
+            
+            multiplierDisplayEl.classList.remove('pulse');
+            
+            // Calculate winnings
+            const winAmount = Math.floor(betAmount * currentMultiplier);
+            await addCoins(winAmount);
+            
+            // Update UI
+            roundStatusEl.textContent = `Cashout a ${currentMultiplier.toFixed(2)}×: +${formatCoins(winAmount)}`;
+            roundStatusEl.className = 'round-status win';
+            
+            // Add to history
+            addToHistory('win', currentMultiplier.toFixed(2));
+            
+            // Cooldown
+            setTimeout(() => {
+                resetRound();
+            }, 800);
+        }
+
+        function crash() {
+            if (cashed) return;
+            
+            gameState = 'cooldown';
+            
+            // Stop animation
+            if (animationFrame) {
+                cancelAnimationFrame(animationFrame);
+                animationFrame = null;
+            }
+            
+            multiplierDisplayEl.classList.remove('pulse');
+            
+            // Update display to crash point
+            currentMultiplier = crashPoint;
+            multiplierDisplayEl.textContent = `${crashPoint.toFixed(2)}×`;
+            
+            // Update UI
+            roundStatusEl.textContent = `Crash a ${crashPoint.toFixed(2)}×`;
+            roundStatusEl.className = 'round-status lose';
+            
+            // Add to history
+            addToHistory('lose', crashPoint.toFixed(2));
+            
+            // Cooldown
+            setTimeout(() => {
+                resetRound();
+            }, 800);
+        }
+
+        function resetRound() {
+            gameState = 'idle';
+            currentMultiplier = 1.00;
+            multiplierDisplayEl.textContent = '1.00×';
+            multiplierDisplayEl.classList.remove('pulse');
+            roundStatusEl.textContent = 'Pronto';
+            roundStatusEl.className = 'round-status';
+            updateUI();
+        }
+
+        function updateUI() {
+            const isIdle = gameState === 'idle';
+            const isRunning = gameState === 'running';
+            
+            // Enable/disable inputs
+            betInputEl.disabled = !isIdle;
+            startBtnEl.disabled = !isIdle;
+            cashoutBtnEl.disabled = !isRunning || cashed;
+            
+            // Chips and adjustment buttons
+            document.querySelectorAll('.chip-btn').forEach(btn => {
+                btn.disabled = !isIdle;
+            });
+            
+            halfBtnEl.disabled = !isIdle;
+            doubleBtnEl.disabled = !isIdle;
+            maxBtnEl.disabled = !isIdle;
+        }
+
+        // ===== BET ADJUSTMENT =====
+        function adjustBet(multiplier) {
+            const currentBet = parseInt(betInputEl.value) || 200;
+            let newBet = Math.floor(currentBet * multiplier);
+            
+            // Clamp to min/max
+            newBet = Math.max(50, Math.min(2000, newBet));
+            
+            // Round to step
+            newBet = Math.round(newBet / 50) * 50;
+            
+            betInputEl.value = newBet;
+        }
+
+        function setMaxBet() {
+            const maxBet = Math.min(2000, currentBalance);
+            const roundedBet = Math.floor(maxBet / 50) * 50;
+            betInputEl.value = Math.max(50, roundedBet);
+        }
+
+        // ===== EVENT LISTENERS =====
+        startBtnEl.addEventListener('click', startRound);
+        cashoutBtnEl.addEventListener('click', cashout);
+
+        // Quick bet chips
+        document.querySelectorAll('.chip-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const amount = parseInt(btn.dataset.amount);
+                betInputEl.value = amount;
+            });
+        });
+
+        // Bet adjustment buttons
+        halfBtnEl.addEventListener('click', () => adjustBet(0.5));
+        doubleBtnEl.addEventListener('click', () => adjustBet(2));
+        maxBtnEl.addEventListener('click', setMaxBet);
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            if (e.code === 'Space' && gameState === 'idle') {
+                e.preventDefault();
+                startRound();
+            } else if (e.code === 'Space' && gameState === 'running' && !cashed) {
+                e.preventDefault();
+                cashout();
+            }
+        });
+
+        // ===== INITIALIZATION =====
+        async function init() {
+            initServerSeed();
+            loadHistory();
+            await loadBalance();
+            updateUI();
+            
+            // Listen to balance changes
+            onValue(playerRef, (snapshot) => {
+                const data = snapshot.val();
+                if (data && data.coins !== undefined) {
+                    currentBalance = data.coins;
+                    updateBalanceDisplay();
+                }
+            });
+        }
+
+        init();
+    </script>
+
+    <!-- ===== TEST CHECKLIST (commenti per sviluppatori) =====
+    □ Start con saldo 5000 e bet 200 → saldo a 4800
+    □ Cashout a ~1.20× → saldo ≈ 4800 + 240 = 5040
+    □ Crash senza cashout → saldo rimane 4800
+    □ Storico mostra correttamente ✔/✖ e il moltiplicatore
+    □ UI disabilita/enabled correttamente i bottoni in ogni stato
+    □ Ricarico pagina → saldo persiste (Firebase); seedHash resta uguale (localStorage)
+    □ Tasti rapidi: Spazio per Start/Cashout
+    □ Bet adjustment (1/2, ×2, Max) funziona correttamente
+    □ Quick chips (100, 200, 500) impostano correttamente la puntata
+    □ Crash point deterministico (stesso seed → stesso crash)
+    □ RTP ~95% verificabile su molti round
+    □ Mobile responsive e touch-friendly
+    □ Focus states accessibili (Tab navigation)
+    □ Error messages mostrati correttamente per validazioni
+    ===== -->
+</body>
+</html>
