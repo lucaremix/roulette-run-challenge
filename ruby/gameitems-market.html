@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Game Items Market - Pokémon Roulette Run</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #0a0a0a;
+            min-height: 100vh;
+            padding: 20px;
+            color: #e0e0e0;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            background: #1a1a1a;
+            border: 1px solid #2a2a2a;
+            border-radius: 8px;
+            color: #e0e0e0;
+            text-decoration: none;
+            font-size: 1em;
+            transition: all 0.3s ease;
+            margin-bottom: 30px;
+        }
+
+        .back-btn:hover {
+            background: #252525;
+            border-color: #3a3a3a;
+        }
+
+        header {
+            background: #1a1a1a;
+            border: 1px solid #2a2a2a;
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 2.5em;
+            color: #ffffff;
+            margin-bottom: 15px;
+        }
+
+        .player-coins {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            font-size: 1.5em;
+            color: #ffd700;
+            margin-bottom: 20px;
+        }
+
+        .coin-img {
+            width: 32px;
+            height: 32px;
+            image-rendering: pixelated;
+        }
+
+        .section {
+            background: #1a1a1a;
+            border: 1px solid #2a2a2a;
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 30px;
+        }
+
+        .section-title {
+            font-size: 2em;
+            color: #ffffff;
+            margin-bottom: 20px;
+        }
+
+        .items-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .item-card {
+            background: #1a1a1a;
+            border: 2px solid #2a2a2a;
+            border-radius: 12px;
+            padding: 25px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+
+        .item-card:hover {
+            border-color: #3a3a3a;
+            transform: translateY(-5px);
+        }
+
+        .item-card.sold-out {
+            opacity: 0.5;
+            pointer-events: none;
+        }
+
+        .sold-out-badge {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-size: 0.8em;
+            font-weight: bold;
+            text-transform: uppercase;
+            background: #c41e3a;
+            color: white;
+        }
+
+        .item-image {
+            width: 100px;
+            height: 100px;
+            object-fit: contain;
+            margin-bottom: 15px;
+            image-rendering: smooth;
+        }
+
+        .item-name {
+            font-size: 1.8em;
+            color: #fff;
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+
+        .item-description {
+            color: #888;
+            margin-bottom: 20px;
+            min-height: 40px;
+        }
+
+        .item-price {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+            color: #ffd700;
+            font-weight: bold;
+        }
+
+        .buy-btn {
+            width: 100%;
+            padding: 12px;
+            background: #2a7a2a;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .buy-btn:hover:not(:disabled) {
+            background: #357a35;
+            transform: scale(1.02);
+        }
+
+        .buy-btn:disabled {
+            background: #2a2a2a;
+            cursor: not-allowed;
+            opacity: 0.5;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 60px 20px;
+            color: #888;
+            font-size: 1.2em;
+        }
+
+        .error {
+            background: #c41e3a;
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .success {
+            background: #2a7a2a;
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2em;
+            }
+
+            .items-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="index.html" class="back-btn">
+            <span>←</span>
+            Torna alla Home
+        </a>
+
+        <header>
+            <h1>🎮 Game Items Market</h1>
+            <div class="player-coins">
+                <img src="https://raw.githubusercontent.com/lucaremix/roulette-run-challenge/main/pixel-art-red-chinese-gold-coin-png.png" 
+                     alt="Coins" 
+                     class="coin-img"
+                     onerror="this.style.display='none'">
+                <span id="playerCoins">0</span>
+            </div>
+        </header>
+
+        <div id="messageArea"></div>
+
+        <div class="section">
+            <h2 class="section-title">🛡️ Strumenti da Tenere</h2>
+            <div id="holdItemsGrid" class="items-grid"></div>
+        </div>
+
+        <div class="section">
+            <h2 class="section-title">💎 Pietre e Rocce</h2>
+            <div id="stonesGrid" class="items-grid"></div>
+        </div>
+
+        <div class="section">
+            <h2 class="section-title">⚡ Strumenti Potenziamento Tipi</h2>
+            <div id="typeBoostGrid" class="items-grid"></div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js';
+        import { getDatabase, ref, get, update } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js';
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyASMm5krOLiE4Wvn14RQvyaEyPk9bAPOYo",
+            authDomain: "progetto-pokemon-roulette.firebaseapp.com",
+            databaseURL: "https://progetto-pokemon-roulette-default-rtdb.europe-west1.firebasedatabase.app",
+            projectId: "progetto-pokemon-roulette",
+            storageBucket: "progetto-pokemon-roulette.firebasestorage.app",
+            messagingSenderId: "634620524846",
+            appId: "1:634620524846:web:f32fb09afbeb086aefef81"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+        // Strumenti da tenere
+        const holdItems = [
+            { name: 'Leftovers', image: 'https://www.serebii.net/itemdex/sprites/sv/leftovers.png', description: 'Ripristina gradualmente i PS' },
+            { name: 'Rocky Helmet', image: 'https://www.serebii.net/itemdex/sprites/sv/rockyhelmet.png', description: 'Danneggia chi attacca con mosse fisiche' },
+            { name: 'Eviolite', image: 'https://www.serebii.net/itemdex/sprites/sv/eviolite.png', description: 'Potenzia Difesa e Dif.Sp. di Pokémon non evoluti' },
+            { name: 'Assault Vest', image: 'https://www.serebii.net/itemdex/sprites/sv/assaultvest.png', description: 'Aumenta Dif.Sp. ma blocca mosse di stato' },
+            { name: 'Toxic Orb', image: 'https://www.serebii.net/itemdex/sprites/sv/toxicorb.png', description: 'Avvelena gravemente chi la tiene' },
+            { name: 'Flame Orb', image: 'https://www.serebii.net/itemdex/sprites/sv/flameorb.png', description: 'Scotta chi la tiene' }
+        ];
+
+        // Pietre e Rocce
+        const stones = [
+            { name: 'Light Clay', image: 'https://www.serebii.net/itemdex/sprites/sv/lightclay.png', description: 'Prolunga Schermoluce e Riflesso' },
+            { name: 'Damp Rock', image: 'https://www.serebii.net/itemdex/sprites/sv/damprock.png', description: 'Prolunga la durata della pioggia' },
+            { name: 'Heat Rock', image: 'https://www.serebii.net/itemdex/sprites/sv/heatrock.png', description: 'Prolunga la durata del sole' },
+            { name: 'Smooth Rock', image: 'https://www.serebii.net/itemdex/sprites/sv/smoothrock.png', description: 'Prolunga la durata della grandinata' },
+            { name: 'Icy Rock', image: 'https://www.serebii.net/itemdex/sprites/sv/icyrock.png', description: 'Prolunga la durata della neve' },
+            { name: 'Sun Stone', image: 'https://www.serebii.net/itemdex/sprites/sv/sunstone.png', description: 'Fa evolvere alcuni Pokémon' },
+            { name: 'Moon Stone', image: 'https://www.serebii.net/itemdex/sprites/sv/moonstone.png', description: 'Fa evolvere alcuni Pokémon' },
+            { name: 'Fire Stone', image: 'https://www.serebii.net/itemdex/sprites/sv/firestone.png', description: 'Fa evolvere alcuni Pokémon' },
+            { name: 'Leaf Stone', image: 'https://www.serebii.net/itemdex/sprites/sv/leafstone.png', description: 'Fa evolvere alcuni Pokémon' },
+            { name: 'Water Stone', image: 'https://www.serebii.net/itemdex/sprites/sv/waterstone.png', description: 'Fa evolvere alcuni Pokémon' },
+            { name: 'Thunder Stone', image: 'https://www.serebii.net/itemdex/sprites/sv/thunderstone.png', description: 'Fa evolvere alcuni Pokémon' },
+            { name: 'Shiny Stone', image: 'https://www.serebii.net/itemdex/sprites/sv/shinystone.png', description: 'Fa evolvere alcuni Pokémon' },
+            { name: 'Dawn Stone', image: 'https://www.serebii.net/itemdex/sprites/sv/dawnstone.png', description: 'Fa evolvere alcuni Pokémon' },
+            { name: 'Oval Stone', image: 'https://www.serebii.net/itemdex/sprites/sv/ovalstone.png', description: 'Fa evolvere Happiny se tenuto' }
+        ];
+
+        // Strumenti potenziamento tipi
+        const typeBoostItems = [
+            { name: 'Charcoal', image: 'https://www.serebii.net/itemdex/sprites/sv/charcoal.png', description: 'Potenzia le mosse di tipo Fuoco' },
+            { name: 'Miracle Seed', image: 'https://www.serebii.net/itemdex/sprites/sv/miracleseed.png', description: 'Potenzia le mosse di tipo Erba' },
+            { name: 'Mystic Water', image: 'https://www.serebii.net/itemdex/sprites/sv/mysticwater.png', description: 'Potenzia le mosse di tipo Acqua' },
+            { name: 'Black Glasses', image: 'https://www.serebii.net/itemdex/sprites/sv/blackglasses.png', description: 'Potenzia le mosse di tipo Buio' },
+            { name: 'Black Belt', image: 'https://www.serebii.net/itemdex/sprites/sv/blackbelt.png', description: 'Potenzia le mosse di tipo Lotta' },
+            { name: 'Sharp Beak', image: 'https://www.serebii.net/itemdex/sprites/sv/sharpbeak.png', description: 'Potenzia le mosse di tipo Volante' },
+            { name: 'Poison Barb', image: 'https://www.serebii.net/itemdex/sprites/sv/poisonbarb.png', description: 'Potenzia le mosse di tipo Veleno' },
+            { name: 'Never-Melt Ice', image: 'https://www.serebii.net/itemdex/sprites/sv/nevermeltice.png', description: 'Potenzia le mosse di tipo Ghiaccio' },
+            { name: 'Spell Tag', image: 'https://www.serebii.net/itemdex/sprites/sv/spelltag.png', description: 'Potenzia le mosse di tipo Spettro' },
+            { name: 'Twisted Spoon', image: 'https://www.serebii.net/itemdex/sprites/sv/twistedspoon.png', description: 'Potenzia le mosse di tipo Psico' },
+            { name: 'Dragon Fang', image: 'https://www.serebii.net/itemdex/sprites/sv/dragonfang.png', description: 'Potenzia le mosse di tipo Drago' },
+            { name: 'Magnet', image: 'https://www.serebii.net/itemdex/sprites/sv/magnet.png', description: 'Potenzia le mosse di tipo Elettro' },
+            { name: 'Hard Stone', image: 'https://www.serebii.net/itemdex/sprites/sv/hardstone.png', description: 'Potenzia le mosse di tipo Roccia' }
+        ];
+
+        const ITEM_PRICE = 500;
+
+        let playerName = localStorage.getItem('playerName');
+        let playerData = null;
+        let playerInventory = null;
+
+        async function loadPlayerData() {
+            if (!playerName) {
+                showError('Nessun giocatore selezionato! Torna alla home per selezionare un giocatore.');
+                return false;
+            }
+
+            try {
+                // Carica i dati del giocatore
+                const playerRef = ref(db, `players/${playerName}`);
+                const snapshot = await get(playerRef);
+                
+                if (!snapshot.exists()) {
+                    showError('Giocatore non trovato nel database!');
+                    return false;
+                }
+
+                playerData = snapshot.val();
+                document.getElementById('playerCoins').textContent = playerData.coins || 0;
+
+                // Carica l'inventario degli items di gioco
+                const inventoryRef = ref(db, `players/${playerName}/inventory/itemgioco`);
+                const inventorySnapshot = await get(inventoryRef);
+                
+                if (inventorySnapshot.exists()) {
+                    playerInventory = inventorySnapshot.val();
+                } else {
+                    playerInventory = {};
+                }
+
+                return true;
+            } catch (error) {
+                console.error('Errore nel caricamento dei dati:', error);
+                showError('Errore nel caricamento dei dati: ' + error.message);
+                return false;
+            }
+        }
+
+        function createItemCard(item) {
+            const card = document.createElement('div');
+            card.className = 'item-card';
+            
+            const currentCount = playerInventory[item.name] || 0;
+
+            card.innerHTML = `
+                <img src="${item.image}" alt="${item.name}" class="item-image" onerror="this.src='https://via.placeholder.com/100?text=Item'">
+                <div class="item-name">${item.name}</div>
+                <div class="item-description">${item.description}</div>
+                ${currentCount > 0 ? `<div style="color: #4a9eff; font-weight: bold; margin-bottom: 10px;">In possesso: ${currentCount}</div>` : ''}
+                <div class="item-price">
+                    <img src="https://raw.githubusercontent.com/lucaremix/roulette-run-challenge/main/pixel-art-red-chinese-gold-coin-png.png" 
+                         alt="Coins" 
+                         class="coin-img"
+                         onerror="this.style.display='none'">
+                    <span>${ITEM_PRICE}</span>
+                </div>
+                <button class="buy-btn" onclick="buyItem('${item.name}', ${ITEM_PRICE})">
+                    💰 Acquista
+                </button>
+            `;
+
+            return card;
+        }
+
+        function renderItems() {
+            // Render hold items
+            const holdItemsGrid = document.getElementById('holdItemsGrid');
+            holdItemsGrid.innerHTML = '';
+            holdItems.forEach(item => {
+                holdItemsGrid.appendChild(createItemCard(item));
+            });
+
+            // Render stones
+            const stonesGrid = document.getElementById('stonesGrid');
+            stonesGrid.innerHTML = '';
+            stones.forEach(item => {
+                stonesGrid.appendChild(createItemCard(item));
+            });
+
+            // Render type boost items
+            const typeBoostGrid = document.getElementById('typeBoostGrid');
+            typeBoostGrid.innerHTML = '';
+            typeBoostItems.forEach(item => {
+                typeBoostGrid.appendChild(createItemCard(item));
+            });
+        }
+
+        window.buyItem = async function(itemName, price) {
+            if (!playerData) return;
+
+            const currentCoins = playerData.coins || 0;
+
+            if (currentCoins < price) {
+                showError('Non hai abbastanza coins!');
+                return;
+            }
+
+            try {
+                const updates = {};
+                
+                // Aggiorna i coins
+                updates[`players/${playerName}/coins`] = currentCoins - price;
+
+                // Aggiorna l'inventario itemgioco
+                const currentCount = playerInventory[itemName] || 0;
+                updates[`players/${playerName}/inventory/itemgioco/${itemName}`] = currentCount + 1;
+
+                await update(ref(db), updates);
+
+                showSuccess(`Hai acquistato ${itemName} per ${price} coins!`);
+                
+                // Ricarica i dati e aggiorna la visualizzazione
+                await loadPlayerData();
+                renderItems();
+
+            } catch (error) {
+                console.error('Errore nell\'acquisto:', error);
+                showError('Errore nell\'acquisto: ' + error.message);
+            }
+        };
+
+        function showError(message) {
+            const messageArea = document.getElementById('messageArea');
+            messageArea.innerHTML = `<div class="error">${message}</div>`;
+            setTimeout(() => {
+                messageArea.innerHTML = '';
+            }, 5000);
+        }
+
+        function showSuccess(message) {
+            const messageArea = document.getElementById('messageArea');
+            messageArea.innerHTML = `<div class="success">${message}</div>`;
+            setTimeout(() => {
+                messageArea.innerHTML = '';
+            }, 3000);
+        }
+
+        // Inizializzazione
+        async function init() {
+            const success = await loadPlayerData();
+            if (success) {
+                renderItems();
+            }
+        }
+
+        init();
+    </script>
+</body>
+</html>
