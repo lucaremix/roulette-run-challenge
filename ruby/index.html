@@ -33,6 +33,52 @@
             position: relative;
         }
 
+        .home-button {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: #1a1a1a;
+            border: 2px solid #2a2a2a;
+            border-radius: 8px;
+            padding: 10px 20px;
+            color: #fff;
+            text-decoration: none;
+            font-weight: bold;
+            transition: all 0.3s;
+            display: inline-block;
+            font-size: 0.9em;
+        }
+
+        .home-button:hover {
+            background: #2a2a2a;
+            border-color: #4a4a4a;
+            transform: scale(1.05);
+        }
+
+
+        /* NUOVO: Pulsante Torna alla Home */
+        .home-button {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: #1a1a1a;
+            border: 2px solid #2a2a2a;
+            border-radius: 8px;
+            padding: 10px 20px;
+            color: #fff;
+            text-decoration: none;
+            font-weight: bold;
+            transition: all 0.3s;
+            display: inline-block;
+            font-size: 0.9em;
+        }
+
+        .home-button:hover {
+            background: #2a2a2a;
+            border-color: #4a4a4a;
+            transform: scale(1.05);
+        }
+
         .logo-img {
             max-width: 50%;
             height: auto;
@@ -590,6 +636,13 @@
         }
 
         @media (max-width: 768px) {
+            .home-button {
+                position: static;
+                margin-bottom: 10px;
+                display: block;
+                text-align: center;
+            }
+
             .coin-counter {
                 position: static;
                 margin: 15px auto 0;
@@ -605,6 +658,9 @@
 <body>
     <div class="container">
         <header>
+            <!-- NUOVO: Pulsante Torna alla Home -->
+            <a href="https://lucaremix.github.io/roulette-run-challenge/" class="home-button">🏠 Torna alla Home</a>
+            
             <img src="https://github.com/lucaremix/roulette-run-challenge/blob/main/images/rising-ruby-logo.webp?raw=true" 
                  alt="Roulette Run Challenge" 
                  class="logo-img"
@@ -625,7 +681,7 @@
         <div class="team-bar" id="teamBar">
             <div class="team-bar-title">
                 <span id="playerTeamTitle">Team</span>
-                <span class="team-count" id="teamCount">(0/∞)</span>
+                <span class="team-count" id="teamCount">(0/âˆž)</span>
             </div>
             <div class="team-bar-grid" id="teamBarGrid"></div>
         </div>
@@ -663,20 +719,8 @@
         <div class="markets-section">
             <h2 class="markets-title">Markets</h2>
             <div class="markets-grid">
-                
-                <div class="market-card" onclick="window.location.href='black-market.html'">
-                    <img src="https://img.nuzlocke.app//leaders/rs-juan.png" 
-                         alt="Black Market" 
-                         class="trainer-img"
-                         onerror="this.style.opacity='0.3'">
-                    <div class="event-info">
-                        <div class="event-name">Black Market</div>
-                        <p style="color: #888; font-size: 0.95em;">Acquista Pokémon per potenziare il tuo team</p>
-                    </div>
-                </div>
-                
                 <div class="market-card" onclick="window.location.href='mt-market.html'">
-                    <img src="https://img.nuzlocke.app//leaders/gs-elderli.png" 
+                    <img src="https://raw.githubusercontent.com/lucaremix/roulette-run-challenge/main/trainer-sprites/blackmarket.png" 
                          alt="MT Market" 
                          class="trainer-img"
                          onerror="this.style.opacity='0.3'">
@@ -686,8 +730,8 @@
                     </div>
                 </div>
 
-                <div class="market-card" onclick="window.location.href='r-items-market.html'">
-                    <img src="https://img.nuzlocke.app//leaders/xy-clemont.png" 
+                <div class="market-card" onclick="window.location.href='items-market.html'">
+                    <img src="https://raw.githubusercontent.com/lucaremix/roulette-run-challenge/main/trainer-sprites/blackmarket.png" 
                          alt="Items Market" 
                          class="trainer-img"
                          onerror="this.style.opacity='0.3'">
@@ -697,8 +741,8 @@
                     </div>
                 </div>
 
-                <div class="market-card" onclick="window.location.href='gameitems-market.html'">
-                    <img src="https://img.nuzlocke.app//leaders/blwh-cheren-boss.png" 
+                <div class="market-card" onclick="alert('Coming soon!')">
+                    <img src="https://raw.githubusercontent.com/lucaremix/roulette-run-challenge/main/trainer-sprites/blackmarket.png" 
                          alt="Items di Gioco" 
                          class="trainer-img"
                          onerror="this.style.opacity='0.3'">
@@ -708,8 +752,8 @@
                     </div>
                 </div>
 
-                <div class="market-card" onclick="window.location.href='berries-market.html'">
-                    <img src="https://img.nuzlocke.app//leaders/swsh-milo.png" 
+                <div class="market-card" onclick="alert('Coming soon!')">
+                    <img src="https://raw.githubusercontent.com/lucaremix/roulette-run-challenge/main/trainer-sprites/blackmarket.png" 
                          alt="Campo di Bacche" 
                          class="trainer-img"
                          onerror="this.style.opacity='0.3'">
@@ -718,25 +762,32 @@
                         <p style="color: #888; font-size: 0.95em;">Coltiva e raccogli bacche</p>
                     </div>
                 </div>
+            </div>
+        </div>
 
-                <div class="market-card" onclick="window.location.href='sell-market.html'">
-                    <img src="https://raw.githubusercontent.com/lucaremix/roulette-run-challenge/main/images/frlg-jessiejames.webp" 
-                         alt="Sell Market" 
+
+        <!-- NUOVO: GAME CORNER SECTION -->
+        <div class="markets-section">
+            <h2 class="markets-title">Game Corner</h2>
+            <div class="markets-grid">
+                <div class="market-card" onclick="window.location.href='black-market.html'">
+                    <img src="https://raw.githubusercontent.com/lucaremix/roulette-run-challenge/main/trainer-sprites/blackmarket.png" 
+                         alt="Game Corner" 
                          class="trainer-img"
                          onerror="this.style.opacity='0.3'">
                     <div class="event-info">
-                        <div class="event-name">Sell Market</div>
-                        <p style="color: #888; font-size: 0.95em;">Vendi i tuoi Pokémon a fronte di offerte</p>
+                        <div class="event-name">Game Corner</div>
+                        <p style="color: #888; font-size: 0.95em;">Prova la tua fortuna e vinci premi esclusivi</p>
                     </div>
                 </div>
             </div>
         </div>
 
         <div class="footer-buttons">
-            <a href="r-rules.html" class="footer-btn">📖 Regole</a>
-            <a href="pool-manager.html" class="footer-btn">🎲 Pool</a>
-            <button class="footer-btn" onclick="resetEvents()">🔄 Reset Eventi</button>
-            <button class="footer-btn danger" onclick="resetAllData()">🗑️ Reset Tutto</button>
+            <a href="r-rules.html" class="footer-btn">ðŸ“– Regole</a>
+            <a href="pool-manager.html" class="footer-btn">ðŸŽ² Pool</a>
+            <button class="footer-btn" onclick="resetEvents()">ðŸ”„ Reset Eventi</button>
+            <button class="footer-btn danger" onclick="resetAllData()">ðŸ—‘ï¸ Reset Tutto</button>
         </div>
     </div>
 
@@ -859,6 +910,15 @@
                     };
                 }
 
+                // NUOVO: Carica items di gioco da itemgioco/
+                const itemGiocoRef = ref(database, `players/${playerName}/itemgioco`);
+                const itemGiocoSnapshot = await get(itemGiocoRef);
+                if (itemGiocoSnapshot.exists()) {
+                    playerInventory.itemgioco = itemGiocoSnapshot.val();
+                } else {
+                    playerInventory.itemgioco = {};
+                }
+
                 renderItems();
             } catch (error) {
                 console.error('Errore caricamento inventario:', error);
@@ -940,12 +1000,49 @@
         }
 
         function getItemImage(name) {
+            // Mappatura immagini per items di gioco da Serebii
+            const itemsGiocoMap = {
+                'leftovers': 'https://www.serebii.net/itemdex/sprites/sv/leftovers.png',
+                'rocky-helmet': 'https://www.serebii.net/itemdex/sprites/sv/rockyhelmet.png',
+                'eviolite': 'https://www.serebii.net/itemdex/sprites/sv/eviolite.png',
+                'assault-vest': 'https://www.serebii.net/itemdex/sprites/sv/assaultvest.png',
+                'toxic-orb': 'https://www.serebii.net/itemdex/sprites/sv/toxicorb.png',
+                'flame-orb': 'https://www.serebii.net/itemdex/sprites/sv/flameorb.png',
+                'light-clay': 'https://www.serebii.net/itemdex/sprites/sv/lightclay.png',
+                'damp-rock': 'https://www.serebii.net/itemdex/sprites/sv/damprock.png',
+                'heat-rock': 'https://www.serebii.net/itemdex/sprites/sv/heatrock.png',
+                'smooth-rock': 'https://www.serebii.net/itemdex/sprites/sv/smoothrock.png',
+                'icy-rock': 'https://www.serebii.net/itemdex/sprites/sv/icyrock.png',
+                'sun-stone': 'https://www.serebii.net/itemdex/sprites/sv/sunstone.png',
+                'moon-stone': 'https://www.serebii.net/itemdex/sprites/sv/moonstone.png',
+                'fire-stone': 'https://www.serebii.net/itemdex/sprites/sv/firestone.png',
+                'leaf-stone': 'https://www.serebii.net/itemdex/sprites/sv/leafstone.png',
+                'water-stone': 'https://www.serebii.net/itemdex/sprites/sv/waterstone.png',
+                'thunder-stone': 'https://www.serebii.net/itemdex/sprites/sv/thunderstone.png',
+                'shiny-stone': 'https://www.serebii.net/itemdex/sprites/sv/shinystone.png',
+                'dawn-stone': 'https://www.serebii.net/itemdex/sprites/sv/dawnstone.png',
+                'oval-stone': 'https://www.serebii.net/itemdex/sprites/sv/ovalstone.png',
+                'charcoal': 'https://www.serebii.net/itemdex/sprites/sv/charcoal.png',
+                'miracle-seed': 'https://www.serebii.net/itemdex/sprites/sv/miracleseed.png',
+                'mystic-water': 'https://www.serebii.net/itemdex/sprites/sv/mysticwater.png',
+                'black-glasses': 'https://www.serebii.net/itemdex/sprites/sv/blackglasses.png',
+                'black-belt': 'https://www.serebii.net/itemdex/sprites/sv/blackbelt.png',
+                'sharp-beak': 'https://www.serebii.net/itemdex/sprites/sv/sharpbeak.png',
+                'poison-barb': 'https://www.serebii.net/itemdex/sprites/sv/poisonbarb.png',
+                'never-melt-ice': 'https://www.serebii.net/itemdex/sprites/sv/nevermeltice.png',
+                'spell-tag': 'https://www.serebii.net/itemdex/sprites/sv/spelltag.png',
+                'twisted-spoon': 'https://www.serebii.net/itemdex/sprites/sv/twistedspoon.png',
+                'dragon-fang': 'https://www.serebii.net/itemdex/sprites/sv/dragonfang.png',
+                'magnet': 'https://www.serebii.net/itemdex/sprites/sv/magnet.png',
+                'hard-stone': 'https://www.serebii.net/itemdex/sprites/sv/hardstone.png'
+            };
+
             const imageMap = {
                 'Bottle Cap': 'https://github.com/lucaremix/roulette-run-challenge/blob/main/images/items/item-bottlecap.png?raw=true',
                 'Golden Bottle Cap': 'https://github.com/lucaremix/roulette-run-challenge/blob/main/images/items/item-goldbottlecap.png?raw=true',
                 'Ability Capsule': 'https://github.com/lucaremix/roulette-run-challenge/blob/main/images/items/item-abilitycapsule.png?raw=true',
                 'Golden Soothe Bell': 'https://github.com/lucaremix/roulette-run-challenge/blob/main/images/items/item-goldensoothebell.png?raw=true',
-                'Pokérus Sludge': 'https://github.com/lucaremix/roulette-run-challenge/blob/main/images/items/item-pokerussludge.png?raw=true',
+                'PokÃ©rus Sludge': 'https://github.com/lucaremix/roulette-run-challenge/blob/main/images/items/item-pokerussludge.png?raw=true',
                 'Lottery Ticket': 'https://github.com/lucaremix/roulette-run-challenge/blob/main/images/items/item-lotteryticket.webp?raw=true',
                 'Spin Enhancer Cell': 'https://github.com/lucaremix/roulette-run-challenge/blob/main/images/items/item-spinenhancercell.png?raw=true',
                 'Type Avoider Herb': 'https://github.com/lucaremix/roulette-run-challenge/blob/main/images/items/item-typeavoiderherb.png?raw=true',
@@ -953,16 +1050,10 @@
                 'Amulet Coin': 'https://github.com/lucaremix/roulette-run-challenge/blob/main/images/items/item-amuletcoin.png?raw=true',
                 'Credit Voucher': 'https://github.com/lucaremix/roulette-run-challenge/blob/main/images/items/item-creditvoucher.png?raw=true',
                 'Limit Breaker Ball': 'https://github.com/lucaremix/roulette-run-challenge/blob/main/images/items/item-limitbreakerball.png?raw=true',
-                'Spray Duck': 'https://github.com/lucaremix/roulette-run-challenge/blob/main/images/items/item-sprayduck.png?raw=true',
-                'Power Herb': 'https://www.serebii.net/itemdex/sprites/sv/powerherb.png',
-                'Sitrus Berry': 'https://www.serebii.net/itemdex/sprites/sv/sitrusberry.png',
-                'Lum Berry': 'https://www.serebii.net/itemdex/sprites/sv/lumberry.png',
-                'Leppa Berry': 'https://www.serebii.net/itemdex/sprites/sv/leppaberry.png',
-                'Honey': 'https://www.serebii.net/itemdex/sprites/sv/honey.png',
-                'White Herb': 'https://www.serebii.net/itemdex/sprites/sv/whiteherb.png'
+                'Spray Duck': 'https://github.com/lucaremix/roulette-run-challenge/blob/main/images/items/item-sprayduck.png?raw=true'
             };
             
-            // Se è una mint, usa l'immagine della mint
+            // Se Ã¨ una mint, usa l'immagine della mint
             if (name.endsWith(' Mint')) {
                 return 'https://github.com/lucaremix/roulette-run-challenge/blob/main/images/items/item-mint.png?raw=true';
             }
@@ -976,11 +1067,11 @@
                 return;
             }
 
-            const applicableItems = ['Bottle Cap', 'Golden Bottle Cap', 'Ability Capsule', 'Golden Soothe Bell', 'Pokérus Sludge'];
+            const applicableItems = ['Bottle Cap', 'Golden Bottle Cap', 'Ability Capsule', 'Golden Soothe Bell', 'PokÃ©rus Sludge'];
             const isMint = itemName.endsWith(' Mint');
             
             if (!applicableItems.includes(itemName) && !isMint) {
-                alert('Questo item non è applicabile ai Pokémon');
+                alert('Questo item non Ã¨ applicabile ai PokÃ©mon');
                 return;
             }
 
@@ -995,10 +1086,10 @@
 
         function renderTeam(team) {
             const teamBarGrid = document.getElementById('teamBarGrid');
-            document.getElementById('teamCount').textContent = `(${team.length}/∞)`;
+            document.getElementById('teamCount').textContent = `(${team.length}/âˆž)`;
 
             if (team.length === 0) {
-                teamBarGrid.innerHTML = '<div style="text-align: center; color: #888; padding: 20px; width: 100%;">Nessun Pokémon nel team</div>';
+                teamBarGrid.innerHTML = '<div style="text-align: center; color: #888; padding: 20px; width: 100%;">Nessun PokÃ©mon nel team</div>';
                 return;
             }
 
@@ -1008,17 +1099,17 @@
 
                 const effects = pokemon.effects || {};
                 const effectsText = Object.entries(effects).map(([key, value]) => {
-                    // Formatta il testo dell'effetto in modo più leggibile
+                    // Formatta il testo dell'effetto in modo piÃ¹ leggibile
                     let displayText = value;
                     if (key.startsWith('MAXED_IV_')) {
                         const stat = key.replace('MAXED_IV_', '');
-                        displayText = `✨ Max IV: ${stat}`;
+                        displayText = `âœ¨ Max IV: ${stat}`;
                     } else if (key === 'ALL_IV_MAXED') {
-                        displayText = `✨ All IVs Maxed`;
+                        displayText = `âœ¨ All IVs Maxed`;
                     } else if (key === 'MAXED_FRIENDSHIP') {
-                        displayText = `💖 Max Friendship`;
+                        displayText = `ðŸ’– Max Friendship`;
                     } else if (key === 'POKERUS') {
-                        displayText = `🦠 Pokérus`;
+                        displayText = `ðŸ¦  PokÃ©rus`;
                     }
                     
                     return `<div class="tooltip-effect">${displayText}</div>`;
@@ -1027,13 +1118,13 @@
                 return `
                     <div class="team-slot ${selectedPokemon === index ? 'selected' : ''}" 
                          onclick="selectPokemon(${index})">
-                        ${pokemon.shiny ? '<div style="position: absolute; top: 2px; right: 2px; font-size: 1.2em;">✨</div>' : ''}
+                        ${pokemon.shiny ? '<div style="position: absolute; top: 2px; right: 2px; font-size: 1.2em;">âœ¨</div>' : ''}
                         <img src="${getPokemonImageUrl(pokemon.national_number)}" 
                              alt="${pokemon.english_name}">
                         <div class="team-tooltip">
                             <div class="tooltip-name">${pokemon.english_name}</div>
                             <div class="tooltip-stat">Natura: ${pokemon.nature || 'Unknown'}</div>
-                            <div class="tooltip-stat">Abilità: ${pokemon.ability || 'Unknown'}</div>
+                            <div class="tooltip-stat">AbilitÃ : ${pokemon.ability || 'Unknown'}</div>
                             ${effectsText}
                         </div>
                     </div>
@@ -1053,7 +1144,7 @@
             const playerData = snapshot.val();
             const pokemon = playerData.rubyteam[index];
 
-            // Se è una mint, cambia la natura
+            // Se Ã¨ una mint, cambia la natura
             if (selectedItem.name.endsWith(' Mint')) {
                 await applyMint(index, selectedItem.name);
             } else if (selectedItem.name === 'Bottle Cap') {
@@ -1064,8 +1155,8 @@
                 await toggleAbility(index, pokemon);
             } else if (selectedItem.name === 'Golden Soothe Bell') {
                 await applyEffect(index, 'MAXED_FRIENDSHIP', 'Maxed Friendship');
-            } else if (selectedItem.name === 'Pokérus Sludge') {
-                await applyEffect(index, 'POKERUS', 'Pokérus');
+            } else if (selectedItem.name === 'PokÃ©rus Sludge') {
+                await applyEffect(index, 'POKERUS', 'PokÃ©rus');
             }
         };
 
@@ -1148,7 +1239,7 @@
                 const abilities = [pokemon.abilities_0, pokemon.abilities_1].filter(a => a && a.trim() !== '');
                 
                 if (abilities.length < 2) {
-                    alert('Questo Pokémon ha solo un\'abilità disponibile!');
+                    alert('Questo PokÃ©mon ha solo un\'abilitÃ  disponibile!');
                     selectedItem = null;
                     selectedPokemon = null;
                     return;
@@ -1168,16 +1259,16 @@
                 selectedItem = null;
                 selectedPokemon = null;
                 
-                alert(`Abilità cambiata in: ${newAbility}`);
+                alert(`AbilitÃ  cambiata in: ${newAbility}`);
 
             } catch (error) {
-                console.error('Errore cambio abilità:', error);
-                alert('Errore durante il cambio di abilità');
+                console.error('Errore cambio abilitÃ :', error);
+                alert('Errore durante il cambio di abilitÃ ');
             }
         }
 
         async function consumeItem(itemName) {
-            // Controlla se è una mint
+            // Controlla se Ã¨ una mint
             if (itemName.endsWith(' Mint')) {
                 const currentQuantity = (playerInventory.mints && playerInventory.mints[itemName]) || 0;
                 if (currentQuantity > 0) {
@@ -1209,7 +1300,7 @@
 
             mtsBarGrid.innerHTML = mts.map(mt => `
                 <div class="mt-slot">
-                    <img src="https://www.thepokestar.com/cdn/shop/collections/Bag_TM_Normal_SV_Sprite.png?v=1692783434" 
+                    <img src="https://raw.githubusercontent.com/lucaremix/roulette-run-challenge/main/MT.png" 
                          alt="${mt.nome}"
                          onerror="this.style.display='none'">
                     <div class="mt-tooltip">
@@ -1248,7 +1339,7 @@
                 } else {
                     playersHTML = players.map(player => {
                         const currentClass = player === currentPlayer ? 'current-user' : '';
-                        return `<div class="player-item ${currentClass}">${player === currentPlayer ? '👤 ' : ''}${player}</div>`;
+                        return `<div class="player-item ${currentClass}">${player === currentPlayer ? 'ðŸ‘¤ ' : ''}${player}</div>`;
                     }).join('');
                 }
 
@@ -1266,7 +1357,7 @@
                         <div class="event-name">${event.name}</div>
                         <div class="player-list">${playersHTML}</div>
                         <div class="join-status ${isJoined ? 'joined' : ''}">
-                            ${isJoined ? '✓ Partecipante' : 'Clicca per entrare'}
+                            ${isJoined ? 'âœ“ Partecipante' : 'Clicca per entrare'}
                         </div>
                     </div>
                 `;
@@ -1304,23 +1395,20 @@
         };
 
         window.resetEvents = async function() {
-            if (!confirm('Vuoi resettare la tua partecipazione a tutti gli eventi?')) {
+            if (!confirm('Vuoi resettare TUTTI gli eventi (cancellando tutti i partecipanti da TUTTI gli eventi)?')) {
+                return;
+            }
+
+            if (!confirm('ATTENZIONE: Questa azione cancellerà TUTTI i dati di TUTTI gli eventi per TUTTI i giocatori. Sei sicuro?')) {
                 return;
             }
 
             try {
-                const eventsRef = ref(database, 'events');
-                const snapshot = await get(eventsRef);
-                const events = snapshot.val() || {};
-
-                // Rimuovi il player da tutti gli eventi
-                for (const eventId in events) {
-                    if (events[eventId].players && events[eventId].players[playerName]) {
-                        await remove(ref(database, `events/${eventId}/players/${playerName}`));
-                    }
-                }
-
-                alert('Partecipazione agli eventi resettata!');
+                // Svuota completamente events/
+                await set(ref(database, 'events'), null);
+                
+                alert('Tutti gli eventi sono stati resettati!');
+                await loadEvents();
             } catch (error) {
                 console.error('Errore:', error);
                 alert('Errore durante il reset degli eventi');
@@ -1328,7 +1416,7 @@
         };
 
         window.resetAllData = async function() {
-            if (!confirm('Sei sicuro di voler resettare TUTTI i dati? Questa azione è irreversibile!')) {
+            if (!confirm('Sei sicuro di voler resettare TUTTI i dati? Questa azione Ã¨ irreversibile!')) {
                 return;
             }
 
