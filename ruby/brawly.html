@@ -1307,8 +1307,8 @@
             winnerData.coins = (winnerData.coins || 0) + 1000 + (hasAmulet ? 250 : 0);
 
 
-            const hasAmulet = loserData?.inventory?.itempermanenti?.['Amulet Coin'] === true;
-            loserData.coins = (loserData.coins || 0) + 750 + (hasAmulet ? 188 : 0);
+            const hasAmulet1 = loserData?.inventory?.itempermanenti?.['Amulet Coin'] === true;
+            loserData.coins = (loserData.coins || 0) + 750 + (hasAmulet1 ? 188 : 0);
 
             await set(winnerRef, winnerData);
             await set(loserRef, loserData);
