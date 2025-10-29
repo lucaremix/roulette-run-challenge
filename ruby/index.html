@@ -769,15 +769,15 @@
 
         <!-- NUOVO: GAME CORNER SECTION -->
         <div class="markets-section">
-            <h2 class="markets-title">Voltorb Burst</h2>
-            <div class="markets-grid">
+            <h2 class="markets-title">Game Corner</h2>
+            <div class="markets-grid" style="justify-items: center;">
                 <div class="market-card" onclick="window.location.href='black-market.html'">
-                    <img src="https://img.nuzlocke.app/sprites/base/100.png" 
+                    <img src="https://img.nuzlocke.app//leaders/rs-juan.png" 
                          alt="Game Corner" 
                          class="trainer-img"
                          onerror="this.style.opacity='0.3'">
                     <div class="event-info">
-                        <div class="event-name">Voltorb Burst</div>
+                        <div class="event-name">Game Corner</div>
                         <p style="color: #888; font-size: 0.95em;">Prova la tua fortuna e vinci premi esclusivi</p>
                     </div>
                 </div>
@@ -913,8 +913,8 @@
                     renderItems();
                 });
 
-                // NUOVO: Carica items di gioco da itemgioco/ con onValue per live updates
-                const itemGiocoRef = ref(database, `players/${playerName}/itemgioco`);
+                // NUOVO: Carica items di gioco da inventory/itemgioco/ con onValue per live updates
+                const itemGiocoRef = ref(database, `players/${playerName}/inventory/itemgioco`);
                 onValue(itemGiocoRef, (snapshot) => {
                     if (snapshot.exists()) {
                         playerInventory.itemgioco = snapshot.val();
