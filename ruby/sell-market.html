@@ -427,12 +427,12 @@
             window.location.href = 'index.html';
         }
 
-        const PRICE_TIERS = [250, 500, 750, 1000, 1250, 1500];
+        const PRICE_TIERS = [250, 500, 750, 1000];
         let currentOffer = null;
 
         function getPokemonImageUrl(nationalNumber) {
             const paddedNumber = String(nationalNumber).padStart(3, '0');
-            return `https://raw.githubusercontent.com/lucaremix/Pokemon-Legality-Checker/main/sprites/${paddedNumber}.png`;
+            return `https://www.pokemon.com/static-assets/content-assets/cms2/img/pokedex/full/${paddedNumber}.png`;
         }
 
         function padNumber(num) {
