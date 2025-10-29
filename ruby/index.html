@@ -769,15 +769,15 @@
 
         <!-- NUOVO: GAME CORNER SECTION -->
         <div class="markets-section">
-            <h2 class="markets-title">Game Corner</h2>
+            <h2 class="markets-title">Voltorb Burst</h2>
             <div class="markets-grid">
                 <div class="market-card" onclick="window.location.href='black-market.html'">
-                    <img src="https://img.nuzlocke.app//leaders/rs-juan.png" 
+                    <img src="https://img.nuzlocke.app/sprites/base/100.png" 
                          alt="Game Corner" 
                          class="trainer-img"
                          onerror="this.style.opacity='0.3'">
                     <div class="event-info">
-                        <div class="event-name">Game Corner</div>
+                        <div class="event-name">Voltorb Burst</div>
                         <p style="color: #888; font-size: 0.95em;">Prova la tua fortuna e vinci premi esclusivi</p>
                     </div>
                 </div>
@@ -1035,43 +1035,51 @@
         function getItemImage(name) {
             // NUOVO: Mappatura immagini per items di gioco da Serebii
             const itemsGiocoMap = {
+                // Items esistenti (con chiavi lowercase e spazi convertiti in trattini)
                 'leftovers': 'https://www.serebii.net/itemdex/sprites/sv/leftovers.png',
-                'rocky-helmet': 'https://www.serebii.net/itemdex/sprites/sv/rockyhelmet.png',
+                'rocky helmet': 'https://www.serebii.net/itemdex/sprites/sv/rockyhelmet.png',
                 'eviolite': 'https://www.serebii.net/itemdex/sprites/sv/eviolite.png',
-                'assault-vest': 'https://www.serebii.net/itemdex/sprites/sv/assaultvest.png',
-                'toxic-orb': 'https://www.serebii.net/itemdex/sprites/sv/toxicorb.png',
-                'flame-orb': 'https://www.serebii.net/itemdex/sprites/sv/flameorb.png',
-                'light-clay': 'https://www.serebii.net/itemdex/sprites/sv/lightclay.png',
-                'damp-rock': 'https://www.serebii.net/itemdex/sprites/sv/damprock.png',
-                'heat-rock': 'https://www.serebii.net/itemdex/sprites/sv/heatrock.png',
-                'smooth-rock': 'https://www.serebii.net/itemdex/sprites/sv/smoothrock.png',
-                'icy-rock': 'https://www.serebii.net/itemdex/sprites/sv/icyrock.png',
-                'sun-stone': 'https://www.serebii.net/itemdex/sprites/sv/sunstone.png',
-                'moon-stone': 'https://www.serebii.net/itemdex/sprites/sv/moonstone.png',
-                'fire-stone': 'https://www.serebii.net/itemdex/sprites/sv/firestone.png',
-                'leaf-stone': 'https://www.serebii.net/itemdex/sprites/sv/leafstone.png',
-                'water-stone': 'https://www.serebii.net/itemdex/sprites/sv/waterstone.png',
-                'thunder-stone': 'https://www.serebii.net/itemdex/sprites/sv/thunderstone.png',
-                'shiny-stone': 'https://www.serebii.net/itemdex/sprites/sv/shinystone.png',
-                'dawn-stone': 'https://www.serebii.net/itemdex/sprites/sv/dawnstone.png',
-                'oval-stone': 'https://www.serebii.net/itemdex/sprites/sv/ovalstone.png',
+                'assault vest': 'https://www.serebii.net/itemdex/sprites/sv/assaultvest.png',
+                'toxic orb': 'https://www.serebii.net/itemdex/sprites/sv/toxicorb.png',
+                'flame orb': 'https://www.serebii.net/itemdex/sprites/sv/flameorb.png',
+                'light clay': 'https://www.serebii.net/itemdex/sprites/sv/lightclay.png',
+                'damp rock': 'https://www.serebii.net/itemdex/sprites/sv/damprock.png',
+                'heat rock': 'https://www.serebii.net/itemdex/sprites/sv/heatrock.png',
+                'smooth rock': 'https://www.serebii.net/itemdex/sprites/sv/smoothrock.png',
+                'icy rock': 'https://www.serebii.net/itemdex/sprites/sv/icyrock.png',
+                'sun stone': 'https://www.serebii.net/itemdex/sprites/sv/sunstone.png',
+                'moon stone': 'https://www.serebii.net/itemdex/sprites/sv/moonstone.png',
+                'fire stone': 'https://www.serebii.net/itemdex/sprites/sv/firestone.png',
+                'leaf stone': 'https://www.serebii.net/itemdex/sprites/sv/leafstone.png',
+                'water stone': 'https://www.serebii.net/itemdex/sprites/sv/waterstone.png',
+                'thunder stone': 'https://www.serebii.net/itemdex/sprites/sv/thunderstone.png',
+                'shiny stone': 'https://www.serebii.net/itemdex/sprites/sv/shinystone.png',
+                'dawn stone': 'https://www.serebii.net/itemdex/sprites/sv/dawnstone.png',
+                'oval stone': 'https://www.serebii.net/itemdex/sprites/sv/ovalstone.png',
                 'charcoal': 'https://www.serebii.net/itemdex/sprites/sv/charcoal.png',
-                'miracle-seed': 'https://www.serebii.net/itemdex/sprites/sv/miracleseed.png',
-                'mystic-water': 'https://www.serebii.net/itemdex/sprites/sv/mysticwater.png',
-                'black-glasses': 'https://www.serebii.net/itemdex/sprites/sv/blackglasses.png',
-                'black-belt': 'https://www.serebii.net/itemdex/sprites/sv/blackbelt.png',
-                'sharp-beak': 'https://www.serebii.net/itemdex/sprites/sv/sharpbeak.png',
-                'poison-barb': 'https://www.serebii.net/itemdex/sprites/sv/poisonbarb.png',
-                'never-melt-ice': 'https://www.serebii.net/itemdex/sprites/sv/nevermeltice.png',
-                'spell-tag': 'https://www.serebii.net/itemdex/sprites/sv/spelltag.png',
-                'twisted-spoon': 'https://www.serebii.net/itemdex/sprites/sv/twistedspoon.png',
-                'dragon-fang': 'https://www.serebii.net/itemdex/sprites/sv/dragonfang.png',
+                'miracle seed': 'https://www.serebii.net/itemdex/sprites/sv/miracleseed.png',
+                'mystic water': 'https://www.serebii.net/itemdex/sprites/sv/mysticwater.png',
+                'black glasses': 'https://www.serebii.net/itemdex/sprites/sv/blackglasses.png',
+                'black belt': 'https://www.serebii.net/itemdex/sprites/sv/blackbelt.png',
+                'sharp beak': 'https://www.serebii.net/itemdex/sprites/sv/sharpbeak.png',
+                'poison barb': 'https://www.serebii.net/itemdex/sprites/sv/poisonbarb.png',
+                'never-melt ice': 'https://www.serebii.net/itemdex/sprites/sv/nevermeltice.png',
+                'spell tag': 'https://www.serebii.net/itemdex/sprites/sv/spelltag.png',
+                'twisted spoon': 'https://www.serebii.net/itemdex/sprites/sv/twistedspoon.png',
+                'dragon fang': 'https://www.serebii.net/itemdex/sprites/sv/dragonfang.png',
                 'magnet': 'https://www.serebii.net/itemdex/sprites/sv/magnet.png',
-                'hard-stone': 'https://www.serebii.net/itemdex/sprites/sv/hardstone.png'
+                'hard stone': 'https://www.serebii.net/itemdex/sprites/sv/hardstone.png',
+                // NUOVI items
+                'power herb': 'https://www.serebii.net/itemdex/sprites/sv/powerherb.png',
+                'sitrus berry': 'https://www.serebii.net/itemdex/sprites/sv/sitrusberry.png',
+                'lum berry': 'https://www.serebii.net/itemdex/sprites/sv/lumberry.png',
+                'leppa berry': 'https://www.serebii.net/itemdex/sprites/sv/leppaberry.png',
+                'honey': 'https://www.serebii.net/itemdex/sprites/sv/honey.png',
+                'white herb': 'https://www.serebii.net/itemdex/sprites/sv/whiteherb.png'
             };
             
-            // Per items di gioco, controlla prima nella mappa Serebii
-            const itemKey = name.toLowerCase().replace(/ /g, '-');
+            // Per items di gioco, controlla nella mappa Serebii usando lowercase
+            const itemKey = name.toLowerCase();
             if (itemsGiocoMap[itemKey]) {
                 return itemsGiocoMap[itemKey];
             }
@@ -1357,16 +1365,8 @@
             `).join('');
         }
 
-        function loadEvents() {
-            renderEvents();
-            
-            // MODIFICATO: Aggiungi listener live per gli eventi
-            events.forEach(event => {
-                const eventRef = ref(database, `events/${event.id}/players`);
-                onValue(eventRef, () => {
-                    renderEvents();
-                });
-            });
+        async function loadEvents() {
+            await renderEvents();
         }
 
         async function renderEvents() {
