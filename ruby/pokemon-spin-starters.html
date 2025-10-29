@@ -495,8 +495,7 @@
                 const playerRef = ref(database, `players/${player}`);
                 const playerSnapshot = await get(playerRef);
                 
-                let playerData = playerSnapshot.val() || { coins: 0, ruby
-                  rubyteam: [] };
+                let playerData = playerSnapshot.val() || { coins: 0, rubyteam: [] };
                 if (!playerData.rubyteam) playerData.rubyteam = [];
 
                 playerData.rubyteam.push({
