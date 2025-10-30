@@ -777,8 +777,8 @@
             
             const hasAmulet = p1Data?.inventory?.itempermanenti?.['Amulet Coin'] === true;
             p1Data.coins = (p1Data.coins || 0) + p1Coins + (hasAmulet ? p1Coins / 4 : 0);
-            const hasAmulet = p2Data?.inventory?.itempermanenti?.['Amulet Coin'] === true;
-            p2Data.coins = (playerData.coins || 0) + p2Coins + (hasAmulet ? p2Coins / 4 : 0);
+            const hasAmulet1 = p2Data?.inventory?.itempermanenti?.['Amulet Coin'] === true;
+            p2Data.coins = (p2Data.coins || 0) + p2Coins + (hasAmulet1 ? p2Coins / 4 : 0);
             
             await set(player1Ref, p1Data);
             await set(player2Ref, p2Data);
