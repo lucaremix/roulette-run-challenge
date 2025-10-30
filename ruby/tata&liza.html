@@ -469,23 +469,24 @@
         const database = getDatabase(app);
 
         const challenges = [
-            '🏠 Torna dalla mamma a piedi',
-            '🌲 Crea una base segreta sul percorso 110',
+            '💎 Cattura e fai evolvere con una Pietra un Pokémon a Porto Selcepoli',
             '🛡️ Resisti a una mossa x4 superefficace di un allenatore',
+            '🌲 Crea una base segreta sul percorso 110',
+            '❤️ Vinci una lotta con 1 HP rimanente contro un allenatore',
+            '🥶 Raggiungi la Cavità Ghiacciata della grotta ondosa e cattura Snorunt',
+            '💥 Effettua un OHKO con una mossa da almeno 150 di potenza (STAB comprese)',
+            '😴⚡️ Rimani addormentato o paralizzato per 2 turni di fila',
+            '🚢 Raggiungi Ciclamare (nord Percorso 108) e apri il magazzino',
             '🌿🔥💧 Cattura un Pokémon Erba, Fuoco e Acqua con una Cura Ball💖',
+            '✨ Vinci una lotta senza subire danni contro un allenatore',
+            '📈📈 Maxa 2 statistiche in una lotta contro un allenatore',
+            '🏠 Torna dalla mamma a piedi',
             '🎯 Metti a segno 3 colpi critici nella stessa lotta',
             '🤯 Fai sì che un Pokémon si colpisca da solo',
-            '😴⚡️ Rimani addormentato o paralizzato per 2 turni di fila',
-            '📈📈 Maxa 2 statistiche in una lotta contro un allenatore',
-            '❤️ Vinci una lotta con 1 HP rimanente contro un allenatore',
-            '✨ Vinci una lotta senza subire danni contro un allenatore',
-            '⚔️ Fullclear del Percorso 127 (11 allenatori)',
-            '💥 Effettua un OHKO con una mossa da almeno 150 di potenza (STAB comprese)',
-            '💎 Cattura e fai evolvere con una Pietra un Pokémon a Porto Selcepoli',
-            '🚢 Raggiungi Ciclamare (nord Percorso 108) e apri il magazzino',
-            '🥶 Raggiungi la Cavità Ghiacciata della grotta ondosa e cattura Snorunt',
-            '⛰️ Raggiungi la cima del Mt. Pira e cattura un Bronzor'
+            '⛰️ Raggiungi la cima del Mt. Pira e cattura un Bronzor',
+            '⚔️ Fullclear del Percorso 127 (11 allenatori)'
         ];
+
 
         let gameState = null;
 
@@ -742,8 +743,8 @@
             const rewardsDiv = document.getElementById('rewardsDiv');
             rewardsDiv.innerHTML = `
                 <h3 style="color: #ffd700; margin-bottom: 15px;">Ricompense</h3>
-                <div class="reward-item">🏆 ${winner}: 1 Spin Pool S + 500 Coins</div>
-                <div class="reward-item">💪 ${loser}: 1 Spin Pool A + 250 Coins</div>
+                <div class="reward-item">🏆 ${winner}: 1 Spin Pool S + 1500 Coins</div>
+                <div class="reward-item">💪 ${loser}: 1 Spin Pool A + 1000 Coins</div>
             `;
         }
 
@@ -765,10 +766,10 @@
             let loserData = loserSnap.val() || { coins: 0, team: [] };
 
             const hasAmuletWinner = winnerData?.inventory?.itempermanenti?.['Amulet Coin'] === true;
-            winnerData.coins = (winnerData.coins || 0) + 500 + (hasAmuletWinner ? 125 : 0);
+            winnerData.coins = (winnerData.coins || 0) + 1500 + (hasAmuletWinner ? 375 : 0);
 
             const hasAmuletLoser = loserData?.inventory?.itempermanenti?.['Amulet Coin'] === true;
-            loserData.coins = (loserData.coins || 0) + 250 + (hasAmuletLoser ? 62 : 0);
+            loserData.coins = (loserData.coins || 0) + 1000 + (hasAmuletLoser ? 250 : 0);
 
             await set(winnerRef, winnerData);
             await set(loserRef, loserData);
