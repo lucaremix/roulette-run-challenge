@@ -521,7 +521,7 @@
 
         async function loadAllPokemon() {
             try {
-                const tiers = ['tier_s', 'tier_a', 'tier_b', 'tier_c'];
+                const tiers = ['s_tier', 'a_tier', 'b_tier', 'c_tier'];
                 allPokemon = [];
 
                 for (const tier of tiers) {
@@ -530,9 +530,12 @@
 
                     if (snapshot.exists()) {
                         const data = snapshot.val();
-                        Object.entries(data).forEach(([key, pokemon]) => {
-                            allPokemon.push({ ...pokemon, key, tier });
-                        });
+                        // I pool sono array, non oggetti
+                        if (Array.isArray(data)) {
+                            data.forEach((pokemon, index) => {
+                                allPokemon.push({ ...pokemon, key: index, tier });
+                            });
+                        }
                     }
                 }
 
@@ -544,10 +547,10 @@
 
         window.filterWishPokemon = function(tier) {
             const tierMap = {
-                'S': 'tier_s',
-                'A': 'tier_a',
-                'B': 'tier_b',
-                'C': 'tier_c'
+                'S': 's_tier',
+                'A': 'a_tier',
+                'B': 'b_tier',
+                'C': 'c_tier'
             };
 
             const filteredPokemon = allPokemon.filter(p => p.tier === tierMap[tier]);
@@ -603,7 +606,7 @@
             rouletteItems = [];
 
             // 1 Pokemon tier S
-            const tierSPokemon = allPokemon.filter(p => p.tier === 'tier_s');
+            const tierSPokemon = allPokemon.filter(p => p.tier === 's_tier');
             if (tierSPokemon.length > 0) {
                 const randomS = tierSPokemon[Math.floor(Math.random() * tierSPokemon.length)];
                 rouletteItems.push({
@@ -614,7 +617,7 @@
             }
 
             // 1 Pokemon tier A
-            const tierAPokemon = allPokemon.filter(p => p.tier === 'tier_a');
+            const tierAPokemon = allPokemon.filter(p => p.tier === 'a_tier');
             if (tierAPokemon.length > 0) {
                 const randomA = tierAPokemon[Math.floor(Math.random() * tierAPokemon.length)];
                 rouletteItems.push({
@@ -625,7 +628,7 @@
             }
 
             // 2 Pokemon tier B
-            const tierBPokemon = allPokemon.filter(p => p.tier === 'tier_b');
+            const tierBPokemon = allPokemon.filter(p => p.tier === 'b_tier');
             for (let i = 0; i < 2; i++) {
                 if (tierBPokemon.length > 0) {
                     const randomB = tierBPokemon[Math.floor(Math.random() * tierBPokemon.length)];
@@ -638,7 +641,7 @@
             }
 
             // 1 Pokemon tier C
-            const tierCPokemon = allPokemon.filter(p => p.tier === 'tier_c');
+            const tierCPokemon = allPokemon.filter(p => p.tier === 'c_tier');
             if (tierCPokemon.length > 0) {
                 const randomC = tierCPokemon[Math.floor(Math.random() * tierCPokemon.length)];
                 rouletteItems.push({
@@ -879,9 +882,18 @@
 
                     await set(playerRef, playerData);
 
-                    // Rimuovi dal pool
-                    const pokemonRef = ref(database, `pools/${pokemon.tier}/${pokemon.key}`);
-                    await remove(pokemonRef);
+                    // Rimuovi dal pool (che è un array)
+                    const poolRef = ref(database, `pools/${pokemon.tier}`);
+                    const poolSnapshot = await get(poolRef);
+                    
+                    if (poolSnapshot.exists()) {
+                        const poolArray = poolSnapshot.val();
+                        // Rimuovi il pokemon dall'array usando l'indice
+                        if (Array.isArray(poolArray) && pokemon.key < poolArray.length) {
+                            poolArray.splice(pokemon.key, 1);
+                            await set(poolRef, poolArray);
+                        }
+                    }
 
                     const shinyMessage = pokemon.isShiny ? ' SHINY ✨' : '';
                     const wishMessage = wonItem.isWish ? ' (WISH)' : '';
