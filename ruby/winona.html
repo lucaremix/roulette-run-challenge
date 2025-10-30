@@ -1242,11 +1242,11 @@
             let loserData = loserSnap.val() || { coins: 0, rubyteam: [] };
 
             const hasAmulet = winnerData?.inventory?.itempermanenti?.['Amulet Coin'] === true;
-            winnerData.coins = (loserData.coins || 0) + 1500 + (hasAmulet ? 375 : 0);
+            winnerData.coins = (winnerData.coins || 0) + 1500 + (hasAmulet ? 375 : 0);
 
 
-            const hasAmulet = loserData?.inventory?.itempermanenti?.['Amulet Coin'] === true;
-            loserData.coins = (loserData.coins || 0) + 1000 + (hasAmulet ? 250 : 0);
+            const hasAmulet1 = loserData?.inventory?.itempermanenti?.['Amulet Coin'] === true;
+            loserData.coins = (loserData.coins || 0) + 1000 + (hasAmulet1 ? 250 : 0);
 
 
             await set(winnerRef, winnerData);
