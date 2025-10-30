@@ -522,7 +522,7 @@
 
             <!-- FOOTER -->
             <div class="footer">
-                RTP target ~95% · Crash: C = 1 / (0.07 + U)
+                RTP target ~90% · Crash: C = 1 / (0.1 + U)
             </div>
         </div>
     </div>
@@ -700,7 +700,7 @@
             const seedString = `${serverSeed}|${timestamp}|${roundSalt}`;
             
             const U = prngUniform(seedString);
-            const b = 0.07;
+            const b = 0.1;
             let C = 1 / (b + U);
             
             if (C < 1.01) C = 1.01;
