@@ -19,12 +19,22 @@
             background-position: center;
             background-attachment: fixed;
             color: #e0e0e0;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        /* ===== MAIN WRAPPER ===== */
+        .main-wrapper {
+            width: 100%;
+            max-width: 640px;
         }
 
         /* ===== CONTAINER ===== */
         .game-container {
             width: 100%;
-            max-width: 600px;
             background: #101214;
             border-radius: 16px;
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
@@ -85,6 +95,24 @@
             text-align: center;
             background: #0b0b0b;
             border-bottom: 1px solid #1c1f24;
+            position: relative;
+        }
+
+        .voltorb-gif {
+            width: 120px;
+            height: 120px;
+            margin: 0 auto 20px;
+            display: none;
+        }
+
+        .voltorb-gif.show {
+            display: block;
+        }
+
+        .voltorb-gif img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
         }
 
         .multiplier-display {
@@ -347,6 +375,26 @@
             display: block;
         }
 
+        /* Back button */
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            background: #1a1a1a;
+            border: 1px solid #2a2a2a;
+            border-radius: 8px;
+            color: #e0e0e0;
+            text-decoration: none;
+            font-size: 1em;
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+        }
+
+        .back-btn:hover {
+            background: #252525;
+        }
+
         /* ===== RESPONSIVE ===== */
         @media (max-width: 480px) {
             .header-title {
@@ -367,6 +415,11 @@
                 grid-template-columns: repeat(6, 1fr);
                 gap: 6px;
             }
+
+            .voltorb-gif {
+                width: 80px;
+                height: 80px;
+            }
         }
 
         /* ===== ACCESSIBILITY ===== */
@@ -377,30 +430,10 @@
             outline: 2px solid #ffd54a;
             outline-offset: 2px;
         }
-
-        /* Back button */
-        .back-btn {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            padding: 10px 20px;
-            background: #1a1a1a;
-            border: 1px solid #2a2a2a;
-            border-radius: 8px;
-            color: #e0e0e0;
-            text-decoration: none;
-            font-size: 1em;
-            transition: all 0.3s ease;
-            margin-bottom: 20px;
-        }
-
-        .back-btn:hover {
-            background: #252525;
-        }
     </style>
 </head>
 <body>
-    <div style="max-width: 640px; width: 100%;">
+    <div class="main-wrapper">
         <a href="index.html" class="back-btn">
             ← Torna alla Home
         </a>
@@ -426,6 +459,9 @@
 
             <!-- MULTIPLIER METER -->
             <div class="meter-container">
+                <div class="voltorb-gif" id="voltorbGif">
+                    <img id="voltorbImage" src="" alt="Voltorb">
+                </div>
                 <div class="multiplier-display" id="multiplierDisplay">1.00×</div>
                 <div class="round-status" id="roundStatus">Pronto</div>
             </div>
@@ -510,6 +546,10 @@
         const app = initializeApp(firebaseConfig);
         const database = getDatabase(app);
 
+        // ===== VOLTORB GIF URLS =====
+        const VOLTORB_IDLE = 'https://64.media.tumblr.com/tumblr_m7qsdkSOEW1r1n5pqo1_500.gif';
+        const VOLTORB_ACTIVE = 'https://25.media.tumblr.com/tumblr_m6pbn6PCMl1ra452ho1_500.gif';
+
         // ===== GAME STATE =====
         let gameState = 'idle'; // idle, running, cooldown
         let currentMultiplier = 1.00;
@@ -533,7 +573,8 @@
             window.location.href = 'index.html';
         }
 
-        const playerRef = ref(database, `players/${currentPlayer}`);
+        // Path corretto per coins
+        const playerCoinsRef = ref(database, `players/${currentPlayer}/coins`);
 
         // ===== DOM ELEMENTS =====
         const balanceAmountEl = document.getElementById('balanceAmount');
@@ -548,24 +589,33 @@
         const halfBtnEl = document.getElementById('halfBtn');
         const doubleBtnEl = document.getElementById('doubleBtn');
         const maxBtnEl = document.getElementById('maxBtn');
+        const voltorbGifEl = document.getElementById('voltorbGif');
+        const voltorbImageEl = document.getElementById('voltorbImage');
 
-        // ===== BALANCE FUNCTIONS (Firebase integration) =====
+        // ===== BALANCE FUNCTIONS (Firebase integration - CORRETTA) =====
         let currentBalance = 0;
 
         async function loadBalance() {
-            const snapshot = await get(playerRef);
-            const data = snapshot.val();
-            currentBalance = data?.coins || 0;
-            updateBalanceDisplay();
+            try {
+                const snapshot = await get(playerCoinsRef);
+                currentBalance = snapshot.val() || 0;
+                updateBalanceDisplay();
+            } catch (error) {
+                console.error('Errore caricamento saldo:', error);
+                currentBalance = 0;
+                updateBalanceDisplay();
+            }
         }
 
         async function setBalance(value) {
-            const snapshot = await get(playerRef);
-            const data = snapshot.val() || {};
-            data.coins = Math.max(0, Math.floor(value));
-            await set(playerRef, data);
-            currentBalance = data.coins;
-            updateBalanceDisplay();
+            try {
+                const newBalance = Math.max(0, Math.floor(value));
+                await set(playerCoinsRef, newBalance);
+                currentBalance = newBalance;
+                updateBalanceDisplay();
+            } catch (error) {
+                console.error('Errore aggiornamento saldo:', error);
+            }
         }
 
         async function addCoins(delta) {
@@ -578,6 +628,16 @@
 
         function formatCoins(value) {
             return Math.floor(value).toLocaleString('it-IT');
+        }
+
+        // ===== VOLTORB GIF CONTROL =====
+        function showVoltorb(active = false) {
+            voltorbImageEl.src = active ? VOLTORB_ACTIVE : VOLTORB_IDLE;
+            voltorbGifEl.classList.add('show');
+        }
+
+        function hideVoltorb() {
+            voltorbGifEl.classList.remove('show');
         }
 
         // ===== SEED & HASH =====
@@ -601,7 +661,6 @@
         }
 
         function updateSeedHashDisplay() {
-            // Display hash (semplificato - FNV-1a hash per display)
             const hash = fnv1aHash(serverSeed);
             seedHashEl.textContent = `Seed: ${hash.substring(0, 16)}...`;
         }
@@ -617,7 +676,6 @@
         }
 
         // ===== PRNG (Provably Fair) =====
-        // Genera float deterministico (0,1] da seed string
         function prngUniform(seedString) {
             let hash = 0;
             for (let i = 0; i < seedString.length; i++) {
@@ -626,12 +684,10 @@
                 hash = hash & hash;
             }
             
-            // Xorshift-like transformation
             hash ^= hash << 13;
             hash ^= hash >> 17;
             hash ^= hash << 5;
             
-            // Convert to (0,1]
             const normalized = (Math.abs(hash) % 1000000) / 1000000;
             return normalized === 0 ? 0.000001 : normalized;
         }
@@ -644,10 +700,9 @@
             const seedString = `${serverSeed}|${timestamp}|${roundSalt}`;
             
             const U = prngUniform(seedString);
-            const b = 0.07; // House edge parameter (RTP ~95%)
+            const b = 0.07;
             let C = 1 / (b + U);
             
-            // Ensure minimum crash point
             if (C < 1.01) C = 1.01;
             
             return Number(C.toFixed(2));
@@ -656,7 +711,7 @@
         // ===== MULTIPLIER CALCULATION =====
         function multAt(elapsedMs) {
             const seconds = elapsedMs / 1000;
-            const k = 0.22; // Growth rate
+            const k = 0.22;
             const mult = Math.exp(k * seconds);
             return Number(mult.toFixed(2));
         }
@@ -690,7 +745,6 @@
         function updateHistoryDisplay() {
             historyGridEl.innerHTML = '';
             
-            // Fill with empty chips if less than 24
             const totalChips = 24;
             const items = [...history];
             while (items.length < totalChips) {
@@ -757,6 +811,7 @@
             await addCoins(-betAmount);
             
             // Update UI
+            showVoltorb(true);
             updateUI();
             multiplierDisplayEl.classList.add('pulse');
             roundStatusEl.textContent = 'In corso...';
@@ -798,6 +853,7 @@
             }
             
             multiplierDisplayEl.classList.remove('pulse');
+            showVoltorb(false);
             
             // Calculate winnings
             const winAmount = Math.floor(betAmount * currentMultiplier);
@@ -813,7 +869,7 @@
             // Cooldown
             setTimeout(() => {
                 resetRound();
-            }, 800);
+            }, 1200);
         }
 
         function crash() {
@@ -828,13 +884,14 @@
             }
             
             multiplierDisplayEl.classList.remove('pulse');
+            hideVoltorb();
             
             // Update display to crash point
             currentMultiplier = crashPoint;
             multiplierDisplayEl.textContent = `${crashPoint.toFixed(2)}×`;
             
             // Update UI
-            roundStatusEl.textContent = `Crash a ${crashPoint.toFixed(2)}×`;
+            roundStatusEl.textContent = `💥 Crash a ${crashPoint.toFixed(2)}×`;
             roundStatusEl.className = 'round-status lose';
             
             // Add to history
@@ -843,7 +900,7 @@
             // Cooldown
             setTimeout(() => {
                 resetRound();
-            }, 800);
+            }, 1200);
         }
 
         function resetRound() {
@@ -853,6 +910,7 @@
             multiplierDisplayEl.classList.remove('pulse');
             roundStatusEl.textContent = 'Pronto';
             roundStatusEl.className = 'round-status';
+            hideVoltorb();
             updateUI();
         }
 
@@ -931,10 +989,10 @@
             updateUI();
             
             // Listen to balance changes
-            onValue(playerRef, (snapshot) => {
-                const data = snapshot.val();
-                if (data && data.coins !== undefined) {
-                    currentBalance = data.coins;
+            onValue(playerCoinsRef, (snapshot) => {
+                const coins = snapshot.val();
+                if (coins !== null && coins !== undefined) {
+                    currentBalance = coins;
                     updateBalanceDisplay();
                 }
             });
@@ -942,22 +1000,5 @@
 
         init();
     </script>
-
-    <!-- ===== TEST CHECKLIST (commenti per sviluppatori) =====
-    □ Start con saldo 5000 e bet 200 → saldo a 4800
-    □ Cashout a ~1.20× → saldo ≈ 4800 + 240 = 5040
-    □ Crash senza cashout → saldo rimane 4800
-    □ Storico mostra correttamente ✔/✖ e il moltiplicatore
-    □ UI disabilita/enabled correttamente i bottoni in ogni stato
-    □ Ricarico pagina → saldo persiste (Firebase); seedHash resta uguale (localStorage)
-    □ Tasti rapidi: Spazio per Start/Cashout
-    □ Bet adjustment (1/2, ×2, Max) funziona correttamente
-    □ Quick chips (100, 200, 500) impostano correttamente la puntata
-    □ Crash point deterministico (stesso seed → stesso crash)
-    □ RTP ~95% verificabile su molti round
-    □ Mobile responsive e touch-friendly
-    □ Focus states accessibili (Tab navigation)
-    □ Error messages mostrati correttamente per validazioni
-    ===== -->
 </body>
 </html>
