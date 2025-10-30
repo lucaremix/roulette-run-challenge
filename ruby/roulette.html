@@ -1,0 +1,943 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Roulette - Roulette Run Challenge</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-image: url('https://raw.githubusercontent.com/lucaremix/roulette-run-challenge/main/background/rubyspin_background.png');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            color: #e0e0e0;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+        }
+
+        h1 {
+            font-size: 2.5em;
+            color: #fff;
+            margin-bottom: 10px;
+        }
+
+        .back-btn {
+            display: inline-block;
+            padding: 10px 20px;
+            background: #1a1a1a;
+            border: 1px solid #2a2a2a;
+            border-radius: 8px;
+            color: #e0e0e0;
+            text-decoration: none;
+            margin-bottom: 20px;
+        }
+
+        /* WISH POKEMON SELECTOR */
+        .wish-selector {
+            background: #1a1a1a;
+            border: 2px solid #2a2a2a;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .wish-title {
+            font-size: 1.3em;
+            color: #ffd700;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .wish-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-bottom: 15px;
+        }
+
+        .tier-filter-btn {
+            padding: 10px 20px;
+            background: #0a0a0a;
+            border: 2px solid #2a2a2a;
+            border-radius: 8px;
+            color: #fff;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .tier-filter-btn:hover {
+            border-color: #ffd700;
+        }
+
+        .tier-filter-btn.selected {
+            border-color: #2a7a2a;
+            background: #1a3a1a;
+        }
+
+        .pokemon-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 10px;
+            max-height: 400px;
+            overflow-y: auto;
+            padding: 10px;
+            background: #0a0a0a;
+            border-radius: 8px;
+        }
+
+        .pokemon-item {
+            background: #1a1a1a;
+            border: 2px solid #2a2a2a;
+            border-radius: 8px;
+            padding: 10px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .pokemon-item:hover {
+            border-color: #ffd700;
+            transform: translateY(-3px);
+        }
+
+        .pokemon-item.selected {
+            border-color: #2a7a2a;
+            background: #1a3a1a;
+            box-shadow: 0 0 20px rgba(42, 122, 42, 0.5);
+        }
+
+        .pokemon-item img {
+            width: 80px;
+            height: 80px;
+            object-fit: contain;
+        }
+
+        .pokemon-item-name {
+            font-size: 0.8em;
+            color: #fff;
+            margin-top: 5px;
+        }
+
+        .selected-wish {
+            text-align: center;
+            padding: 15px;
+            background: #0a0a0a;
+            border-radius: 8px;
+            margin-top: 15px;
+        }
+
+        .selected-wish img {
+            width: 100px;
+            height: 100px;
+            object-fit: contain;
+        }
+
+        .player-info {
+            text-align: center;
+            font-size: 1.2em;
+            color: #ffd700;
+            margin-bottom: 10px;
+        }
+
+        .controls {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            justify-content: center;
+            background: #1a1a1a;
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid #2a2a2a;
+        }
+
+        .spin-btn {
+            padding: 15px 40px;
+            background: #2a7a2a;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.2em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .spin-btn:hover:not(:disabled) {
+            background: #3a9a3a;
+            transform: scale(1.05);
+        }
+
+        .spin-btn:disabled {
+            background: #444;
+            cursor: not-allowed;
+            opacity: 0.5;
+        }
+
+        .slot-machine {
+            background: linear-gradient(135deg, #1a1a1a, #0a0a0a);
+            border: 4px solid #ffd700;
+            border-radius: 20px;
+            padding: 30px;
+            margin: 20px auto;
+            max-width: 900px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.7);
+            overflow: hidden;
+            position: relative;
+        }
+
+        .slot-window {
+            height: 180px;
+            overflow: hidden;
+            position: relative;
+            border: 3px solid #ffd700;
+            border-radius: 15px;
+            background: #000;
+        }
+
+        .golden-box {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 180px;
+            height: 180px;
+            border: 4px solid #ffd700;
+            border-radius: 15px;
+            box-shadow: 0 0 30px rgba(255, 215, 0, 0.5), inset 0 0 30px rgba(255, 215, 0, 0.2);
+            z-index: 10;
+            pointer-events: none;
+        }
+
+        .slot-reel {
+            display: flex;
+            gap: 20px;
+            padding: 0 20px;
+            position: relative;
+        }
+
+        .slot-item {
+            min-width: 150px;
+            height: 150px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: #1a1a1a;
+            border: 2px solid #2a2a2a;
+            border-radius: 12px;
+            position: relative;
+            padding: 10px;
+        }
+
+        .slot-item img {
+            max-width: 90px;
+            max-height: 90px;
+            object-fit: contain;
+            margin-bottom: 5px;
+        }
+
+        .slot-item-label {
+            font-size: 0.75em;
+            color: #ffd700;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .shiny-badge {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background: linear-gradient(135deg, #ffd700, #ff6b6b);
+            padding: 3px 8px;
+            border-radius: 10px;
+            font-size: 0.8em;
+            font-weight: bold;
+            animation: shine 2s infinite;
+        }
+
+        @keyframes shine {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        .result-panel {
+            background: #1a1a1a;
+            border: 2px solid #ffd700;
+            border-radius: 15px;
+            padding: 30px;
+            margin: 20px auto;
+            max-width: 600px;
+            display: none;
+            box-shadow: 0 10px 40px rgba(255, 215, 0, 0.3);
+        }
+
+        .result-panel.show {
+            display: block;
+            animation: slideIn 0.5s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .result-content {
+            text-align: center;
+        }
+
+        .result-image {
+            margin: 20px 0;
+            position: relative;
+        }
+
+        .result-image img {
+            width: 150px;
+            height: 150px;
+            object-fit: contain;
+        }
+
+        .result-info {
+            margin: 20px 0;
+        }
+
+        .result-stat {
+            margin: 10px 0;
+            font-size: 1.1em;
+        }
+
+        .result-stat strong {
+            color: #ffd700;
+        }
+
+        .add-btn {
+            padding: 12px 30px;
+            background: #2a7a2a;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 20px;
+        }
+
+        .add-btn:hover {
+            background: #3a9a3a;
+            transform: scale(1.05);
+        }
+
+        .shiny-text {
+            color: #ffd700;
+            text-shadow: 0 0 10px #ffd700;
+            animation: shine 2s infinite;
+        }
+
+        .result-shiny-badge {
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            background: linear-gradient(135deg, #ffd700, #ff6b6b);
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-size: 1.2em;
+            font-weight: bold;
+            animation: shine 2s infinite;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <a href="index.html" class="back-btn">← Indietro</a>
+            <h1>🎰 Roulette 🎰</h1>
+            <div class="player-info" id="playerInfo">Caricamento...</div>
+        </header>
+
+        <!-- WISH POKEMON SELECTOR -->
+        <div class="wish-selector">
+            <div class="wish-title">Seleziona il tuo Pokemon Wish</div>
+            <div class="wish-buttons">
+                <button class="tier-filter-btn" onclick="filterWishPokemon('S')">Tier S</button>
+                <button class="tier-filter-btn" onclick="filterWishPokemon('A')">Tier A</button>
+                <button class="tier-filter-btn" onclick="filterWishPokemon('B')">Tier B</button>
+                <button class="tier-filter-btn" onclick="filterWishPokemon('C')">Tier C</button>
+            </div>
+            <div class="pokemon-list" id="pokemonList"></div>
+            <div class="selected-wish" id="selectedWish" style="display: none;">
+                <h3 style="color: #ffd700; margin-bottom: 10px;">Pokemon Wish Selezionato:</h3>
+                <img id="wishImage" src="" alt="">
+                <p id="wishName" style="color: #fff; font-size: 1.2em; margin-top: 10px;"></p>
+            </div>
+        </div>
+
+        <!-- CONTROLS -->
+        <div class="controls">
+            <button class="spin-btn" id="spinBtn" onclick="startSpin()" disabled>
+                SPIN! 🎰
+            </button>
+        </div>
+
+        <!-- SLOT MACHINE -->
+        <div class="slot-machine">
+            <div class="slot-window">
+                <div class="golden-box"></div>
+                <div class="slot-reel" id="slotReel"></div>
+            </div>
+        </div>
+
+        <!-- RESULT PANEL -->
+        <div class="result-panel" id="resultPanel">
+            <div class="result-content" id="resultContent"></div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js';
+        import { getDatabase, ref, get, set, update, remove } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js';
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDGEk4BNIUlooP40kodji2D_Ays2C8KzX8",
+            authDomain: "pkmnrouletterun.firebaseapp.com",
+            databaseURL: "https://pkmnrouletterun-default-rtdb.europe-west1.firebasedatabase.app",
+            projectId: "pkmnrouletterun",
+            storageBucket: "pkmnrouletterun.firebasestorage.app",
+            messagingSenderId: "816815945105",
+            appId: "1:816815945105:web:9555cdbf4ec1e86f7ccf78"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app);
+
+        const itemsGiocoMap = {
+            'Leftovers': 'https://www.serebii.net/itemdex/sprites/sv/leftovers.png',
+            'Rocky Helmet': 'https://www.serebii.net/itemdex/sprites/sv/rockyhelmet.png',
+            'Eviolite': 'https://www.serebii.net/itemdex/sprites/sv/eviolite.png',
+            'Assault Vest': 'https://www.serebii.net/itemdex/sprites/sv/assaultvest.png',
+            'Toxic Orb': 'https://www.serebii.net/itemdex/sprites/sv/toxicorb.png',
+            'Flame Orb': 'https://www.serebii.net/itemdex/sprites/sv/flameorb.png',
+            'Light Clay': 'https://www.serebii.net/itemdex/sprites/sv/lightclay.png',
+            'Damp Rock': 'https://www.serebii.net/itemdex/sprites/sv/damprock.png',
+            'Heat Rock': 'https://www.serebii.net/itemdex/sprites/sv/heatrock.png',
+            'Smooth Rock': 'https://www.serebii.net/itemdex/sprites/sv/smoothrock.png',
+            'Icy Rock': 'https://www.serebii.net/itemdex/sprites/sv/icyrock.png',
+            'Sun Stone': 'https://www.serebii.net/itemdex/sprites/sv/sunstone.png',
+            'Moon Stone': 'https://www.serebii.net/itemdex/sprites/sv/moonstone.png',
+            'Fire Stone': 'https://www.serebii.net/itemdex/sprites/sv/firestone.png',
+            'Leaf Stone': 'https://www.serebii.net/itemdex/sprites/sv/leafstone.png',
+            'Water Stone': 'https://www.serebii.net/itemdex/sprites/sv/waterstone.png',
+            'Thunder Stone': 'https://www.serebii.net/itemdex/sprites/sv/thunderstone.png',
+            'Shiny Stone': 'https://www.serebii.net/itemdex/sprites/sv/shinystone.png',
+            'Dawn Stone': 'https://www.serebii.net/itemdex/sprites/sv/dawnstone.png',
+            'Oval Stone': 'https://www.serebii.net/itemdex/sprites/sv/ovalstone.png',
+            'Charcoal': 'https://www.serebii.net/itemdex/sprites/sv/charcoal.png',
+            'Miracle Seed': 'https://www.serebii.net/itemdex/sprites/sv/miracleseed.png',
+            'Mystic Water': 'https://www.serebii.net/itemdex/sprites/sv/mysticwater.png',
+            'Black Glasses': 'https://www.serebii.net/itemdex/sprites/sv/blackglasses.png',
+            'Black Belt': 'https://www.serebii.net/itemdex/sprites/sv/blackbelt.png',
+            'Sharp Beak': 'https://www.serebii.net/itemdex/sprites/sv/sharpbeak.png',
+            'Poison Barb': 'https://www.serebii.net/itemdex/sprites/sv/poisonbarb.png',
+            'Never-melt Ice': 'https://www.serebii.net/itemdex/sprites/sv/nevermeltice.png',
+            'Spell Tag': 'https://www.serebii.net/itemdex/sprites/sv/spelltag.png',
+            'Twisted Spoon': 'https://www.serebii.net/itemdex/sprites/sv/twistedspoon.png',
+            'Dragon Fang': 'https://www.serebii.net/itemdex/sprites/sv/dragonfang.png',
+            'Magnet': 'https://www.serebii.net/itemdex/sprites/sv/magnet.png',
+            'Hard Stone': 'https://www.serebii.net/itemdex/sprites/sv/hardstone.png',
+            'Power Herb': 'https://www.serebii.net/itemdex/sprites/sv/powerherb.png',
+            'Sitrus Berry': 'https://www.serebii.net/itemdex/sprites/sv/sitrusberry.png',
+            'Lum Berry': 'https://www.serebii.net/itemdex/sprites/sv/lumberry.png',
+            'Leppa Berry': 'https://www.serebii.net/itemdex/sprites/sv/leppaberry.png',
+            'Honey': 'https://www.serebii.net/itemdex/sprites/sv/honey.png',
+            'White Herb': 'https://www.serebii.net/itemdex/sprites/sv/whiteherb.png'
+        };
+
+        const imageMap = {
+            'Bottle Cap': 'https://github.com/lucaremix/roulette-run-challenge/blob/main/images/items/item-bottlecap.png?raw=true',
+            'Golden Bottle Cap': 'https://github.com/lucaremix/roulette-run-challenge/blob/main/images/items/item-goldbottlecap.png?raw=true',
+            'Ability Capsule': 'https://github.com/lucaremix/roulette-run-challenge/blob/main/images/items/item-abilitycapsule.png?raw=true',
+            'Golden Soothe Bell': 'https://github.com/lucaremix/roulette-run-challenge/blob/main/images/items/item-goldensoothebell.png?raw=true',
+            'Pokérus Sludge': 'https://github.com/lucaremix/roulette-run-challenge/blob/main/images/items/item-pokerussludge.png?raw=true',
+            'Lottery Ticket': 'https://github.com/lucaremix/roulette-run-challenge/blob/main/images/items/item-lotteryticket.webp?raw=true',
+            'Spin Enhancer Cell': 'https://github.com/lucaremix/roulette-run-challenge/blob/main/images/items/item-spinenhancercell.png?raw=true',
+            'Type Avoider Herb': 'https://github.com/lucaremix/roulette-run-challenge/blob/main/images/items/item-typeavoiderherb.png?raw=true',
+            'Adamant Mint': 'https://github.com/lucaremix/roulette-run-challenge/blob/main/images/items/item-mint.png?raw=true',
+            'Modest Mint': 'https://github.com/lucaremix/roulette-run-challenge/blob/main/images/items/item-mint.png?raw=true'
+        };
+
+        const natures = [
+            'Hardy', 'Lonely', 'Brave', 'Adamant', 'Naughty',
+            'Bold', 'Docile', 'Relaxed', 'Impish', 'Lax',
+            'Timid', 'Hasty', 'Serious', 'Jolly', 'Naive',
+            'Modest', 'Mild', 'Quiet', 'Bashful', 'Rash',
+            'Calm', 'Gentle', 'Sassy', 'Careful', 'Quirky'
+        ];
+
+        let playerName = localStorage.getItem('playerName') || 'Giocatore';
+        let allPokemon = [];
+        let wishPokemon = null;
+        let rouletteItems = [];
+        let wonItem = null;
+        let isSpinning = false;
+
+        function getPokemonImageUrl(nationalNumber) {
+            const paddedNumber = String(nationalNumber).padStart(3, '0');
+            return `https://raw.githubusercontent.com/lucaremix/roulette-run-challenge/main/pokemon/pokemon_${paddedNumber}.png`;
+        }
+
+        function padNumber(num) {
+            return String(num).padStart(3, '0');
+        }
+
+        async function init() {
+            document.getElementById('playerInfo').textContent = `Giocatore: ${playerName}`;
+            await loadAllPokemon();
+        }
+
+        async function loadAllPokemon() {
+            try {
+                const tiers = ['tier_s', 'tier_a', 'tier_b', 'tier_c'];
+                allPokemon = [];
+
+                for (const tier of tiers) {
+                    const poolRef = ref(database, `pools/${tier}`);
+                    const snapshot = await get(poolRef);
+
+                    if (snapshot.exists()) {
+                        const data = snapshot.val();
+                        Object.entries(data).forEach(([key, pokemon]) => {
+                            allPokemon.push({ ...pokemon, key, tier });
+                        });
+                    }
+                }
+
+                console.log('Loaded pokemon:', allPokemon.length);
+            } catch (error) {
+                console.error('Errore nel caricamento dei pokemon:', error);
+            }
+        }
+
+        window.filterWishPokemon = function(tier) {
+            const tierMap = {
+                'S': 'tier_s',
+                'A': 'tier_a',
+                'B': 'tier_b',
+                'C': 'tier_c'
+            };
+
+            const filteredPokemon = allPokemon.filter(p => p.tier === tierMap[tier]);
+            displayPokemonList(filteredPokemon);
+
+            // Highlight selected tier button
+            document.querySelectorAll('.tier-filter-btn').forEach(btn => {
+                btn.classList.remove('selected');
+            });
+            event.target.classList.add('selected');
+        };
+
+        function displayPokemonList(pokemonList) {
+            const listContainer = document.getElementById('pokemonList');
+            listContainer.innerHTML = '';
+
+            pokemonList.forEach(pokemon => {
+                const item = document.createElement('div');
+                item.className = 'pokemon-item';
+                item.innerHTML = `
+                    <img src="${getPokemonImageUrl(pokemon.national_number)}" alt="${pokemon.english_name}">
+                    <div class="pokemon-item-name">${pokemon.english_name}</div>
+                `;
+                item.onclick = () => selectWishPokemon(pokemon, item);
+                listContainer.appendChild(item);
+            });
+        }
+
+        function selectWishPokemon(pokemon, element) {
+            wishPokemon = pokemon;
+
+            // Remove previous selection
+            document.querySelectorAll('.pokemon-item').forEach(item => {
+                item.classList.remove('selected');
+            });
+            element.classList.add('selected');
+
+            // Show selected wish
+            document.getElementById('selectedWish').style.display = 'block';
+            document.getElementById('wishImage').src = getPokemonImageUrl(pokemon.national_number);
+            document.getElementById('wishName').textContent = pokemon.english_name;
+
+            // Enable spin button
+            document.getElementById('spinBtn').disabled = false;
+
+            // Setup roulette with wish pokemon
+            setupRoulette();
+        }
+
+        async function setupRoulette() {
+            if (!wishPokemon) return;
+
+            rouletteItems = [];
+
+            // 1 Pokemon tier S
+            const tierSPokemon = allPokemon.filter(p => p.tier === 'tier_s');
+            if (tierSPokemon.length > 0) {
+                const randomS = tierSPokemon[Math.floor(Math.random() * tierSPokemon.length)];
+                rouletteItems.push({
+                    type: 'pokemon',
+                    data: randomS,
+                    isShiny: Math.random() < 0.1
+                });
+            }
+
+            // 1 Pokemon tier A
+            const tierAPokemon = allPokemon.filter(p => p.tier === 'tier_a');
+            if (tierAPokemon.length > 0) {
+                const randomA = tierAPokemon[Math.floor(Math.random() * tierAPokemon.length)];
+                rouletteItems.push({
+                    type: 'pokemon',
+                    data: randomA,
+                    isShiny: Math.random() < 0.1
+                });
+            }
+
+            // 2 Pokemon tier B
+            const tierBPokemon = allPokemon.filter(p => p.tier === 'tier_b');
+            for (let i = 0; i < 2; i++) {
+                if (tierBPokemon.length > 0) {
+                    const randomB = tierBPokemon[Math.floor(Math.random() * tierBPokemon.length)];
+                    rouletteItems.push({
+                        type: 'pokemon',
+                        data: randomB,
+                        isShiny: Math.random() < 0.1
+                    });
+                }
+            }
+
+            // 1 Pokemon tier C
+            const tierCPokemon = allPokemon.filter(p => p.tier === 'tier_c');
+            if (tierCPokemon.length > 0) {
+                const randomC = tierCPokemon[Math.floor(Math.random() * tierCPokemon.length)];
+                rouletteItems.push({
+                    type: 'pokemon',
+                    data: randomC,
+                    isShiny: Math.random() < 0.1
+                });
+            }
+
+            // 1 Pokemon wish
+            rouletteItems.push({
+                type: 'pokemon',
+                data: wishPokemon,
+                isShiny: Math.random() < 0.1,
+                isWish: true
+            });
+
+            // 5 Strumenti casuali
+            const allItems = [...Object.keys(itemsGiocoMap), ...Object.keys(imageMap)];
+            for (let i = 0; i < 5; i++) {
+                const randomItem = allItems[Math.floor(Math.random() * allItems.length)];
+                rouletteItems.push({
+                    type: 'item',
+                    data: randomItem
+                });
+            }
+
+            // 1000 coins
+            rouletteItems.push({
+                type: 'coins',
+                data: 1000
+            });
+
+            // 500 coins
+            rouletteItems.push({
+                type: 'coins',
+                data: 500
+            });
+
+            // Shuffle
+            rouletteItems = rouletteItems.sort(() => Math.random() - 0.5);
+
+            renderRoulette();
+        }
+
+        function renderRoulette() {
+            const reel = document.getElementById('slotReel');
+
+            // Crea abbastanza slot per l'animazione
+            const totalSlots = rouletteItems.length * 5;
+            const slots = [];
+
+            for (let i = 0; i < totalSlots; i++) {
+                const item = rouletteItems[i % rouletteItems.length];
+                slots.push(item);
+            }
+
+            reel.innerHTML = slots.map(item => {
+                if (item.type === 'pokemon') {
+                    const shinyBadge = item.isShiny ? '<div class="shiny-badge">✨</div>' : '';
+                    const wishLabel = item.isWish ? ' (WISH)' : '';
+                    return `
+                        <div class="slot-item">
+                            ${shinyBadge}
+                            <img src="${getPokemonImageUrl(item.data.national_number)}" alt="${item.data.english_name}">
+                            <div class="slot-item-label">${item.data.english_name}${wishLabel}</div>
+                        </div>
+                    `;
+                } else if (item.type === 'item') {
+                    const imageUrl = itemsGiocoMap[item.data] || imageMap[item.data];
+                    return `
+                        <div class="slot-item">
+                            <img src="${imageUrl}" alt="${item.data}">
+                            <div class="slot-item-label">${item.data}</div>
+                        </div>
+                    `;
+                } else if (item.type === 'coins') {
+                    return `
+                        <div class="slot-item">
+                            <img src="https://raw.githubusercontent.com/lucaremix/roulette-run-challenge/main/images/coin.png" alt="Coins">
+                            <div class="slot-item-label">${item.data} Coins</div>
+                        </div>
+                    `;
+                }
+            }).join('');
+
+            // Reset position
+            reel.style.transition = 'none';
+            reel.style.transform = 'translateX(100px)';
+        }
+
+        window.startSpin = async function() {
+            if (isSpinning || !wishPokemon) return;
+
+            isSpinning = true;
+            document.getElementById('spinBtn').disabled = true;
+            document.getElementById('resultPanel').classList.remove('show');
+
+            // Seleziona item vincente casuale
+            const winIndex = Math.floor(Math.random() * rouletteItems.length);
+            wonItem = rouletteItems[winIndex];
+
+            const reel = document.getElementById('slotReel');
+            const reelChildren = reel.children;
+
+            // Trova lo slot vincente nella seconda metà del reel
+            let targetSlotIndex = -1;
+            for (let i = Math.floor(reelChildren.length / 2); i < reelChildren.length; i++) {
+                const slotIndex = i % rouletteItems.length;
+                if (slotIndex === winIndex) {
+                    targetSlotIndex = i;
+                    break;
+                }
+            }
+
+            if (targetSlotIndex === -1) {
+                targetSlotIndex = Math.floor(reelChildren.length * 0.7);
+            }
+
+            // Animazione slot machine
+            const slotWidth = 170;
+            const machineWidth = document.querySelector('.slot-machine').offsetWidth;
+            const machineCenter = machineWidth / 2;
+            const slotCenter = slotWidth / 2;
+            const targetPosition = (targetSlotIndex * slotWidth) + slotCenter;
+            const finalTransform = machineCenter - targetPosition;
+
+            reel.style.transition = 'transform 5s cubic-bezier(0.25, 0.1, 0.25, 1)';
+            reel.style.transform = `translateX(${finalTransform}px)`;
+
+            // Dopo l'animazione, mostra risultato
+            setTimeout(() => {
+                showResult();
+                isSpinning = false;
+                document.getElementById('spinBtn').disabled = false;
+            }, 5000);
+        };
+
+        function showResult() {
+            const resultPanel = document.getElementById('resultPanel');
+            const resultContent = document.getElementById('resultContent');
+
+            if (wonItem.type === 'pokemon') {
+                const pokemon = wonItem.data;
+                
+                // Genera natura e abilità casuali
+                const randomNature = natures[Math.floor(Math.random() * natures.length)];
+                const abilities = [
+                    pokemon.abilities_0,
+                    pokemon.abilities_1,
+                    pokemon.abilities_2
+                ].filter(a => a && a.trim() !== '');
+                
+                const randomAbility = abilities.length > 0 
+                    ? abilities[Math.floor(Math.random() * abilities.length)]
+                    : 'Unknown';
+
+                pokemon.rolled_nature = randomNature;
+                pokemon.rolled_ability = randomAbility;
+                pokemon.isShiny = wonItem.isShiny;
+
+                const types = [pokemon.primary_type];
+                if (pokemon.secondary_type) types.push(pokemon.secondary_type);
+
+                const shinyBadge = wonItem.isShiny ? '<div class="result-shiny-badge">✨</div>' : '';
+                const shinyStatus = wonItem.isShiny ? '<div class="result-stat"><span class="shiny-text">⭐ SHINY! ⭐</span></div>' : '';
+                const wishLabel = wonItem.isWish ? '<div class="result-stat" style="color: #ffd700; font-size: 1.3em;">🌟 WISH POKEMON! 🌟</div>' : '';
+
+                resultContent.innerHTML = `
+                    <h2 style="color: #ffd700; margin-bottom: 20px;">Hai vinto!</h2>
+                    <div class="result-image">
+                        ${shinyBadge}
+                        <img src="${getPokemonImageUrl(pokemon.national_number)}" alt="${pokemon.english_name}">
+                    </div>
+                    <div class="result-info">
+                        <h2 style="color: #fff;">${pokemon.english_name}</h2>
+                        ${wishLabel}
+                        <div class="result-stat"><strong>Numero:</strong> #${padNumber(pokemon.national_number)}</div>
+                        <div class="result-stat"><strong>Tipo:</strong> ${types.join(' / ')}</div>
+                        <div class="result-stat"><strong>BST:</strong> ${pokemon.bst}</div>
+                        <div class="result-stat"><strong>Natura:</strong> ${randomNature}</div>
+                        <div class="result-stat"><strong>Abilità:</strong> ${randomAbility}</div>
+                        ${shinyStatus}
+                    </div>
+                    <button class="add-btn" onclick="addPrize()">+ Aggiungi al Team</button>
+                `;
+            } else if (wonItem.type === 'item') {
+                const itemName = wonItem.data;
+                const imageUrl = itemsGiocoMap[itemName] || imageMap[itemName];
+
+                resultContent.innerHTML = `
+                    <h2 style="color: #ffd700; margin-bottom: 20px;">Hai vinto!</h2>
+                    <div class="result-image">
+                        <img src="${imageUrl}" alt="${itemName}">
+                    </div>
+                    <div class="result-info">
+                        <h2 style="color: #fff;">${itemName}</h2>
+                    </div>
+                    <button class="add-btn" onclick="addPrize()">+ Aggiungi all'Inventario</button>
+                `;
+            } else if (wonItem.type === 'coins') {
+                resultContent.innerHTML = `
+                    <h2 style="color: #ffd700; margin-bottom: 20px;">Hai vinto!</h2>
+                    <div class="result-image">
+                        <img src="https://raw.githubusercontent.com/lucaremix/roulette-run-challenge/main/images/coin.png" alt="Coins">
+                    </div>
+                    <div class="result-info">
+                        <h2 style="color: #fff;">${wonItem.data} Coins</h2>
+                    </div>
+                    <button class="add-btn" onclick="addPrize()">+ Aggiungi</button>
+                `;
+            }
+
+            resultPanel.classList.add('show');
+        }
+
+        window.addPrize = async function() {
+            if (!wonItem) return;
+
+            try {
+                const playerRef = ref(database, `players/${playerName}`);
+                const playerSnapshot = await get(playerRef);
+                let playerData = playerSnapshot.val() || { coins: 0, rubyteam: [], inventory: { itemgioco: {}, itemconsumabili: {} } };
+
+                if (wonItem.type === 'pokemon') {
+                    const pokemon = wonItem.data;
+                    
+                    // Aggiungi al rubyteam
+                    if (!playerData.rubyteam) playerData.rubyteam = [];
+                    playerData.rubyteam.push({
+                        ...pokemon,
+                        nature: pokemon.rolled_nature,
+                        ability: pokemon.rolled_ability,
+                        shiny: pokemon.isShiny || false,
+                        won_from: pokemon.tier,
+                        won_at: Date.now()
+                    });
+
+                    await set(playerRef, playerData);
+
+                    // Rimuovi dal pool
+                    const pokemonRef = ref(database, `pools/${pokemon.tier}/${pokemon.key}`);
+                    await remove(pokemonRef);
+
+                    const shinyMessage = pokemon.isShiny ? ' SHINY ✨' : '';
+                    const wishMessage = wonItem.isWish ? ' (WISH)' : '';
+                    alert(`${pokemon.english_name}${shinyMessage}${wishMessage} aggiunto al Ruby Team!`);
+
+                } else if (wonItem.type === 'item') {
+                    const itemName = wonItem.data;
+
+                    if (!playerData.inventory) {
+                        playerData.inventory = { itemgioco: {}, itemconsumabili: {} };
+                    }
+
+                    // Determina se è itemgioco o itemconsumabili
+                    if (itemsGiocoMap[itemName]) {
+                        if (!playerData.inventory.itemgioco) playerData.inventory.itemgioco = {};
+                        const currentQuantity = playerData.inventory.itemgioco[itemName] || 0;
+                        playerData.inventory.itemgioco[itemName] = currentQuantity + 1;
+                    } else if (imageMap[itemName]) {
+                        if (!playerData.inventory.itemconsumabili) playerData.inventory.itemconsumabili = {};
+                        const currentQuantity = playerData.inventory.itemconsumabili[itemName] || 0;
+                        playerData.inventory.itemconsumabili[itemName] = currentQuantity + 1;
+                    }
+
+                    await set(playerRef, playerData);
+                    alert(`${itemName} aggiunto all'inventario!`);
+
+                } else if (wonItem.type === 'coins') {
+                    const currentCoins = playerData.coins || 0;
+                    await update(ref(database), {
+                        [`players/${playerName}/coins`]: currentCoins + wonItem.data
+                    });
+                    alert(`${wonItem.data} coins aggiunti!`);
+                }
+
+                // Reset
+                document.getElementById('resultPanel').classList.remove('show');
+                wishPokemon = null;
+                document.getElementById('selectedWish').style.display = 'none';
+                document.getElementById('spinBtn').disabled = true;
+                
+                // Rimuovi selezione tier e pokemon
+                document.querySelectorAll('.tier-filter-btn').forEach(btn => {
+                    btn.classList.remove('selected');
+                });
+                document.getElementById('pokemonList').innerHTML = '';
+
+                await loadAllPokemon();
+
+            } catch (error) {
+                console.error('Errore:', error);
+                alert('Errore durante l\'aggiunta del premio!');
+            }
+        };
+
+        // Inizializzazione
+        init();
+    </script>
+</body>
+</html>
